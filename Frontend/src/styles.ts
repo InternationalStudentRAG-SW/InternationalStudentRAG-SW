@@ -25,6 +25,7 @@ export const styles: Styles = {
     zIndex: 2,
     maxWidth: "1400px",
     margin: "0 auto",
+    marginTop : "60px",
     display: "grid",
     gridTemplateColumns: "360px 1fr",
     gap: "24px",

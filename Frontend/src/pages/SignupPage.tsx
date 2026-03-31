@@ -1,4 +1,8 @@
-import { Link } from 'react-router-dom'
+import { useState, useMemo } from 'react' // [수정] useMemo 추가
+import { Link, useNavigate } from 'react-router-dom'
+import axios from 'axios'
+import Select from 'react-select' // [추가] react-select 임포트
+import countryList from 'react-select-country-list' // [추가] 국가 리스트 임포트
 import './auth.css'
 
 function BackgroundGlow() {
@@ -22,6 +26,74 @@ function GoogleIcon() {
 }
 
 export default function SignupPage() {
+  const navigate = useNavigate();
+  
+  // [추가] 국가 리스트 데이터 생성
+  const options = useMemo(() => countryList().getData(), []);
+
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    nationality: null as any, // [수정] react-select를 위해 객체 타입으로 변경
+    major: '',
+    password: '',
+    passwordConfirm: ''
+  });
+
+  const [isLoading, setIsLoading] = useState(false);
+
+  // [추가] 국적 선택 전용 핸들러
+  const handleSelectChange = (value: any) => {
+    setFormData(prev => ({ ...prev, nationality: value }));
+  };
+
+  // 일반 입력 핸들러
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { id, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [id]: value
+    }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (formData.password !== formData.passwordConfirm) {
+      alert("비밀번호가 서로 일치하지 않습니다.");
+      return;
+    }
+
+    if (!formData.nationality) {
+      alert("국적을 선택해 주세요.");
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      const response = await axios.post('http://127.0.0.1:8000/api/signup', {
+        email: formData.email,
+        password: formData.password,
+        nationality: formData.nationality.label, // [수정] 객체에서 국가 이름(label)만 추출해서 전송
+        major: formData.major,
+        role: 'STUDENT',
+        status: 'ACTIVE'
+      });
+
+      if (response.status === 200 || response.status === 201) {
+        alert("회원가입이 완료되었습니다! 로그인해 주세요.");
+        navigate('/login');
+      }
+    } catch (error: any) {
+      console.error("Signup Error:", error);
+      const errorMsg = error.response?.data?.detail || "오류가 발생했습니다.";
+      alert("회원가입 실패: " + errorMsg);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div className="auth-page">
       <BackgroundGlow />
@@ -38,7 +110,8 @@ export default function SignupPage() {
         <h1 className="auth-heading">회원가입</h1>
         <p className="auth-subheading">계정을 만들고 서비스를 시작하세요.</p>
 
-        <form className="auth-form" onSubmit={(e) => e.preventDefault()}>
+        <form className="auth-form" onSubmit={handleSubmit}>
+          {/* 이름 */}
           <div className="auth-field">
             <label className="auth-label" htmlFor="name">이름</label>
             <input
@@ -46,10 +119,13 @@ export default function SignupPage() {
               type="text"
               className="auth-input"
               placeholder="홍길동"
-              autoComplete="name"
+              value={formData.name}
+              onChange={handleChange}
+              required
             />
           </div>
 
+          {/* 이메일 */}
           <div className="auth-field">
             <label className="auth-label" htmlFor="email">이메일</label>
             <input
@@ -57,10 +133,49 @@ export default function SignupPage() {
               type="email"
               className="auth-input"
               placeholder="example@email.com"
-              autoComplete="email"
+              value={formData.email}
+              onChange={handleChange}
+              required
             />
           </div>
 
+          {/* [수정] 국적 선택 (react-select 적용) */}
+          <div className="auth-field">
+            <label className="auth-label">국적 (Nationality) *</label>
+            <Select 
+              options={options} 
+              value={formData.nationality} 
+              onChange={handleSelectChange}
+              placeholder="국적을 검색하거나 선택하세요"
+              className="country-select-container"
+              styles={{
+                control: (base) => ({
+                  ...base,
+                  borderRadius: '8px',
+                  padding: '2px',
+                  borderColor: '#e2e8f0',
+                  boxShadow: 'none',
+                  '&:hover': { borderColor: '#cbd5e1' }
+                })
+              }}
+            />
+          </div>
+
+          {/* 전공 */}
+          <div className="auth-field">
+            <label className="auth-label" htmlFor="major">전공 (Major)</label>
+            <input
+              id="major"
+              type="text"
+              className="auth-input"
+              placeholder="학과를 입력하세요 (예: 컴퓨터공학과)"
+              value={formData.major}
+              onChange={handleChange}
+              required
+            />
+          </div>
+
+          {/* 비밀번호 */}
           <div className="auth-field">
             <label className="auth-label" htmlFor="password">비밀번호</label>
             <input
@@ -68,22 +183,29 @@ export default function SignupPage() {
               type="password"
               className="auth-input"
               placeholder="비밀번호를 입력하세요"
-              autoComplete="new-password"
+              value={formData.password}
+              onChange={handleChange}
+              required
             />
           </div>
 
+          {/* 비밀번호 확인 */}
           <div className="auth-field">
-            <label className="auth-label" htmlFor="password-confirm">비밀번호 확인</label>
+            <label className="auth-label" htmlFor="passwordConfirm">비밀번호 확인</label>
             <input
-              id="password-confirm"
+              id="passwordConfirm"
               type="password"
               className="auth-input"
               placeholder="비밀번호를 다시 입력하세요"
-              autoComplete="new-password"
+              value={formData.passwordConfirm}
+              onChange={handleChange}
+              required
             />
           </div>
 
-          <button type="submit" className="auth-btn-primary">회원가입</button>
+          <button type="submit" className="auth-btn-primary" disabled={isLoading}>
+            {isLoading ? "처리 중..." : "회원가입"}
+          </button>
         </form>
 
         <div className="auth-divider">또는</div>

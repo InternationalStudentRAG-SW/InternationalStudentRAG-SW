@@ -58,3 +58,25 @@ class HealthResponse(BaseModel):
     status: str
     database_status: str
     total_chunks: int
+
+# --- 인증 관련 스키마 ---
+class SignupRequest(BaseModel):
+    email: str
+    password: str
+    nationality: str
+    major: Optional[str] = None
+    role: str = "STUDENT"
+    status: str = "ACTIVE"
+
+class LoginRequest(BaseModel):
+    email: str
+    password: str
+
+class GoogleLoginRequest(BaseModel):
+    token: str
+
+class AdditionalInfoRequest(BaseModel):
+    email: str
+    nationality: str
+    major: Optional[str] = None
+    

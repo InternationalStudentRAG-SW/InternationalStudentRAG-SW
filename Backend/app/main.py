@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import text
 
 # 라우터 임포트
-from app.api.routes import chat, admin, auth
+from app.api.routes import chat, admin, auth, document
 # from app.db.database import engine, Base, get_db
 
 # DB 테이블 생성
@@ -29,6 +29,7 @@ app.add_middleware(
 app.include_router(auth.router)
 app.include_router(chat.router)
 app.include_router(admin.router)
+app.include_router(document.router)
 
 # 시스템 관련 엔드포인트만 유지
 # @app.get("/db-test")

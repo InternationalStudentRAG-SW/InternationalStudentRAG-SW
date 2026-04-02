@@ -7,7 +7,6 @@ import requests
 from bs4 import BeautifulSoup
 from app.config import settings
 
-
 class DocumentIngester:
     """PDF 및 웹 소스에서 문서를 수집합니다."""
 

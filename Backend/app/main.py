@@ -30,7 +30,6 @@ app.include_router(auth.router)
 app.include_router(chat.router)
 app.include_router(admin.router)
 
-# 시스템 관련 엔드포인트만 유지
 # @app.get("/db-test")
 # def test_db_connection(db: Session = Depends(get_db)):
 #     try:

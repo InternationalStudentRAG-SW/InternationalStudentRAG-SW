@@ -1,17 +1,22 @@
 fastapi[standard]
 uvicorn
-langchain>=0.2.0
-langchain-openai>=0.1.8
-langchain-community>=0.1.0
-langchain-chroma>=0.1.0
-chromadb>=0.4.0
+# --- 의존성 충돌 해결을 위해 업데이트된 핵심 패키지 ---
+langchain>=0.3.0
+langchain-openai>=0.2.0
+langchain-community>=0.3.0
+langchain-chroma>=0.1.4
+langchain-text-splitters>=0.3.0
+chromadb>=0.5.0
 openai>=1.3.0
+# ------------------------------------------------
+
 pdfplumber>=0.10.0
 beautifulsoup4>=4.12.0
 requests>=2.31.0
 python-dotenv>=1.0.0
 langdetect>=1.0.9
 pydantic-settings>=2.1.0
+
 # PostgreSQL Drivers
 psycopg2-binary>=2.9.9
 psycopg[binary]>=3.1.18
@@ -21,7 +26,16 @@ sqlalchemy>=2.0.0
 nltk==3.9.4
 contractions==0.1.73
 konlpy==0.6.0
-langdetect==1.0.9
+# langdetect는 위와 중복되어 하나만 유지하셔도 됩니다.
 
 # BM25 알고리즘 구현
 rank_bm25==0.2.2
+
+# RAGAS 평가 프레임워크 (최신 버전으로 업데이트)
+ragas>=0.2.0
+
+# 데이터셋 처리 (RAGAS 의존성)
+datasets>=2.18.0
+
+# 결과 저장
+pandas>=2.0.0

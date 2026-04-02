@@ -49,3 +49,8 @@ export async function clearDatabase(): Promise<{ message: string }> {
   const { data } = await client.post<{ message: string }>('/admin/clear-database')
   return data
 }
+// 출처 문서(PDF)를 열기 위한 URL을 만들어주는 함수
+export function getDocumentUrl(filename: string): string {
+  // 특수문자까지 전부
+  return `${BASE_URL}/documents/${encodeURIComponent(filename)}`
+}

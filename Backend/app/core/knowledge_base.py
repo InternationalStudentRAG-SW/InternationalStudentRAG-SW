@@ -1,3 +1,7 @@
+# ---------------
+# 데이터 저장소 역할
+# ---------------
+
 from typing import List, Optional, Dict
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_openai import OpenAIEmbeddings
@@ -53,6 +57,14 @@ class KnowledgeBase:
             texts=chunks,
             metadatas=chunk_metadatas
         )
+        
+    def get_all_documents(self) -> List[Dict]:
+        """BM25 색인을 위해 DB에 저장된 모든 청크와 메타데이터를 가져옵니다."""
+        results = self.vector_store.get()
+        return [
+            {"content": doc, "metadata": meta} 
+            for doc, meta in zip(results['documents'], results['metadatas'])
+        ]
 
     def get_document_count(self) -> int:
         """데이터베이스에 저장된 총 청크(조각) 수를 반환합니다."""

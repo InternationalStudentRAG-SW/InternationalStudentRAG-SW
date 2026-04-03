@@ -1,201 +1,112 @@
-import os
-from dotenv import load_dotenv 
-
-from typing import List, Tuple, Dict, Optional
 import numpy as np
-from rank_bm25 import BM25Okapi
-from sentence_transformers import CrossEncoder
-
+from typing import List, Tuple, Optional, Dict, Any
+from langchain_community.retrievers import BM25Retriever
+from langchain_classic.retrievers import EnsembleRetriever
+from langchain_core.documents import Document
 from app.core.knowledge_base import knowledge_base
-from app.core.data_preprocessing import HybridPipeline
-from app.core.translation import QueryTranslator
 from app.config import settings
 
-load_dotenv()
-
 class RAGRetriever:
+    """
+    Hybrid Search(BM25 + Vector)를 사용하여 관련 문서를 검색합니다.
+    단순 키워드 매칭과 의미론적 유사성을 동시에 고려하여 최적의 컨텍스트를 제공합니다.
+    """
+
     def __init__(self):
-        self.pipeline = HybridPipeline()
-        self.translator = QueryTranslator() 
-        
-        # BGE-Reranker 초기화
-        self.reranker = CrossEncoder('BAAI/bge-reranker-v2-m3')
-        
-        self.bm25 = None
-        self.corpus_docs = [] 
-        self.doc_mapping = {}  # 문서 순서 추적을 위한 딕셔너리
-        self._refresh_bm25()
+        self.top_k = settings.top_k_results
+        self.min_similarity = settings.min_similarity_score
+        self._initialize_hybrid_retriever()
 
-    def _refresh_bm25(self):
-        """지식베이스의 최신 텍스트를 가져와 BM25 색인과 매핑 테이블을 생성합니다."""
-        all_data = knowledge_base.get_all_documents()
-        if all_data:
-            self.corpus_docs = all_data
-            
-            # 각 문서의 고유 키(source_chunkIndex)와 배열 인덱스를 매핑
-            self.doc_mapping = {}
-            for idx, d in enumerate(all_data):
-                source = d['metadata'].get('source', 'unknown')
-                chunk_idx = d['metadata'].get('chunk_index', 0)
-                self.doc_mapping[f"{source}_{chunk_idx}"] = idx
-                
-            # 논문 7단계 전처리 적용 
-            tokenized_corpus = [self.pipeline.run_pipeline(d['content']) for d in all_data]
-            self.bm25 = BM25Okapi(tokenized_corpus)
+    def _initialize_hybrid_retriever(self):
+        """
+        ChromaDB에 저장된 데이터를 바탕으로 BM25와 Vector 리트리버를 초기화합니다.
+        """
+        # 1. Vector Store로부터 원본 데이터 로드 (BM25 학습용)
+        # ChromaDB에 저장된 모든 텍스트와 메타데이터를 가져옵니다.
+        db_data = knowledge_base.vector_store.get()
+        
+        if not db_data or not db_data['documents']:
+            print("⚠️ 지식베이스가 비어있습니다. 동기화를 먼저 진행하세요.")
+            # 비어있는 경우를 대비해 기본 리트리버만 설정 (에러 방지)
+            self.retriever = knowledge_base.vector_store.as_retriever(
+                search_kwargs={"k": self.top_k}
+            )
+            return
 
-    def _normalize_scores(self, scores: np.ndarray) -> np.ndarray:
-        """논문 방식의 합산을 위해 점수를 0~1 사이로 정규화합니다."""
-        max_score = np.max(scores)
-        min_score = np.min(scores)
-        if max_score == min_score:
-            return np.ones_like(scores)
-        return (scores - min_score) / (max_score - min_score)
+        # 2. BM25 학습을 위한 Document 객체 리스트 생성
+        # BM25는 임베딩이 아닌 '원본 텍스트' 통계(TF-IDF 변형)를 기반으로 작동합니다.
+        langchain_docs = [
+            Document(page_content=text, metadata=meta) 
+            for text, meta in zip(db_data['documents'], db_data['metadatas'])
+        ]
 
-    def retrieve_vector_only(self, query: str, k=3):
-        """[실험 1] Baseline: 단순 벡터 검색"""
-        return knowledge_base.vector_store.similarity_search_with_score(query, k=k)
+        # 3. 개별 리트리버 생성
+        # 키워드 기반 (정확한 단어/수치 매칭에 강함)
+        keyword_retriever = BM25Retriever.from_documents(langchain_docs)
+        keyword_retriever.k = self.top_k
 
-    def retrieve_hybrid(self, query: str, k=5):
-        """[가중치 합산 하이브리드] 점수를 정규화하고 Vector에 더 높은 가중치를 부여합니다."""
-        # 방어 코드 (DB가 비어있을 경우 에러 방지)
-        if not self.corpus_docs or self.bm25 is None:
-            return []
-            
-        expanded_query = self.translator.combine_ko_en(query)
-        fast_k = 40 
-        alpha = 0.85 
-        
-        print(f"\n==================================================")
-        print(f"🤖 [하이브리드 검색 디버깅 시작] 질문: '{query}'")
-        print(f"==================================================")
-        
-        # 1. Vector 검색
-        vec_results = knowledge_base.vector_store.similarity_search_with_score(query, k=fast_k)
-        
-        # 🚨 추가됨: Vector 검색 결과 확인 (상위 5개)
-        print("\n🔍 [Vector (의미 검색) 상위 5개]")
-        for i, (doc, score) in enumerate(vec_results[:5]):
-            source = doc.metadata.get('source', 'unknown')
-            chunk_idx = doc.metadata.get('chunk_index', 0)
-            # 텍스트가 너무 길면 잘라서 보여주기 (50글자)
-            snippet = doc.page_content.replace('\n', ' ')[:50] + "..." 
-            print(f" {i+1}위 | 출처: {source} (청크 {chunk_idx}) | 거리 점수: {score:.4f}")
-            print(f"      내용: {snippet}")
-        
-        # 2. BM25 검색
-        tokenized_query = self.pipeline.run_pipeline(expanded_query)
-        bm25_scores_all = np.array(self.bm25.get_scores(tokenized_query))
-        bm25_top_indices = np.argsort(bm25_scores_all)[::-1][:fast_k]
-        
-        # 🚨 추가됨: BM25 검색 결과 확인 (상위 5개)
-        print("\n🔑 [BM25 (키워드 검색) 상위 5개]")
-        for i, idx in enumerate(bm25_top_indices[:5]):
-            doc_info = self.corpus_docs[idx]
-            source = doc_info['metadata'].get('source', 'unknown')
-            chunk_idx = doc_info['metadata'].get('chunk_index', 0)
-            score = bm25_scores_all[idx]
-            snippet = doc_info['content'].replace('\n', ' ')[:50] + "..."
-            print(f" {i+1}위 | 출처: {source} (청크 {chunk_idx}) | 단어 매칭 점수: {score:.4f}")
-            print(f"      내용: {snippet}")
-            
-        print("==================================================\n")
+        # 의미 기반 (문장의 맥락과 의도 파악에 강함)
+        vector_retriever = knowledge_base.vector_store.as_retriever(
+            search_kwargs={"k": self.top_k}
+        )
 
-        # --- 점수 정규화 (0.0 ~ 1.0) 준비 ---
-        vec_scores_only = [score for _, score in vec_results]
-        v_min, v_max = min(vec_scores_only), max(vec_scores_only)
-        
-        b_min, b_max = min(bm25_scores_all), max(bm25_scores_all)
-        
-        combined_scores = {}
-        
-        # --- 3-1. Vector 점수 계산 (가중치 alpha 적용) ---
-        for doc, score in vec_results:
-            key = f"{doc.metadata.get('source')}_{doc.metadata.get('chunk_index')}"
-            if v_max == v_min:
-                norm_score = 1.0
-            else:
-                norm_score = (v_max - score) / (v_max - v_min)
-            combined_scores[key] = combined_scores.get(key, 0.0) + (alpha * norm_score)
-            
-        # --- 3-2. BM25 점수 계산 (가중치 1 - alpha 적용) ---
-        for rank, idx in enumerate(bm25_top_indices):
-            doc_info = self.corpus_docs[idx]
-            key = f"{doc_info['metadata'].get('source')}_{doc_info['metadata'].get('chunk_index')}"
-            raw_score = bm25_scores_all[idx]
-            if b_max == b_min:
-                norm_score = 1.0
-            else:
-                norm_score = (raw_score - b_min) / (b_max - b_min)
-            combined_scores[key] = combined_scores.get(key, 0.0) + ((1.0 - alpha) * norm_score)
-            
-        # 4. 최종 합산 점수로 내림차순 정렬
-        sorted_combined = sorted(combined_scores.items(), key=lambda x: x[1], reverse=True)
-        
-        # 5. 결과 조립 (k개만큼 반환)
-        hybrid_results = []
-        for key, score in sorted_combined[:k]:
-            idx = self.doc_mapping.get(key)
-            if idx is not None:
-                doc_info = self.corpus_docs[idx]
-                hybrid_results.append((doc_info['content'], score, doc_info['metadata']))
-                
-        return hybrid_results
+        # 4. 하이브리드 앙상블 리트리버 구축
+        # 가중치(weights)를 통해 어떤 검색 방식에 더 비중을 둘지 결정합니다.
+        # [0.3, 0.7]은 의미 검색에 더 비중을 두되, 키워드 일치성도 30% 반영함을 의미합니다.
+        self.retriever = EnsembleRetriever(
+            retrievers=[keyword_retriever, vector_retriever],
+            weights=[0.3, 0.7]
+        )
+        print("✅ 하이브리드 검색기(BM25 + Vector) 초기화 완료")
 
-    def retrieve_with_rerank(self, query: str, k=3):
-        """[실험 3] Ultimate: 하이브리드 + BGE-Reranker"""
-        # 🚨 변경점 2: 리랭커에게 10개가 아닌 '30개'의 후보를 검토하라고 지시합니다!
-        candidates = self.retrieve_hybrid(query, k=30)
+    def retrieve(self, query: str, k: Optional[int] = None) -> List[Document]:
+        """
+        쿼리에 대해 하이브리드 검색을 수행하여 관련 문서를 반환합니다.
         
-        pairs = [[query, c[0]] for c in candidates]
-        rerank_scores = self.reranker.predict(pairs)
-        sorted_indices = np.argsort(rerank_scores)[::-1][:k]
-        
-        final_results = []
-        for idx in sorted_indices:
-            content, _, metadata = candidates[idx]
-            final_results.append((content, float(rerank_scores[idx]), metadata))
-            
-        return final_results
+        Returns:
+            검색된 Document 객체 리스트 (유사도 점수는 앙상블 시 재계산됨)
+        """
+        # 앙상블 리트리버는 내부적으로 RRF(Reciprocal Rank Fusion) 알고리즘을 사용해
+        # 두 검색 방식의 순위를 재조합합니다.
+        return self.retriever.invoke(query)
 
-    def retrieve(self, query: str, k=5, mode="hybrid_rerank"):
-        if mode == "vector":
-            docs = self.retrieve_vector_only(query, k=k)
-            return [(d[0].page_content, d[1], d[0].metadata) for d in docs]
-        elif mode == "hybrid":
-            return self.retrieve_hybrid(query, k=k)
-        else:
-            return self.retrieve_with_rerank(query, k=k)
-        
-    def format_context(self, retrieved_docs: List[Tuple[str, float, dict]]) -> str:
+    def format_context(self, retrieved_docs: List[Document]) -> str:
+        """검색된 문서를 LLM에 입력할 컨텍스트 문자열로 변환합니다."""
         if not retrieved_docs:
             return "관련 문서를 찾을 수 없습니다."
 
         context_parts = []
-        for i, (content, score, metadata) in enumerate(retrieved_docs, 1):
-            source = metadata.get("source", "알 수 없음")
-            chunk_idx = metadata.get("chunk_index", 0)
+        for i, doc in enumerate(retrieved_docs, 1):
+            source = doc.metadata.get("source", "알 수 없음")
+            page = doc.metadata.get("page", "-")
             
-            # 🚨 수정됨: 점수(score)를 프롬프트에서 제거했습니다!
+            # 출처와 페이지 번호를 명시하여 LLM이 정확한 답변 근거를 갖게 합니다.
             context_parts.append(
-                f"[문서 {i}] (출처: {source}, 청크 {chunk_idx})\n{content}"
+                f"[문서 {i}] (출처: {source}, {page}페이지)\n{doc.page_content}"
             )
+
         return "\n\n".join(context_parts)
 
-    def retrieve_with_sources(self, query: str, k: Optional[int] = None) -> Tuple[str, List[dict]]:
-        if k is None:
-            k = settings.top_k_results
-            
-        docs = self.retrieve(query, k=k, mode="vector") 
+    def retrieve_with_sources(self, query: str, k: Optional[int] = None) -> Tuple[str, List[Dict[str, Any]]]:
+        """
+        질의에 대해 검색을 수행하고, 포맷된 컨텍스트와 출처 목록을 함께 반환합니다.
+        """
+        docs = self.retrieve(query, k=k)
         context = self.format_context(docs)
 
+        # UI 또는 로그 확인용 출처 리스트 생성
         sources = [
             {
-                "source": metadata.get("source", "알 수 없음"),
-                "chunk_index": metadata.get("chunk_index", 0),
-                "similarity_score": float(score)
+                "source": doc.metadata.get("source", "알 수 없음"),
+                "page": doc.metadata.get("page", "-"),
+                "chunk_index": doc.metadata.get("chunk_index", i),  # 추가
+                "similarity_score": doc.metadata.get("similarity_score", 0.0),  # 추가
+                "content_preview": doc.page_content[:50] + "..."
             }
-            for _, score, metadata in docs
+            for i, doc in enumerate(docs)  # enumerate로 변경
         ]
+        
         return context, sources
 
+# 싱글톤 객체 생성
 retriever = RAGRetriever()

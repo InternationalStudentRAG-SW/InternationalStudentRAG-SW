@@ -1,27 +1,29 @@
-from app.core.ingestion import ingester
 from app.core.knowledge_base import knowledge_base
 
-def build_chroma_db():
-    print("🚀 ChromaDB 구축을 시작합니다...")
-
-    # 1. 문서 디렉토리(settings.document_path)에서 PDF 파일들 읽기
-    # ingester.extract_from_directory()는 (파일명, 전체텍스트) 튜플 리스트를 반환합니다.
-    documents = ingester.extract_from_directory()
-
-    if not documents:
-        print("❌ 처리할 PDF 파일이 없습니다. 지정된 경로에 PDF 파일을 넣어주세요.")
+def check_db_content():
+    # 1. 저장된 전체 데이터 가져오기
+    data = knowledge_base.vector_store.get()
+    
+    print(f"=== VectorDB 상태 확인 ===")
+    
+    if not data['ids']:
+        print("DB가 비어 있습니다. 동기화 코드를 먼저 실행하세요.")
         return
 
-    for filename, content in documents:
-        print(f"📄 '{filename}' 임베딩 및 DB 추가 중...")
-        
-        # 2. 지식 베이스에 문서 추가
-        # 이 과정에서 내부적으로 split_documents -> HybridPipeline(전처리) -> ChromaDB 저장이 수행됩니다.
-        doc_id = knowledge_base.add_pdf_document(filename, content)
-        
-        print(f"✅ '{filename}' 처리 완료 (ID: {len(doc_id)} chunks added)")
+    # 2. 저장된 파일 목록(Source) 추출
+    sources = set(m['source'] for m in data['metadatas'])
+    
+    print(f"📍 저장된 총 청크 수: {len(data['ids'])}개")
+    print(f"📄 학습된 파일 목록:")
+    for src in sources:
+        # 해당 파일의 페이지 수 계산
+        pages = [m['page'] for m in data['metadatas'] if m['source'] == src]
+        print(f"   - {src} (총 {max(pages)}페이지 분량)")
 
-    print(f"\n✨ DB 구축 완료! 총 청크 수: {knowledge_base.get_document_count()}")
+    # 3. 데이터 샘플 확인 (첫 번째 조각)
+    print(f"\n🔍 데이터 샘플 (첫 번째 청크):")
+    print(f"내용: {data['documents'][0][:100]}...")
+    print(f"메타데이터: {data['metadatas'][0]}")
 
 if __name__ == "__main__":
-    build_chroma_db()
+    check_db_content()

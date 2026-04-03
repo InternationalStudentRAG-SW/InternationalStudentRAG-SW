@@ -56,7 +56,9 @@ async def chat(request: ChatRequest):
         )
 
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error processing question: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.post("/simple", response_model=ChatResponse)

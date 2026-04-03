@@ -1,3 +1,4 @@
+import os
 import numpy as np
 from typing import List, Tuple, Optional, Dict, Any, Literal
 from langchain_community.retrievers import BM25Retriever
@@ -7,6 +8,9 @@ from langchain_classic.retrievers.contextual_compression import ContextualCompre
 from sentence_transformers import CrossEncoder
 from app.core.knowledge_base import knowledge_base
 from app.config import settings
+
+if settings.hf_token:
+    os.environ["HF_TOKEN"] = settings.hf_token
 
 RetrieverMode = Literal["vector", "hybrid", "hybrid_rerank"]
 

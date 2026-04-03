@@ -108,8 +108,10 @@ class RAGRetriever:
         return context, sources
 
 
-# 세 가지 모드 싱글톤 생성 (ragas 평가용)
-retriever = RAGRetriever(mode="hybrid_rerank")  # 기본값 (실서비스용)
+# 실서비스용 모델
+retriever = RAGRetriever(mode="hybrid_rerank")
+
+# 평가용 모델
 vector_retriever = RAGRetriever(mode="vector")
 hybrid_retriever = RAGRetriever(mode="hybrid")
 hybrid_rerank_retriever = RAGRetriever(mode="hybrid_rerank")

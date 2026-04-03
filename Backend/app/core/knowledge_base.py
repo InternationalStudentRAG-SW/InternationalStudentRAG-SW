@@ -66,6 +66,14 @@ class KnowledgeBase:
             persist_directory=self.chroma_db_path,
             collection_name="international_student_rag"
         )
+        
+    def delete_document_by_filename(self, filename: str):
+        try:
+            # ChromaDB의 delete 기능을 사용해 메타데이터가 일치하는 것만 삭제
+            self.vector_store.delete(where={"source": filename})
+            print(f"  🗑️  지식베이스에서 '{filename}' 데이터를 성공적으로 제거했습니다.")
+        except Exception as e:
+            print(f"  ❌ '{filename}' 삭제 중 오류 발생: {e}")
 
 # 전역 지식베이스 인스턴스
 knowledge_base = KnowledgeBase()

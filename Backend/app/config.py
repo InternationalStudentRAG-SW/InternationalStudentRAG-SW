@@ -9,6 +9,8 @@ class Settings(BaseSettings):
 
     # ChromaDB Configuration
     chroma_db_path: str = "./data/chroma_db"
+    
+    hf_token: str | None = None
 
     # Server Configuration
     debug: bool = False
@@ -16,7 +18,7 @@ class Settings(BaseSettings):
 
     # Document Ingestion
     document_path: str = "./data/documents"
-    chunk_size: int = 1000
+    chunk_size: int = 500
     chunk_overlap: int = 200
 
     # RAG Retrieval

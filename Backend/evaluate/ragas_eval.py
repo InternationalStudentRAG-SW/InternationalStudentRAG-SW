@@ -9,17 +9,16 @@ from datasets import Dataset
 from langchain_openai import ChatOpenAI
 from ragas import evaluate
 from ragas.metrics import (
-    answer_relevancy,
-    context_precision,
-    context_recall,
-    faithfulness,
+    Faithfulness,
+    AnswerRelevancy,
+    ContextPrecision,
+    ContextRecall,
 )
 
 # 프로젝트 모듈 로드
 from app.config import settings
 from app.core.knowledge_base import knowledge_base
 from app.core.retriever import retriever 
-
 
 # 0. 설정 및 모델 수정
 OUTPUT_DIR = "evaluate/results"
@@ -32,14 +31,13 @@ EVAL_LLM = ChatOpenAI(
     temperature=0,
 )
 
-# 1. QA 데이터셋 생성기
+# 1. QA 데이터셋 생성기 (기존과 동일)
 @dataclass
 class QAGenerator:
     llm: ChatOpenAI
-    max_chunks: int = 10  # 테스트를 위해 우선 10개로 설정
+    max_chunks: int = 50
 
     def _load_chunks_from_chroma(self) -> list[dict]:
-        # ChromaDB에서 실제 저장된 데이터 추출
         result = knowledge_base.vector_store._collection.get(include=["documents", "metadatas"])
         chunks = []
         for text, meta in zip(result["documents"], result["metadatas"]):
@@ -52,11 +50,9 @@ class QAGenerator:
  
  [텍스트]: {chunk_text[:1500]}
  [출력형식]: {{"question": "질문", "ground_truth": "정답"}}"""
-
         try:
             response = self.llm.invoke(prompt)
             content = response.content.strip()
-            # JSON만 추출하는 로직
             if "```json" in content:
                 content = content.split("```json")[1].split("```")[0]
             return json.loads(content)
@@ -82,20 +78,27 @@ class QAGenerator:
             json.dump(qa_list, f, ensure_ascii=False, indent=2)
         return qa_list
 
-# 2. RAGAS 데이터셋 빌더 (Vector 전용)
-def build_evaluation_dataset(qa_list: list[dict], top_k: int = 3) -> Dataset:
+# 2. RAGAS 데이터셋 빌더 [수정됨: mode 파라미터 추가]
+def build_evaluation_dataset(qa_list: list[dict], top_k: int = 3, mode: str = "vector") -> Dataset:
     questions, answers, contexts, ground_truths = [], [], [], []
 
-    print(f"Vector Search 결과 수집 중 (k={top_k})...")
-    for item in qa_list:
+    print(f"[{mode.upper()}] 검색 결과 수집 중 (k={top_k})...")
+    for i, item in enumerate(qa_list):
         q = item["question"]
         
-        # 1. 현재 구현된 retriever.py의 로직 사용
-        retrieved_docs = retriever.retrieve(q, k=top_k)
+        print(f"  ⏳ {i+1}/{len(qa_list)} 번째 질문 처리 중...")
+        
+        # [핵심 변경] retriever.retrieve에 mode 인자를 넘겨줍니다!
+        retrieved_docs = retriever.retrieve(q, k=top_k, mode=mode)
         ctx_list = [doc[0] for doc in retrieved_docs] # 콘텐츠만 추출
         
         # 2. LLM 답변 생성 (llm.py의 프롬프트 구조와 유사하게)
         context_str = "\n\n".join(ctx_list)
+        
+        # OpenAI 400 에러 방지용 텍스트 정제 (Null 바이트 및 깨진 문자 소독)
+        context_str = context_str.replace('\x00', '').replace('\ufffd', '')
+        context_str = context_str.encode('utf-8', 'ignore').decode('utf-8')
+        
         prompt = f"다음 컨텍스트를 참고하여 답변하세요.\n\n컨텍스트:\n{context_str}\n\n질문: {q}"
         response = EVAL_LLM.invoke(prompt)
         
@@ -111,9 +114,8 @@ def build_evaluation_dataset(qa_list: list[dict], top_k: int = 3) -> Dataset:
         "ground_truth": ground_truths
     })
 
-# 3. 실행 및 결과 출력
+# 3. 실행 및 결과 출력 [수정됨: 3가지 모드 연속 실행]
 def main():
-    # 1. 데이터 준비
     gen = QAGenerator(llm=EVAL_LLM, max_chunks=10)
     qa_list = gen.generate(use_cache=True)
     
@@ -121,31 +123,55 @@ def main():
         print("평가할 QA 데이터가 없습니다.")
         return
 
-    # 2. 결과 수집
-    eval_dataset = build_evaluation_dataset(qa_list, top_k=settings.top_k_results)
+    # 비교할 3가지 검색 모드 정의
+    modes_to_test = ["vector", "hybrid", "hybrid_rerank"]
+    all_summaries = [] # 최종 비교표를 위한 리스트
 
-    # 3. RAGAS 평가
-    print("RAGAS 평가 지표 계산 중...")
-    result = evaluate(
-        eval_dataset,
-        metrics=[faithfulness, answer_relevancy, context_precision, context_recall],
-        llm=EVAL_LLM,
-        embeddings=knowledge_base.embeddings # 기존 임베딩 재사용
-    )
+    for mode in modes_to_test:
+        print("\n" + "="*50)
+        print(f" 🚀 실험 시작: {mode.upper()} 모드 평가")
+        print("="*50)
 
-    # 4. 결과 출력
-    print("\n" + "="*50)
-    print("       VECTOR SEARCH 평가 결과")
-    print("="*50)
-    df = result.to_pandas()
-    print(df[['faithfulness', 'answer_relevancy', 'context_precision', 'context_recall']].mean())
-    print("="*50)
+        # 모드별 데이터셋 빌드
+        eval_dataset = build_evaluation_dataset(qa_list, top_k=settings.top_k_results, mode=mode)
 
-    # 5. 저장
-    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    output_path = os.path.join(OUTPUT_DIR, f"vector_only_result_{timestamp}.csv")
-    df.to_csv(output_path, index=False)
-    print(f"상세 결과 저장 완료: {output_path}")
+        print(f"[{mode.upper()}] RAGAS 지표 계산 중 (시간이 조금 걸립니다)...")
+        result = evaluate(
+            eval_dataset,
+            metrics=[Faithfulness(), AnswerRelevancy(), ContextPrecision(), ContextRecall()],
+            llm=EVAL_LLM,
+            embeddings=knowledge_base.embeddings
+        )
+
+        df = result.to_pandas()
+        mean_scores = df[['faithfulness', 'answer_relevancy', 'context_precision', 'context_recall']].mean()
+        
+        # 결과 요약 저장
+        mean_scores['mode'] = mode
+        all_summaries.append(mean_scores)
+
+        print(f"\n[{mode.upper()}] 평균 점수:")
+        print(mean_scores.drop('mode'))
+
+        # 개별 상세 결과 저장
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        output_path = os.path.join(OUTPUT_DIR, f"{mode}_result_{timestamp}.csv")
+        df.to_csv(output_path, index=False)
+        print(f"상세 결과 저장 완료: {output_path}")
+
+    # ==========================================
+    # 🌟 최종 논문/보고서용 비교 표 출력
+    # ==========================================
+    print("\n\n" + "★"*50)
+    print("      🏆 최종 성능 비교 결과 (Summary)")
+    print("★"*50)
+    summary_df = pd.DataFrame(all_summaries).set_index('mode')
+    print(summary_df)
+    
+    # 요약본 CSV로 별도 저장
+    summary_path = os.path.join(OUTPUT_DIR, "final_comparison_summary.csv")
+    summary_df.to_csv(summary_path)
+    print(f"\n최종 비교표 저장 완료: {summary_path}")
 
 if __name__ == "__main__":
     main()

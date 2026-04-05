@@ -17,12 +17,16 @@ RetrieverMode = Literal["vector", "hybrid", "hybrid_rerank"]
 class RAGRetriever:
     def __init__(self, mode: RetrieverMode = "hybrid"):
         self.top_k = settings.top_k_results
+        self.initial_fetch_k = getattr(settings, 'initial_fetch_k', self.top_k)
         self.min_similarity = settings.min_similarity_score
         self.mode = mode
+
         self._initialize_retriever()
 
     def _initialize_retriever(self):
         db_data = knowledge_base.vector_store.get()
+
+        fetch_k = self.initial_fetch_k if self.mode == "hybrid_rerank" else self.top_k
 
         # 1. Vector Retriever (공통)
         self.vector_retriever = knowledge_base.vector_store.as_retriever(
@@ -45,7 +49,7 @@ class RAGRetriever:
             for text, meta in zip(db_data['documents'], db_data['metadatas'])
         ]
         keyword_retriever = BM25Retriever.from_documents(langchain_docs)
-        keyword_retriever.k = self.top_k
+        keyword_retriever.k = fetch_k
 
         hybrid_retriever = EnsembleRetriever(
             retrievers=[keyword_retriever, self.vector_retriever],
@@ -64,19 +68,21 @@ class RAGRetriever:
             print("하이브리드 + BGE Reranker 초기화 완료")
 
     def retrieve(self, query: str, k: Optional[int] = None) -> List[Document]:
+        # 1차 검색: hybrid_rerank 모드라면 여기서 15개(initial_fetch_k) 정도의 넉넉한 문서가 나옵니다.
         docs = self.retriever.invoke(query)
         
         if self.mode == "hybrid_rerank":
             pairs = [[query, doc.page_content] for doc in docs]
-            scores = self.reranker.predict(pairs)  # 1️⃣ 점수 계산
+            scores = self.reranker.predict(pairs)
             
             scored_docs = sorted(zip(scores, docs), key=lambda x: x[0], reverse=True)
-            top_k = k or self.top_k
             
-            # 2️⃣ [추가된 부분] 화면으로 던지기 전에, 문서의 '메타데이터'라는 주머니에 점수를 넣어줌
+            # 최종 반환 개수: 매개변수로 들어온 k가 없으면 config의 최종 top_k(예: 5)를 사용
+            final_k = k or self.top_k 
+            
             final_docs = []
-            for score, doc in scored_docs[:top_k]:
-                doc.metadata["similarity_score"] = float(score)  # 👈 바로 이 한 줄이 핵심
+            for score, doc in scored_docs[:final_k]:
+                doc.metadata["similarity_score"] = float(score)
                 final_docs.append(doc)
                 
             return final_docs
@@ -98,16 +104,21 @@ class RAGRetriever:
     def retrieve_with_sources(self, query: str, k: Optional[int] = None) -> Tuple[str, List[Dict[str, Any]]]:
         docs = self.retrieve(query, k=k)
         context = self.format_context(docs)
-        sources = [
-            {
-                "source": doc.metadata.get("source", "알 수 없음"),
-                "page": doc.metadata.get("page", "-"),
-                "chunk_index": doc.metadata.get("chunk_index", i),
-                "similarity_score": doc.metadata.get("similarity_score", 0.0),
-                "content_preview": doc.page_content[:50] + "..."
-            }
-            for i, doc in enumerate(docs)
-        ]
+
+        seen_sources = set()
+        sources = []
+        for i, doc in enumerate(docs):
+            source = doc.metadata.get("source", "알 수 없음")
+            if source not in seen_sources:
+                seen_sources.add(source)
+                sources.append({
+                    "source": source,
+                    "page": doc.metadata.get("page", "-"),
+                    "chunk_index": doc.metadata.get("chunk_index", i),
+                    "similarity_score": doc.metadata.get("similarity_score", 0.0),
+                    "content_preview": doc.page_content[:50] + "..."
+                })
+
         return context, sources
 
 

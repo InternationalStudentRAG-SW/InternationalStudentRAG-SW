@@ -13,8 +13,8 @@ class ChatRequest(BaseModel):
 class Source(BaseModel):
     """출처 문서 메타데이터."""
     source: str
-    chunk_index: int
-    similarity_score: float
+    chunk_index: Optional[int] = 0
+    similarity_score: Optional[float] = 0.0
 
 
 class ChatResponse(BaseModel):

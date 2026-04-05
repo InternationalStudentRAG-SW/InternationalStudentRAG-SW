@@ -1,3 +1,4 @@
+# llm.py
 from typing import Optional, Tuple, List
 from langchain_openai import ChatOpenAI
 from langchain_core.prompts import PromptTemplate
@@ -13,7 +14,7 @@ class RAGLLMChain:
         self.llm = ChatOpenAI(
             api_key=settings.openai_api_key,
             model=settings.openai_model,
-            temperature=0.7,
+            temperature=0.0,
             max_tokens=2048
         )
 
@@ -100,6 +101,7 @@ class RAGLLMChain:
             template=f"""대학교 관련 질문으로 유학생을 돕는 전문가 어시스턴트입니다.
 
 다음 컨텍스트를 사용하여 질문에 답변하십시오. 컨텍스트에 관련된 정보가 없으면 "이 질문에 답변할 충분한 정보가 없습니다"라고 말하세요.
+답변을 작성할 때는 반드시 제공된 컨텍스트의 (출처: PDF파일명) 형식으로 출처를 함께 언급하여 신뢰성을 높여주세요.
 
 {lang_instruction}
 

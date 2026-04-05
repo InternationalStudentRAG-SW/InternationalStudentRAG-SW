@@ -1,0 +1,160 @@
+user_input,retrieved_contexts,response,reference,faithfulness,answer_relevancy,context_precision,context_recall
+학생 비자를 신청하기 위해 필요한 서류는 무엇인가요?,"['| 1 1 | Financial proof (670EURO * 00Months) - Your bank statement issued within 1 month (Original needed). - If you submit parents’ bank statement, please submit your birth or family certification. (Please translate the document if it is not written in English or Korean. And submit a translate verification.) |\n| 1 2 | A visa request letter(reference letter) issued by the Principal of home country university. (Submission of the Incomplete document form is not acceptable) - The principal’s stamp or signature must be included. |\n| 1 3 | Document proving that you are an exchange student. (Submission of the Incomplete document form is not acceptable) 1) Exchange student agreement between the two universities. OR 2) Letter of Acceptance - The exchange program title and name of the home country university and the inviting university in Korea must be included. |', '| 1 1 | Financial proof (670EURO * 00Months) - Your bank statement issued within 1 month (Original needed). - If you submit parents’ bank statement, please submit your birth or family certification. (Please translate the document if it is not written in English or Korean. And submit a translate verification.) |\n| 1 2 | The language training plan includes - Lecture schedule, teacher’s profile, training facility information, etc. |', '[Tables]\n|  |\n| 15. 캠퍼스별 안내도 가. 승학 캠퍼스 S01 인문과학대학(A) S08 교수회관(W) S15 한림생활관승학1관 S02 학생회관(C) S09 생명자원과학대학및건강과학대학 S16 학생군사교육단(DE) S03 공과대학1호관(P1) S10 한림도서관(B) S17 예술체육대학2관 S04 공과대학2호관(P2) S11 자연과학대학(E) S18 예술체육대학실습동 S05 공과대학3호관(P3) S12 공과대학4호관(P4) S19,20 한림생활관승학2관 S06 공과대학5호관(RS) S13 창업관 S31 수위실 S07 예술체육대학1관 S14 산학관(SM) ★ 정문 - 19 - |\n| S01 | 인문과학대학(A) | S08 | 교수회관(W) | S15 | 한림생활관승학1관 |\n| S02 | 학생회관(C) | S09 | 생명자원과학대학및건강과학대학 | S16 | 학생군사교육단(DE) |\n| S03 | 공과대학1호관(P1) | S10 | 한림도서관(B) | S17 | 예술체육대학2관 |\n| S04 | 공과대학2호관(P2) | S11 | 자연과학대학(E) | S18 | 예술체육대학실습동 |\n| S05 | 공과대학3호관(P3) | S12 | 공과대학4호관(P4) | S19,20 | 한림생활관승학2관 |\n| S06 | 공과대학5호관(RS) | S13 | 창업관 | S31 | 수위실 |\n| S07 | 예술체육대학1관 | S14 | 산학관(SM) | ★ | 정문 |']","학생 비자를 신청하기 위해 필요한 서류는 다음과 같습니다:
+
+1. **재정 증명서**: 
+   - 최근 1개월 이내에 발급된 은행 잔고 증명서 (원본 필요).
+   - 부모의 은행 잔고 증명서를 제출하는 경우, 출생증명서 또는 가족관계증명서를 함께 제출해야 합니다. (문서가 영어 또는 한국어로 작성되지 않은 경우 번역본과 번역 확인서를 제출해야 함).
+
+2. **비자 요청서 (추천서)**: 
+   - 본국 대학의 교장에 의해 발급된 비자 요청서. (불완전한 문서 양식 제출은 허용되지 않음).
+   - 교장의 도장 또는 서명이 포함되어야 합니다.
+
+3. **교환학생임을 증명하는 문서**: 
+   - 두 대학 간의 교환학생 협약서 또는 수락서.
+   - 교환 프로그램 제목과 본국 대학 및 한국의 초청 대학 이름이 포함되어야 합니다.
+
+4. **어학 연수 계획서**: 
+   - 강의 일정, 교수 프로필, 연수 시설 정보 등이 포함되어야 합니다. 
+
+이 서류들을 준비하여 비자 신청을 진행하시면 됩니다.","학생 비자를 신청하기 위해서는 입학허가서, 재정증명서, 여권 사본, 비자 신청서, 사진, 건강보험 증명서 등의 서류가 필요합니다.",1.0,0.6050801946677179,0.0,0.0
+학생 유학 비자(D-2-1 ~ D-2-4)의 유효 기간은 어떻게 되나요?,"['이 지침은 2022. 3. 1.부터 시행하며, 장학 기간 중인 장학생 전체에 적용된다.\n이 지침은 2023. 3. 1.부터 시행하며, 장학 기간 중인 장학생 전체에 적용된다.\n이 지침은 2023. 6. 5.부터 시행한다. 단, 제22조제7항은 2024. 1. 1.부터 시행한다.\n본 개정안 시행일 이전 학위취득을 목적으로 귀국 신고를 연기한 장학생은 제22조제7항을\n종전 규정을 적용한다.\n이 지침은 2024. 3. 1. 부터 시행하며, 장학 기간 중인 장학생 전체에 적용한다.\n이 지침은 2025. 3. 1. 부터 시행하며, 장학 기간 중인 장학생 전체에 적용한다.\n이 지침은 2026. 3. 1. 부터 시행하며, 장학 기간 중인 장학생 전체에 적용한다.\n- 11 -\n\n[Tables]', '[Tables]\n|  |\n| 15. 캠퍼스별 안내도 가. 승학 캠퍼스 S01 인문과학대학(A) S08 교수회관(W) S15 한림생활관승학1관 S02 학생회관(C) S09 생명자원과학대학및건강과학대학 S16 학생군사교육단(DE) S03 공과대학1호관(P1) S10 한림도서관(B) S17 예술체육대학2관 S04 공과대학2호관(P2) S11 자연과학대학(E) S18 예술체육대학실습동 S05 공과대학3호관(P3) S12 공과대학4호관(P4) S19,20 한림생활관승학2관 S06 공과대학5호관(RS) S13 창업관 S31 수위실 S07 예술체육대학1관 S14 산학관(SM) ★ 정문 - 19 - |\n| S01 | 인문과학대학(A) | S08 | 교수회관(W) | S15 | 한림생활관승학1관 |\n| S02 | 학생회관(C) | S09 | 생명자원과학대학및건강과학대학 | S16 | 학생군사교육단(DE) |\n| S03 | 공과대학1호관(P1) | S10 | 한림도서관(B) | S17 | 예술체육대학2관 |\n| S04 | 공과대학2호관(P2) | S11 | 자연과학대학(E) | S18 | 예술체육대학실습동 |\n| S05 | 공과대학3호관(P3) | S12 | 공과대학4호관(P4) | S19,20 | 한림생활관승학2관 |\n| S06 | 공과대학5호관(RS) | S13 | 창업관 | S31 | 수위실 |\n| S07 | 예술체육대학1관 | S14 | 산학관(SM) | ★ | 정문 |', '| 12. 장학금 가. 신입생 장학금 1) 외국인 우수신입생 장학금 구분 수혜금액 수혜조건 장학명 자격요건 종류 A 수업료100% 한국어능력시험(TOPIKPBT, TOPIK iBT) 5급이상소지자 외국인 B 수업료60% 한국어능력시험(TOPIKPBT, TOPIK iBT) 4급소지자 우수신입생 외국인신(편)입학 장학금 C 수업료50% 한국어능력시험(TOPIKPBT, TOPIK iBT) 3급소지자 특별전형합격자 A,B,C,D,E D 수업료40% 동아한국어능력시험(Dong-A TOPIK) 3급이상소지자 본교입학자격요건을갖춘신(편)입생중, E 수업료30% 외국인우수신입생장학금A,B,C,D에해당되지않는자 외국인신(편)입학 A 수업료100% 한국어능력시험(TOPIKPBT, TOPIK iBT) 5급이상소지자 DAU 특별전형합격자중, 외국인 본교한국어학당을 B 수업료70% 한국어능력시험(TOPIKPBT, TOPIK iBT) 4급소지자 우수신입생 2개학기이상수료 장학금 하고최종2개학기 C 수업료60% 한국어능력시험(TOPIKPBT, TOPIK iBT) 3급소지자 A,B,C,D 출석률이80% 이 본교입학자격요건을갖춘신(편)입생중, D 수업료50% 상인자 DAU 외국인우수신입생장학금A,B,C에해당되지않는자 ※위장학금은입학학기에만적용되며2번째학기부터는재학생장학금기준에따라지급 ※장학금지급기준및지급액은본교장학제도에따라변동될수있음 2) 외국인 유학생 국가장학금 구분 수혜기간 수혜금액 수혜조건 아래학과외국인신입학특별전형합격자중학과추천자 - 인문과학대학: 역사문화학부, 한국어문학과 - 자연과학대학: 반도체학과, 바이오메디컬학과 - 사회과학대학: 미디어커뮤니케이션학과 - 경영대학: 경영학과, 관광경영학과, 국제무역학과, 경영정보학과 동아특화분야 - 생명자원과학대학: 식품생명공학과, 스마트그린자원학과 첫학기 우수장학금Ⅰ - 공학: 환경에너지공학과-미래에너지공학전공, 전기공학과, 전자공학과, 기계공학과, 산업경영공학과, 조선해양공학과, 화학공학과, 신소재공학과 수업료전액 - 디자인환경대학:']","제공된 컨텍스트에는 학생 유학 비자(D-2-1 ~ D-2-4)의 유효 기간에 대한 정보가 포함되어 있지 않습니다. 유학 비자의 유효 기간은 일반적으로 해당 국가의 이민 정책이나 비자 발급 기관에 따라 다르므로, 정확한 정보를 얻기 위해서는 해당 국가의 대사관이나 이민 관련 기관에 문의하는 것이 좋습니다.","학생 유학 비자(D-2-1 ~ D-2-4)는 91일 이상 유효하며, 단수입국 비자입니다. 단, 독일인과 일본인은 복수입국 비자를 신청할 수 있습니다.",0.3333333333333333,0.0,0.0,0.0
+유학생 비자 신청 시 필수 제출 서류는 무엇인가요?,"['| 1 1 | Financial proof (670EURO * 00Months) - Your bank statement issued within 1 month (Original needed). - If you submit parents’ bank statement, please submit your birth or family certification. (Please translate the document if it is not written in English or Korean. And submit a translate verification.) |\n| 1 2 | A visa request letter(reference letter) issued by the Principal of home country university. (Submission of the Incomplete document form is not acceptable) - The principal’s stamp or signature must be included. |\n| 1 3 | Document proving that you are an exchange student. (Submission of the Incomplete document form is not acceptable) 1) Exchange student agreement between the two universities. OR 2) Letter of Acceptance - The exchange program title and name of the home country university and the inviting university in Korea must be included. |', '| 12. 장학금 가. 신입생 장학금 1) 외국인 우수신입생 장학금 구분 수혜금액 수혜조건 장학명 자격요건 종류 A 수업료100% 한국어능력시험(TOPIKPBT, TOPIK iBT) 5급이상소지자 외국인 B 수업료60% 한국어능력시험(TOPIKPBT, TOPIK iBT) 4급소지자 우수신입생 외국인신(편)입학 장학금 C 수업료50% 한국어능력시험(TOPIKPBT, TOPIK iBT) 3급소지자 특별전형합격자 A,B,C,D,E D 수업료40% 동아한국어능력시험(Dong-A TOPIK) 3급이상소지자 본교입학자격요건을갖춘신(편)입생중, E 수업료30% 외국인우수신입생장학금A,B,C,D에해당되지않는자 외국인신(편)입학 A 수업료100% 한국어능력시험(TOPIKPBT, TOPIK iBT) 5급이상소지자 DAU 특별전형합격자중, 외국인 본교한국어학당을 B 수업료70% 한국어능력시험(TOPIKPBT, TOPIK iBT) 4급소지자 우수신입생 2개학기이상수료 장학금 하고최종2개학기 C 수업료60% 한국어능력시험(TOPIKPBT, TOPIK iBT) 3급소지자 A,B,C,D 출석률이80% 이 본교입학자격요건을갖춘신(편)입생중, D 수업료50% 상인자 DAU 외국인우수신입생장학금A,B,C에해당되지않는자 ※위장학금은입학학기에만적용되며2번째학기부터는재학생장학금기준에따라지급 ※장학금지급기준및지급액은본교장학제도에따라변동될수있음 2) 외국인 유학생 국가장학금 구분 수혜기간 수혜금액 수혜조건 아래학과외국인신입학특별전형합격자중학과추천자 - 인문과학대학: 역사문화학부, 한국어문학과 - 자연과학대학: 반도체학과, 바이오메디컬학과 - 사회과학대학: 미디어커뮤니케이션학과 - 경영대학: 경영학과, 관광경영학과, 국제무역학과, 경영정보학과 동아특화분야 - 생명자원과학대학: 식품생명공학과, 스마트그린자원학과 첫학기 우수장학금Ⅰ - 공학: 환경에너지공학과-미래에너지공학전공, 전기공학과, 전자공학과, 기계공학과, 산업경영공학과, 조선해양공학과, 화학공학과, 신소재공학과 수업료전액 - 디자인환경대학:', '| 1 1 | Financial proof (670EURO * 00Months) - Your bank statement issued within 1 month (Original needed). - If you submit parents’ bank statement, please submit your birth or family certification. (Please translate the document if it is not written in English or Korean. And submit a translate verification.) |\n| 1 2 | The language training plan includes - Lecture schedule, teacher’s profile, training facility information, etc. |']","유학생 비자 신청 시 필수 제출 서류는 다음과 같습니다:
+
+1. **재정 증명서**: 최근 1개월 이내에 발급된 은행 명세서 (원본 필요). 부모의 은행 명세서를 제출하는 경우, 출생증명서 또는 가족관계증명서를 함께 제출해야 하며, 해당 문서가 영어 또는 한국어로 작성되지 않은 경우 번역본과 번역 확인서를 제출해야 합니다.
+
+2. **비자 요청서 (추천서)**: 본국 대학의 교장 또는 학장의 서명이 포함된 비자 요청서. 불완전한 문서 양식 제출은 허용되지 않습니다.
+
+3. **교환학생임을 증명하는 문서**: 교환학생 협약서 또는 수락서. 이 문서에는 교환 프로그램 제목, 본국 대학 및 한국의 초청 대학 이름이 포함되어야 합니다.
+
+이 외에도 추가적인 서류가 필요할 수 있으니, 해당 기관의 요구 사항을 확인하는 것이 중요합니다.","비자 신청 시 필수 제출 서류는 다음과 같습니다: 1) 비자 신청서(Form no. 17), 2) 여권(유효기간이 최소 6개월 이상 남아 있어야 함), 3) 최근 6개월 이내 촬영한 3.5X4.5cm 사진(신청서에 풀로 부착), 4) 입학 허가서(대학의 도장이 명확히 보이도록).",0.8571428571428571,0.5082691582999452,0.0,0.0
+입학허가서(Certificate of Admission)에서 확인해야 할 중요한 사항은 무엇인가요?,"['in National Health Insurance. (Approx. 60,000 KRW/per month) C. On-campus Programs for Int’l Student D. Information on Issuance of Certificate of Admission and Visa application:To be announced. E. Orientation(Mandatory) -Orientation schedule will be announced individually. -Contents: Course Registration, Introduction of Academic affairs, Busan tour and so on. -All freshmen must participate in the orientation. - 12 - |', '| 5 | Certificate of Admission/표준입학허가서 ❖Please make sure the following points are valid: 1) Stamp of the University is clearly visible 2) Your name, passport number, and date of birth, Nationality are correctly written on your CoA document 3) Document is issued within 3 months 4) “Signature of Student” (Only hand signature will be accepted/e-signature not permitted) *If there are inaccuracies on your CoA, kindly reach out to your university directly. Incorrect information cannot be accepted. |\n| 6 | Business registration of the university in Korea issued within 3 months 한국대학교의사업자등록증명원(발급3개월이내) |\n| 7 | Proof of Payment Receipt / 송금내역서 |\n| 8 | KVAC Waiver Courier / 우편접수시책임면책서 Please clearly write down the address where you wish to have your passport sent back including C/O. 반드시여권을돌려받아야하는주소를정확하게기재해주시기바랍니다. (우편함이름까지기재) |', '| 1 1 | Financial proof (670EURO * 00Months) - Your bank statement issued within 1 month (Original needed). - If you submit parents’ bank statement, please submit your birth or family certification. (Please translate the document if it is not written in English or Korean. And submit a translate verification.) |\n| 1 2 | A visa request letter(reference letter) issued by the Principal of home country university. (Submission of the Incomplete document form is not acceptable) - The principal’s stamp or signature must be included. |\n| 1 3 | Document proving that you are an exchange student. (Submission of the Incomplete document form is not acceptable) 1) Exchange student agreement between the two universities. OR 2) Letter of Acceptance - The exchange program title and name of the home country university and the inviting university in Korea must be included. |']","입학허가서(Certificate of Admission)에서 확인해야 할 중요한 사항은 다음과 같습니다:
+
+1. **대학의 도장**: 대학의 도장이 명확하게 보이는지 확인해야 합니다.
+2. **개인 정보**: 본인의 이름, 여권 번호, 생년월일, 국적이 정확하게 기재되어 있는지 확인해야 합니다.
+3. **발급일**: 문서가 발급된 지 3개월 이내인지 확인해야 합니다.
+4. **학생 서명**: ""학생 서명""이 포함되어 있어야 하며, 손으로 쓴 서명만 인정되며 전자 서명은 허용되지 않습니다.
+
+이러한 사항들이 정확하지 않을 경우, 해당 대학에 직접 문의해야 하며, 잘못된 정보는 수용되지 않습니다.","입학허가서에서 확인해야 할 중요한 사항은 다음과 같습니다: 1) 대학의 도장이 명확하게 보이는지, 2) 이름, 여권 번호, 생년월일, 국적이 정확하게 기재되어 있는지, 3) 문서가 3개월 이내에 발급되었는지, 4) 학생의 서명이 손으로 작성되었는지(전자 서명 불가).",1.0,0.7123175086226176,0.9999999999666667,1.0
+D-2-5 비자를 신청하기 위해 필요한 서류는 무엇인가요?,"['| 1 1 | Financial proof (670EURO * 00Months) - Your bank statement issued within 1 month (Original needed). - If you submit parents’ bank statement, please submit your birth or family certification. (Please translate the document if it is not written in English or Korean. And submit a translate verification.) |\n| 1 2 | A visa request letter(reference letter) issued by the Principal of home country university. (Submission of the Incomplete document form is not acceptable) - The principal’s stamp or signature must be included. |\n| 1 3 | Document proving that you are an exchange student. (Submission of the Incomplete document form is not acceptable) 1) Exchange student agreement between the two universities. OR 2) Letter of Acceptance - The exchange program title and name of the home country university and the inviting university in Korea must be included. |', '| 5 | Certificate of Admission/표준입학허가서 ❖Please make sure the following points are valid: 1) Stamp of the University is clearly visible 2) Your name, passport number, and date of birth, Nationality are correctly written on your CoA document 3) Document is issued within 3 months 4) “Signature of Student” (Only hand signature will be accepted/e-signature not permitted) *If there are inaccuracies on your CoA, kindly reach out to your university directly. Incorrect information cannot be accepted. |\n| 6 | Business registration of the university in Korea issued within 3 months 한국대학교의사업자등록증명원(발급3개월이내) |\n| 7 | Proof of Payment Receipt / 송금내역서 |\n| 8 | KVAC Waiver Courier / 우편접수시책임면책서 Please clearly write down the address where you wish to have your passport sent back including C/O. 반드시여권을돌려받아야하는주소를정확하게기재해주시기바랍니다. (우편함이름까지기재) |', '| 8 | KVAC Waiver Courier / 우편접수시책임면책서 Please clearly write down the address where you wish to have your passport sent back including C/O. 반드시여권을돌려받아야하는주소를정확하게기재해주시기바랍니다. (우편함이름까지기재) |\n| 9 | KVAC Consent Form and Terms of Use / KVAC 이용약관동의서 On page 2, “I have the right to contact IOM at _____”, please write The Hague 2번째장, “I have the right to contact IOM at _____” 에는The Hague 을기재해주시기바랍니다. |\n| CASE 2: If your university is NOT on the Excellent accredited Universities list, additional documents are required |  |\n| 1 0 | Documents proving your current or last academic background certification - Original and Apostille document should be submitted *If your country of origin is not among the Apostille Convention countries, please visit the Embassy of your country of origin located in the country where you are studying/have studied *If you have graduated from a Dutch university, you have the option to have your documents apostilled through the official Dutch Apostille organization. |']","D-2-5 비자를 신청하기 위해 필요한 서류는 다음과 같습니다:
+
+1. **재정 증명서**: 은행 명세서 (670유로 * 00개월) - 1개월 이내에 발급된 원본 필요. 부모의 은행 명세서를 제출하는 경우, 출생증명서 또는 가족관계증명서를 함께 제출해야 하며, 문서가 영어 또는 한국어로 작성되지 않은 경우 번역본과 번역 확인서를 제출해야 합니다.
+
+2. **비자 요청서**: 본국 대학의 교장이 발급한 추천서. 불완전한 문서 양식 제출은 허용되지 않으며, 교장의 도장 또는 서명이 포함되어야 합니다.
+
+3. **교환학생 증명서**: 교환학생임을 증명하는 문서. 불완전한 문서 양식 제출은 허용되지 않으며, 두 대학 간의 교환학생 협약서 또는 수락서가 필요합니다. 교환 프로그램 제목과 본국 대학 및 한국의 초청 대학 이름이 포함되어야 합니다.
+
+4. **입학 허가서**: Certificate of Admission (표준입학허가서) - 다음 사항이 유효해야 합니다:
+   - 대학의 도장이 명확하게 보임
+   - 이름, 여권 번호, 생년월일, 국적이 정확하게 기재됨
+   - 문서가 3개월 이내에 발급됨
+   - 학생의 서명이 포함되어야 하며, 전자 서명은 허용되지 않음
+
+5. **한국 대학의 사업자 등록증명원**: 3개월 이내에 발급된 문서.
+
+6. **송금 내역서**: Proof of Payment Receipt.
+
+7. **우편접수시 책임면책서**: KVAC Waiver Courier - 여권을 돌려받을 주소를 정확하게 기재해야 함.
+
+8. **KVAC 이용약관 동의서**: KVAC Consent Form and Terms of Use - 2페이지에 ""I have the right to contact IOM at _____"" 부분에 The Hague를 기재해야 함.
+
+9. **현재 또는 마지막 학력 증명서**: 원본 및 아포스티유 문서 제출. 아포스티유 협약 국가가 아닌 경우, 본국 대사관을 방문해야 함.
+
+이 외에도 추가 서류가 필요할 수 있으니, 본인의 상황에 맞게 확인하시기 바랍니다.","D-2-5 비자를 신청하기 위해 필요한 서류는 다음과 같습니다: 1) 비자 신청서 (사증발급신청서 제17호 서식), 2) 여권 (최소 6개월 이상 유효해야 함), 3) 최근 6개월 이내 촬영한 3.5X4.5cm 사진 (신청서에 풀로 부착), 4) 석사 또는 박사 학위 증명서 (원본 및 아포스티유 필요).",1.0,0.0,0.99999999995,0.0
+유학 비자를 신청할 때 필요한 재정 증명은 무엇인가요?,"['| 1 1 | Financial proof (670EURO * 00Months) - Your bank statement issued within 1 month (Original needed). - If you submit parents’ bank statement, please submit your birth or family certification. (Please translate the document if it is not written in English or Korean. And submit a translate verification.) |\n| 1 2 | A visa request letter(reference letter) issued by the Principal of home country university. (Submission of the Incomplete document form is not acceptable) - The principal’s stamp or signature must be included. |\n| 1 3 | Document proving that you are an exchange student. (Submission of the Incomplete document form is not acceptable) 1) Exchange student agreement between the two universities. OR 2) Letter of Acceptance - The exchange program title and name of the home country university and the inviting university in Korea must be included. |', '| 8 | KVAC Waiver Courier / 우편접수시책임면책서 Please clearly write down the address where you wish to have your passport sent back including C/O. 반드시여권을돌려받아야하는주소를정확하게기재해주시기바랍니다. (우편함이름까지기재) |\n| 9 | KVAC Consent Form and Terms of Use / KVAC 이용약관동의서 On page 2, “I have the right to contact IOM at _____”, please write The Hague 2번째장, “I have the right to contact IOM at _____” 에는The Hague 을기재해주시기바랍니다. |\n| CASE 2: If your university is NOT on the Excellent accredited Universities list, additional documents are required |  |\n| 1 0 | Documents proving your current or last academic background certification - Original and Apostille document should be submitted *If your country of origin is not among the Apostille Convention countries, please visit the Embassy of your country of origin located in the country where you are studying/have studied *If you have graduated from a Dutch university, you have the option to have your documents apostilled through the official Dutch Apostille organization. |', '| 1 1 | Financial proof (670EURO * 00Months) - Your bank statement issued within 1 month (Original needed). - If you submit parents’ bank statement, please submit your birth or family certification. (Please translate the document if it is not written in English or Korean. And submit a translate verification.) |\n| 1 2 | The language training plan includes - Lecture schedule, teacher’s profile, training facility information, etc. |']","유학 비자를 신청할 때 필요한 재정 증명은 다음과 같습니다:
+
+1. **재정 증명서**: 최소 670유로 * 00개월에 해당하는 금액이 포함된 은행 명세서를 제출해야 합니다. 이 명세서는 1개월 이내에 발급된 원본이어야 합니다.
+2. **부모의 은행 명세서 제출 시**: 부모의 은행 명세서를 제출하는 경우, 출생증명서 또는 가족관계증명서를 함께 제출해야 합니다. 이 문서가 영어 또는 한국어로 작성되지 않은 경우, 번역본과 번역 인증서도 제출해야 합니다. 
+
+이러한 서류들은 비자 신청 시 필수적으로 요구됩니다.",신청인의 은행 계좌 내역서(650 EUR * 00개월) 또는 연구 수당 지급 확인서가 필요합니다. 연구 수당이 월 650 EUR 이상일 경우 다른 비자 타입을 신청해야 합니다.,0.8333333333333334,0.36435949472258355,0.8333333332916666,0.0
+D-2-5 비자를 신청하기 위해 필요한 서류는 무엇인가요?,"['| 1 1 | Financial proof (670EURO * 00Months) - Your bank statement issued within 1 month (Original needed). - If you submit parents’ bank statement, please submit your birth or family certification. (Please translate the document if it is not written in English or Korean. And submit a translate verification.) |\n| 1 2 | A visa request letter(reference letter) issued by the Principal of home country university. (Submission of the Incomplete document form is not acceptable) - The principal’s stamp or signature must be included. |\n| 1 3 | Document proving that you are an exchange student. (Submission of the Incomplete document form is not acceptable) 1) Exchange student agreement between the two universities. OR 2) Letter of Acceptance - The exchange program title and name of the home country university and the inviting university in Korea must be included. |', '| 5 | Certificate of Admission/표준입학허가서 ❖Please make sure the following points are valid: 1) Stamp of the University is clearly visible 2) Your name, passport number, and date of birth, Nationality are correctly written on your CoA document 3) Document is issued within 3 months 4) “Signature of Student” (Only hand signature will be accepted/e-signature not permitted) *If there are inaccuracies on your CoA, kindly reach out to your university directly. Incorrect information cannot be accepted. |\n| 6 | Business registration of the university in Korea issued within 3 months 한국대학교의사업자등록증명원(발급3개월이내) |\n| 7 | Proof of Payment Receipt / 송금내역서 |\n| 8 | KVAC Waiver Courier / 우편접수시책임면책서 Please clearly write down the address where you wish to have your passport sent back including C/O. 반드시여권을돌려받아야하는주소를정확하게기재해주시기바랍니다. (우편함이름까지기재) |', '| 8 | KVAC Waiver Courier / 우편접수시책임면책서 Please clearly write down the address where you wish to have your passport sent back including C/O. 반드시여권을돌려받아야하는주소를정확하게기재해주시기바랍니다. (우편함이름까지기재) |\n| 9 | KVAC Consent Form and Terms of Use / KVAC 이용약관동의서 On page 2, “I have the right to contact IOM at _____”, please write The Hague 2번째장, “I have the right to contact IOM at _____” 에는The Hague 을기재해주시기바랍니다. |\n| CASE 2: If your university is NOT on the Excellent accredited Universities list, additional documents are required |  |\n| 1 0 | Documents proving your current or last academic background certification - Original and Apostille document should be submitted *If your country of origin is not among the Apostille Convention countries, please visit the Embassy of your country of origin located in the country where you are studying/have studied *If you have graduated from a Dutch university, you have the option to have your documents apostilled through the official Dutch Apostille organization. |']","D-2-5 비자를 신청하기 위해 필요한 서류는 다음과 같습니다:
+
+1. **Financial proof**: 은행 명세서 (670유로 * 00개월) - 1개월 이내에 발급된 원본 필요. 부모의 은행 명세서를 제출하는 경우, 출생증명서 또는 가족관계증명서를 함께 제출해야 하며, 문서가 영어 또는 한국어로 작성되지 않은 경우 번역본과 번역 확인서를 제출해야 합니다.
+
+2. **Visa request letter**: 본국 대학의 교장이 발급한 비자 요청서 (참조서) - 불완전한 문서 양식 제출은 허용되지 않으며, 교장의 도장 또는 서명이 포함되어야 합니다.
+
+3. **Document proving exchange student status**: 교환학생임을 증명하는 문서 - 두 대학 간의 교환학생 협약서 또는 수락서 제출 (불완전한 문서 양식 제출은 허용되지 않음). 교환 프로그램 제목과 본국 대학 및 한국의 초청 대학 이름이 포함되어야 합니다.
+
+4. **Certificate of Admission (CoA)**: 입학 허가서 - 다음 사항이 유효해야 합니다:
+   - 대학의 도장이 명확하게 보임
+   - 이름, 여권 번호, 생년월일, 국적이 정확하게 기재됨
+   - 3개월 이내에 발급됨
+   - 학생의 서명이 포함되어야 하며, 전자 서명은 허용되지 않음
+
+5. **Business registration of the university in Korea**: 한국 대학의 사업자 등록증명원 (3개월 이내 발급)
+
+6. **Proof of Payment Receipt**: 송금 내역서
+
+7. **KVAC Waiver Courier**: 우편접수시 책임 면책서 - 여권을 돌려받을 주소를 정확하게 기재해야 함.
+
+8. **KVAC Consent Form and Terms of Use**: KVAC 이용 약관 동의서 - 2페이지에 ""I have the right to contact IOM at _____"" 부분에 ""The Hague""를 기재해야 함.
+
+9. **Documents proving current or last academic background certification**: 현재 또는 마지막 학력 증명서 - 원본 및 아포스티유 문서 제출 (아포스티유 협약 국가가 아닌 경우, 본국 대사관 방문 필요).
+
+이 외에도, 귀하의 대학이 우수 인증 대학 목록에 없는 경우 추가 서류가 필요할 수 있습니다.",석사학위 증명서 대신 석사 과정 등록 증명서와 아포스티유 문서가 필요합니다.,1.0,,0.3333333333,0.0
+D-2-6 교환학생 비자를 신청할 때 필요한 필수 제출 서류는 무엇인가요?,"['| 1 1 | Financial proof (670EURO * 00Months) - Your bank statement issued within 1 month (Original needed). - If you submit parents’ bank statement, please submit your birth or family certification. (Please translate the document if it is not written in English or Korean. And submit a translate verification.) |\n| 1 2 | A visa request letter(reference letter) issued by the Principal of home country university. (Submission of the Incomplete document form is not acceptable) - The principal’s stamp or signature must be included. |\n| 1 3 | Document proving that you are an exchange student. (Submission of the Incomplete document form is not acceptable) 1) Exchange student agreement between the two universities. OR 2) Letter of Acceptance - The exchange program title and name of the home country university and the inviting university in Korea must be included. |', '| 1 1 | Financial proof (670EURO * 00Months) - Your bank statement issued within 1 month (Original needed). - If you submit parents’ bank statement, please submit your birth or family certification. (Please translate the document if it is not written in English or Korean. And submit a translate verification.) |\n| 1 2 | The language training plan includes - Lecture schedule, teacher’s profile, training facility information, etc. |', '| 8 | KVAC Waiver Courier / 우편접수시책임면책서 Please clearly write down the address where you wish to have your passport sent back including C/O. 반드시여권을돌려받아야하는주소를정확하게기재해주시기바랍니다. (우편함이름까지기재) |\n| 9 | KVAC Consent Form and Terms of Use / KVAC 이용약관동의서 On page 2, “I have the right to contact IOM at _____”, please write The Hague 2번째장, “I have the right to contact IOM at _____” 에는The Hague 을기재해주시기바랍니다. |\n| CASE 2: If your university is NOT on the Excellent accredited Universities list, additional documents are required |  |\n| 1 0 | Documents proving your current or last academic background certification - Original and Apostille document should be submitted *If your country of origin is not among the Apostille Convention countries, please visit the Embassy of your country of origin located in the country where you are studying/have studied *If you have graduated from a Dutch university, you have the option to have your documents apostilled through the official Dutch Apostille organization. |']","D-2-6 교환학생 비자를 신청할 때 필요한 필수 제출 서류는 다음과 같습니다:
+
+1. **재정 증명서**: 최근 1개월 이내에 발급된 은행 명세서 (원본 필요). 부모의 은행 명세서를 제출하는 경우, 출생증명서 또는 가족관계증명서를 함께 제출해야 하며, 해당 문서가 영어 또는 한국어로 작성되지 않은 경우 번역본과 번역 확인서를 제출해야 합니다.
+
+2. **비자 요청서 (참조서)**: 본국 대학의 교장이 발급한 비자 요청서. 교장의 도장 또는 서명이 포함되어야 합니다.
+
+3. **교환학생임을 증명하는 문서**: 
+   - 두 대학 간의 교환학생 협약서 또는 
+   - 수락서. 교환 프로그램 제목과 본국 대학 및 한국의 초청 대학 이름이 포함되어야 합니다. 
+
+이 외에도 추가 서류가 필요할 수 있으니, 해당 사항을 확인하는 것이 좋습니다.","D-2-6 교환학생 비자를 신청할 때 필요한 필수 제출 서류는 명시되어 있지 않지만, 일반적으로 비자 신청서, 여권 사본, 입학 허가서, 재정 증명서 등이 포함될 수 있습니다. 정확한 서류 목록은 해당 대학교의 국제학생 사무소나 비자 관련 웹사이트에서 확인해야 합니다.",1.0,0.7081476297704904,0.9999999999,0.0
+유학 비자를 신청할 때 필요한 서류는 무엇인가요?,"['| 1 1 | Financial proof (670EURO * 00Months) - Your bank statement issued within 1 month (Original needed). - If you submit parents’ bank statement, please submit your birth or family certification. (Please translate the document if it is not written in English or Korean. And submit a translate verification.) |\n| 1 2 | A visa request letter(reference letter) issued by the Principal of home country university. (Submission of the Incomplete document form is not acceptable) - The principal’s stamp or signature must be included. |\n| 1 3 | Document proving that you are an exchange student. (Submission of the Incomplete document form is not acceptable) 1) Exchange student agreement between the two universities. OR 2) Letter of Acceptance - The exchange program title and name of the home country university and the inviting university in Korea must be included. |', '| 1 1 | Financial proof (670EURO * 00Months) - Your bank statement issued within 1 month (Original needed). - If you submit parents’ bank statement, please submit your birth or family certification. (Please translate the document if it is not written in English or Korean. And submit a translate verification.) |\n| 1 2 | The language training plan includes - Lecture schedule, teacher’s profile, training facility information, etc. |', '| 8 | KVAC Waiver Courier / 우편접수시책임면책서 Please clearly write down the address where you wish to have your passport sent back including C/O. 반드시여권을돌려받아야하는주소를정확하게기재해주시기바랍니다. (우편함이름까지기재) |\n| 9 | KVAC Consent Form and Terms of Use / KVAC 이용약관동의서 On page 2, “I have the right to contact IOM at _____”, please write The Hague 2번째장, “I have the right to contact IOM at _____” 에는The Hague 을기재해주시기바랍니다. |\n| CASE 2: If your university is NOT on the Excellent accredited Universities list, additional documents are required |  |\n| 1 0 | Documents proving your current or last academic background certification - Original and Apostille document should be submitted *If your country of origin is not among the Apostille Convention countries, please visit the Embassy of your country of origin located in the country where you are studying/have studied *If you have graduated from a Dutch university, you have the option to have your documents apostilled through the official Dutch Apostille organization. |']","유학 비자를 신청할 때 필요한 서류는 다음과 같습니다:
+
+1. **재정 증명서**: 
+   - 최근 1개월 이내에 발급된 은행 명세서 (원본 필요).
+   - 부모의 은행 명세서를 제출하는 경우, 출생증명서 또는 가족관계증명서를 함께 제출해야 하며, 해당 문서가 영어 또는 한국어로 작성되지 않은 경우 번역본과 번역 확인서를 제출해야 합니다.
+
+2. **비자 요청서 (추천서)**: 
+   - 본국 대학의 교장에 의해 발급된 비자 요청서. (불완전한 문서 양식 제출은 허용되지 않음)
+   - 교장의 도장 또는 서명이 포함되어야 합니다.
+
+3. **교환학생 증명서**: 
+   - 두 대학 간의 교환학생 협약서 또는 수락서.
+   - 교환 프로그램 제목과 본국 대학 및 한국의 초청 대학 이름이 포함되어야 합니다.
+
+4. **언어 교육 계획**: 
+   - 강의 일정, 교수 프로필, 교육 시설 정보 등이 포함되어야 합니다.
+
+5. **현재 또는 마지막 학력 증명서**: 
+   - 원본 및 아포스티유 문서 제출.
+   - 아포스티유 협약 국가가 아닌 경우, 본국 대사관을 방문해야 합니다.
+
+6. **KVAC 면책서**: 
+   - 여권을 반환받을 주소를 정확하게 기재해야 합니다.
+
+7. **KVAC 이용약관 동의서**: 
+   - 특정 페이지에 ""I have the right to contact IOM at _____"" 부분에 ""The Hague""를 기재해야 합니다.
+
+이 외에도, 귀하의 대학이 우수 인증 대학 목록에 없는 경우 추가 서류가 필요할 수 있습니다.","비자 신청서(Form no. 17), 여권(유효기간이 최소 6개월 이상 남아 있어야 함), 최근 6개월 이내 촬영한 3.5X4.5cm 사진, 표준 입학 허가서(대학의 도장이 명확히 보이고, 이름, 여권 번호, 생년월일, 국적이 정확히 기재되어 있으며, 발급일이 3개월 이내여야 함, 학생의 서명은 손 서명만 가능함) 등이 필요합니다.",1.0,0.41180468186456115,0.8333333332916666,0.0
+비자 신청 시 필요한 서류는 무엇인가요?,"['| 1 1 | Financial proof (670EURO * 00Months) - Your bank statement issued within 1 month (Original needed). - If you submit parents’ bank statement, please submit your birth or family certification. (Please translate the document if it is not written in English or Korean. And submit a translate verification.) |\n| 1 2 | A visa request letter(reference letter) issued by the Principal of home country university. (Submission of the Incomplete document form is not acceptable) - The principal’s stamp or signature must be included. |\n| 1 3 | Document proving that you are an exchange student. (Submission of the Incomplete document form is not acceptable) 1) Exchange student agreement between the two universities. OR 2) Letter of Acceptance - The exchange program title and name of the home country university and the inviting university in Korea must be included. |', '| 8 | KVAC Waiver Courier / 우편접수시책임면책서 Please clearly write down the address where you wish to have your passport sent back including C/O. 반드시여권을돌려받아야하는주소를정확하게기재해주시기바랍니다. (우편함이름까지기재) |\n| 9 | KVAC Consent Form and Terms of Use / KVAC 이용약관동의서 On page 2, “I have the right to contact IOM at _____”, please write The Hague 2번째장, “I have the right to contact IOM at _____” 에는The Hague 을기재해주시기바랍니다. |\n| CASE 2: If your university is NOT on the Excellent accredited Universities list, additional documents are required |  |\n| 1 0 | Documents proving your current or last academic background certification - Original and Apostille document should be submitted *If your country of origin is not among the Apostille Convention countries, please visit the Embassy of your country of origin located in the country where you are studying/have studied *If you have graduated from a Dutch university, you have the option to have your documents apostilled through the official Dutch Apostille organization. |', '| 1 1 | Financial proof (670EURO * 00Months) - Your bank statement issued within 1 month (Original needed). - If you submit parents’ bank statement, please submit your birth or family certification. (Please translate the document if it is not written in English or Korean. And submit a translate verification.) |\n| 1 2 | The language training plan includes - Lecture schedule, teacher’s profile, training facility information, etc. |']","비자 신청 시 필요한 서류는 다음과 같습니다:
+
+1. **재정 증명서**: 
+   - 최근 1개월 이내에 발급된 은행 명세서 (원본 필요).
+   - 부모의 은행 명세서를 제출하는 경우, 출생증명서 또는 가족관계증명서를 함께 제출해야 하며, 해당 문서가 영어 또는 한국어로 작성되지 않은 경우 번역본과 번역 인증서를 제출해야 합니다.
+
+2. **비자 요청서 (참조서)**: 
+   - 본국 대학의 교장에 의해 발급된 비자 요청서. (불완전한 문서 양식 제출은 허용되지 않음)
+   - 교장의 도장 또는 서명이 포함되어야 합니다.
+
+3. **교환학생임을 증명하는 문서**: 
+   - 두 대학 간의 교환학생 협정서 또는 수락서.
+   - 교환 프로그램 제목과 본국 대학 및 한국의 초청 대학 이름이 포함되어야 합니다.
+
+4. **KVAC 면책서**: 
+   - 여권을 반환받을 주소를 정확하게 기재해야 합니다.
+
+5. **KVAC 이용약관 동의서**: 
+   - 2페이지에 ""I have the right to contact IOM at _____"" 부분에 ""The Hague""를 기재해야 합니다.
+
+6. **추가 서류 (해당되는 경우)**: 
+   - 현재 또는 마지막 학력 증명서 (원본 및 아포스티유 문서 제출 필요).
+   - 아포스티유 협약 국가가 아닌 경우, 본국 대사관을 방문해야 합니다.
+
+7. **언어 교육 계획**: 
+   - 강의 일정, 강사 프로필, 교육 시설 정보 등을 포함해야 합니다.
+
+이 외에도 특정 상황에 따라 추가 서류가 필요할 수 있습니다.","비자 신청 시 필요한 서류에는 한국대학교의 사업자등록증명원(발급 3개월 이내), 송금내역서, KVAC 우편접수시 책임면책서, KVAC 이용약관 동의서가 포함됩니다.",1.0,0.425550917187872,0.49999999995,0.5

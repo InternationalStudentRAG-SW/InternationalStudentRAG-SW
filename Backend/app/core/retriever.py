@@ -68,15 +68,18 @@ class RAGRetriever:
         
         if self.mode == "hybrid_rerank":
             pairs = [[query, doc.page_content] for doc in docs]
-            scores = self.reranker.predict(pairs)  # predict()로 변경
+            scores = self.reranker.predict(pairs)  # 1️⃣ 점수 계산
             
-            scored_docs = sorted(
-                zip(scores, docs),
-                key=lambda x: x[0],
-                reverse=True
-            )
+            scored_docs = sorted(zip(scores, docs), key=lambda x: x[0], reverse=True)
             top_k = k or self.top_k
-            return [doc for _, doc in scored_docs[:top_k]]
+            
+            # 2️⃣ [추가된 부분] 화면으로 던지기 전에, 문서의 '메타데이터'라는 주머니에 점수를 넣어줌
+            final_docs = []
+            for score, doc in scored_docs[:top_k]:
+                doc.metadata["similarity_score"] = float(score)  # 👈 바로 이 한 줄이 핵심
+                final_docs.append(doc)
+                
+            return final_docs
         
         return docs
 

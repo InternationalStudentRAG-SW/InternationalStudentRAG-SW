@@ -76,7 +76,15 @@ class RAGRetriever:
                 reverse=True
             )
             top_k = k or self.top_k
-            return [doc for _, doc in scored_docs[:top_k]]
+            
+            # 🌟 [수정된 부분] 리랭킹 점수를 문서의 메타데이터에 주입
+            final_docs = []
+            for score, doc in scored_docs[:top_k]:
+                # 프론트엔드에서 표시할 수 있도록 float 형태로 저장
+                doc.metadata["similarity_score"] = float(score)
+                final_docs.append(doc)
+                
+            return final_docs
         
         return docs
 

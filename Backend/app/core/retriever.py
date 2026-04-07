@@ -1,96 +1,131 @@
-from typing import List, Tuple, Optional
+import os
+import numpy as np
+from typing import List, Tuple, Optional, Dict, Any, Literal
+from langchain_community.retrievers import BM25Retriever
+from langchain_classic.retrievers import EnsembleRetriever
+from langchain_core.documents import Document
+from langchain_classic.retrievers.contextual_compression import ContextualCompressionRetriever
+from sentence_transformers import CrossEncoder
 from app.core.knowledge_base import knowledge_base
 from app.config import settings
 
+if settings.hf_token:
+    os.environ["HF_TOKEN"] = settings.hf_token
+
+RetrieverMode = Literal["vector", "hybrid", "hybrid_rerank"]
 
 class RAGRetriever:
-    """벡터 유사도 검색을 사용하여 관련 문서를 검색합니다."""
-
-    def __init__(self):
+    def __init__(self, mode: RetrieverMode = "hybrid"):
         self.top_k = settings.top_k_results
+        self.initial_fetch_k = getattr(settings, 'initial_fetch_k', self.top_k)
         self.min_similarity = settings.min_similarity_score
+        self.mode = mode
 
-    def retrieve(
-        self,
-        query: str,
-        k: Optional[int] = None,
-        min_similarity: Optional[float] = None
-    ) -> List[Tuple[str, float, dict]]:
-        """
-        쿼리에 대해 상위 k개의 유사한 문서를 검색합니다.
+        self._initialize_retriever()
 
-        Args:
-            query: 사용자 쿼리 문자열
-            k: 결과 개수 (기본값: settings.top_k_results)
-            min_similarity: 최소 유사도 임계값 (기본값: settings.min_similarity_score)
+    def _initialize_retriever(self):
+        db_data = knowledge_base.vector_store.get()
 
-        Returns:
-            (콘텐츠, 점수, 메타데이터) 튜플의 목록
-        """
-        if k is None:
-            k = self.top_k
-        if min_similarity is None:
-            min_similarity = self.min_similarity
+        fetch_k = self.initial_fetch_k if self.mode == "hybrid_rerank" else self.top_k
 
-        # 유사도 점수로 검색
-        results = knowledge_base.vector_store.similarity_search_with_score(
-            query,
-            k=k
+        # 1. Vector Retriever (공통)
+        self.vector_retriever = knowledge_base.vector_store.as_retriever(
+            search_kwargs={"k": self.top_k}
         )
 
-        # 최소 유사도로 필터링하고 결과 포맷팅
-        retrieved_docs = []
-        for doc, score in results:
-            # ChromaDB의 유사도 점수는 이미 정규화됨 (0-1)
-            if score >= min_similarity:
-                retrieved_docs.append(
-                    (doc.page_content, score, doc.metadata)
-                )
+        if self.mode == "vector":
+            self.retriever = self.vector_retriever
+            print("Vector 검색기 초기화 완료")
+            return
 
-        return retrieved_docs
+        if not db_data or not db_data['documents']:
+            print("지식베이스가 비어있습니다.")
+            self.retriever = self.vector_retriever
+            return
 
-    def format_context(
-        self,
-        retrieved_docs: List[Tuple[str, float, dict]]
-    ) -> str:
-        """검색된 문서를 LLM용 컨텍스트로 포맷팅합니다."""
+        # 2. BM25 + Vector Hybrid
+        langchain_docs = [
+            Document(page_content=text, metadata=meta)
+            for text, meta in zip(db_data['documents'], db_data['metadatas'])
+        ]
+        keyword_retriever = BM25Retriever.from_documents(langchain_docs)
+        keyword_retriever.k = fetch_k
+
+        hybrid_retriever = EnsembleRetriever(
+            retrievers=[keyword_retriever, self.vector_retriever],
+            weights=[0.35, 0.65]
+        )
+
+        if self.mode == "hybrid":
+            self.retriever = hybrid_retriever
+            print("하이브리드 검색기(BM25 + Vector) 초기화 완료")
+            return
+
+        # 3. Hybrid + Reranker
+        if self.mode == "hybrid_rerank":
+            self.reranker = CrossEncoder("BAAI/bge-reranker-v2-m3")
+            self.retriever = hybrid_retriever
+            print("하이브리드 + BGE Reranker 초기화 완료")
+
+    def retrieve(self, query: str, k: Optional[int] = None) -> List[Document]:
+        # 1차 검색: hybrid_rerank 모드라면 여기서 15개(initial_fetch_k) 정도의 넉넉한 문서가 나옵니다.
+        docs = self.retriever.invoke(query)
+        
+        if self.mode == "hybrid_rerank":
+            pairs = [[query, doc.page_content] for doc in docs]
+            scores = self.reranker.predict(pairs)
+            
+            scored_docs = sorted(zip(scores, docs), key=lambda x: x[0], reverse=True)
+            
+            # 최종 반환 개수: 매개변수로 들어온 k가 없으면 config의 최종 top_k(예: 5)를 사용
+            final_k = k or self.top_k 
+            
+            final_docs = []
+            for score, doc in scored_docs[:final_k]:
+                doc.metadata["similarity_score"] = float(score)
+                final_docs.append(doc)
+                
+            return final_docs
+        
+        return docs
+
+    def format_context(self, retrieved_docs: List[Document]) -> str:
         if not retrieved_docs:
             return "관련 문서를 찾을 수 없습니다."
-
         context_parts = []
-        for i, (content, score, metadata) in enumerate(retrieved_docs, 1):
-            source = metadata.get("source", "알 수 없음")
-            chunk_idx = metadata.get("chunk_index", 0)
+        for i, doc in enumerate(retrieved_docs, 1):
+            source = doc.metadata.get("source", "알 수 없음")
+            page = doc.metadata.get("page", "-")
             context_parts.append(
-                f"[문서 {i}] (출처: {source}, 청크 {chunk_idx}, 점수: {score:.2f})\n{content}"
+                f"[문서 {i}] (출처: {source}, {page}페이지)\n{doc.page_content}"
             )
-
         return "\n\n".join(context_parts)
 
-    def retrieve_with_sources(
-        self,
-        query: str,
-        k: Optional[int] = None
-    ) -> Tuple[str, List[dict]]:
-        """
-        문서를 검색하고 출처 정보와 함께 포맷된 컨텍스트를 반환합니다.
-
-        Returns:
-            (포맷된_컨텍스트, 출처_목록)
-        """
+    def retrieve_with_sources(self, query: str, k: Optional[int] = None) -> Tuple[str, List[Dict[str, Any]]]:
         docs = self.retrieve(query, k=k)
         context = self.format_context(docs)
 
-        sources = [
-            {
-                "source": metadata.get("source", "알 수 없음"),
-                "chunk_index": metadata.get("chunk_index", 0),
-                "similarity_score": float(score)
-            }
-            for _, score, metadata in docs
-        ]
+        seen_sources = set()
+        sources = []
+        for i, doc in enumerate(docs):
+            source = doc.metadata.get("source", "알 수 없음")
+            if source not in seen_sources:
+                seen_sources.add(source)
+                sources.append({
+                    "source": source,
+                    "page": doc.metadata.get("page", "-"),
+                    "chunk_index": doc.metadata.get("chunk_index", i),
+                    "similarity_score": doc.metadata.get("similarity_score", 0.0),
+                    "content_preview": doc.page_content[:50] + "..."
+                })
 
         return context, sources
 
 
-retriever = RAGRetriever()
+# 실서비스용 모델
+retriever = RAGRetriever(mode="hybrid_rerank")
+
+# 평가용 모델
+vector_retriever = RAGRetriever(mode="vector")
+hybrid_retriever = RAGRetriever(mode="hybrid")
+hybrid_rerank_retriever = RAGRetriever(mode="hybrid_rerank")

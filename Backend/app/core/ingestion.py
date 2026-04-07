@@ -14,31 +14,40 @@ class DocumentIngester:
     def __init__(self):
         self.document_path = Path(settings.document_path)
         self.document_path.mkdir(parents=True, exist_ok=True)
-
-    def extract_from_pdf(self, pdf_path: str) -> List[str]:
-        """PDF 파일에서 텍스트를 추출합니다."""
-        pages_content = []
+        
+    def extract_from_pdf(self, pdf_path: str) -> List[dict]:
+        """표 구조와 페이지 메타데이터를 유지하며 텍스트를 추출합니다."""
+        documents = []
         try:
             with pdfplumber.open(pdf_path) as pdf:
                 for page_num, page in enumerate(pdf.pages):
-                    text = page.extract_text()
-                    if text:
-                        pages_content.append(f"--- 페이지 {page_num + 1} ---\n{text}")
+                    # 1. 일반 텍스트 추출
+                    text = page.extract_text() or ""
+                    
+                    # 2. 표(Table) 추출 및 Markdown 변환
+                    tables = page.extract_tables()
+                    table_text = ""
+                    if tables:
+                        for table in tables:
+                            # 리스트 형태의 표를 문자열로 변환 (간단한 구현 예시)
+                            for row in table:
+                                filtered_row = [item.replace('\n', ' ') if item else "" for item in row]
+                                table_text += "| " + " | ".join(filtered_row) + " |\n"
+                    
+                    # 텍스트와 표 결합
+                    combined_content = f"{text}\n\n[Tables]\n{table_text}"
+                    
+                    if combined_content.strip():
+                        documents.append({
+                            "content": combined_content,
+                            "metadata": {
+                                "source": os.path.basename(pdf_path),
+                                "page": page_num + 1
+                            }
+                        })
         except Exception as e:
             print(f"PDF 추출 오류 {pdf_path}: {e}")
-        return pages_content
-
-    def extract_from_directory(self) -> List[Tuple[str, str]]:
-        """문서 디렉토리의 모든 PDF 파일에서 텍스트를 추출합니다."""
-        documents = []
-        pdf_files = list(self.document_path.glob("*.pdf"))
-
-        for pdf_file in pdf_files:
-            print(f"처리 중 {pdf_file.name}...")
-            pages = self.extract_from_pdf(str(pdf_file))
-            full_text = "\n".join(pages)
-            documents.append((pdf_file.name, full_text))
-
+            
         return documents
 
     def crawl_web(self, url: str) -> Tuple[str, str]:

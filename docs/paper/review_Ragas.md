@@ -2,6 +2,7 @@
 
 ---
 저자: Shahul Es, Jithin James, Luis Espinosa-Anke, Steven Schockaert
+<br>
 요약: 손수윤
 
 ## 평가 전략

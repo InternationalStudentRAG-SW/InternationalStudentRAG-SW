@@ -72,7 +72,7 @@ ChromaDB에 저장된 청크를 활용한 **자문자답 방식**으로 평가 �
 
 ## 📁 관련 발표자료
 [📎 발표자료 전문(중간발표)](assets/slides/mid/MidSlide.md)
-</br>
+<br>
 ![slide 5](assets/slides/mid/slide_01.png)
 ![slide 6](assets/slides/mid/slide_06.png)
 ![slide 7](assets/slides/mid/slide_07.png)

@@ -5,7 +5,7 @@
 RAG 기반 유학생 생활 및 행정 절차 안내 AI 서비스 개발을 통해  
 **정보 접근의 어려움**과 **행정 절차의 복잡성**을 해결합니다.
 
-## 기술 스택
+## ⚙️ 기술 스택
 
 ### Frontend
 | 기술 | 용도 |
@@ -31,7 +31,7 @@ RAG 기반 유학생 생활 및 행정 절차 안내 AI 서비스 개발을 통�
 | ChromaDB | 벡터 청크 및 메타데이터 저장 |
 | PostgreSQL | 회원 정보 저장 |
 
-## RAG 파이프라인
+## 🌐 RAG 파이프라인
 
 ### 1. Hybrid Search
 
@@ -59,7 +59,7 @@ Top-K 최종 문서 → GPT 컨텍스트 주입
 
 ---
 
-## 평가 (RAGAS)
+## 📊 평가 (RAGAS)
 
 ChromaDB에 저장된 청크를 활용한 **자문자답 방식**으로 평가 데이터셋을 구성하고, 아래 4가지 지표로 시스템을 측정합니다.
 
@@ -70,7 +70,7 @@ ChromaDB에 저장된 청크를 활용한 **자문자답 방식**으로 평가 �
 | **Context Precision** (문맥 정확성) | 핵심 정보가 컨텍스트 상단에 배치되었는가 |
 | **Context Recall** (문맥 재현율) | 정답 작성에 필요한 정보가 컨텍스트에 포함되었는가 |
 
-## 관련 발표자료
+## 📁 관련 발표자료
 [📎 발표자료 전문(중간발표)](assets/slides/mid/MidSlide.md)
 ![slide 5](assets/slides/mid/slide_01.png)
 ![slide 6](assets/slides/mid/slide_06.png)

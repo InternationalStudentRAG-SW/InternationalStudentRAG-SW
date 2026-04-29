@@ -94,4 +94,4 @@
     2. **모순 점수 (Contradiction Score, $C_s$):** 답변 중에 원문과 반대되는 내용이 있는지 확인
     3. **의무 범위 점수 (Obligation Coverage Score, $OC_s$):** 원문에 나온 중요한 행정적/법적 의무 사항들을 빠짐없이 담았는지 체크
         
-        ![스크린샷 2026-04-01 23.33.04.png](assets/images/paper_hybrid_02.png)
+        ![result2](assets/slides/mid/slide_05.png)

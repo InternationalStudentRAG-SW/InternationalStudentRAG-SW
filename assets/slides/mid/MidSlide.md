@@ -12,4 +12,9 @@
 9. 진행계획 및 마일스톤
 10. 팀원 구성
 
-![slide 1](slide_1.png)
+lines = []
+for i in range(1, 31):
+    lines.append(f"![slide {i:02d}](../assets/slides/mid/slide_{i:02d}.png)")
+    lines.append("")  # 줄바꿈
+
+print("\n".join(lines))

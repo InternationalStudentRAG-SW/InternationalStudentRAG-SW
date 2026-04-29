@@ -67,8 +67,8 @@ ChromaDB에 저장된 청크를 활용한 **자문자답 방식**으로 평가 �
 | **Context Recall** (문맥 재현율) | 정답 작성에 필요한 정보가 컨텍스트에 포함되었는가 |
 
 ## 관련 발표자료
-![slide 5](assets/slides/mid/slides_1.jpeg)
-![slide 6](assets/slides/mid/slides_6.jpeg)
-![slide 7](assets/slides/mid/slides_7.jpeg)
-![slide 8](assets/slides/mid/slides_8.jpeg)
-![slide 17](assets/slides/mid/slides_17.jpeg)
+![slide 5](assets/slides/mid/slide_01.png)
+![slide 6](assets/slides/mid/slide_06.png)
+![slide 7](assets/slides/mid/slide_07.png)
+![slide 8](assets/slides/mid/slide_08.png)
+![slide 17](assets/slides/mid/slide_17.png)

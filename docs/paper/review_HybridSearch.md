@@ -15,28 +15,19 @@
     5. Stopwords(불용어): *nltk & scikit-learn* 세트를 이용해 불용어 제거
         
         <aside>
-        🙋🏻‍♀️
-        
         **stopword**: 자연어 처리 부문에서 사용되는 용어로, **문장의 의미를 전달하는 데에 거의 기여를 하지 않는, 자주 등장하지만 불필요한 단어**를 의미함.
-        
         </aside>
         
     6. Stemming(어간 추출): Snowball Stemmer을 적용하여 어간 추출
         
         <aside>
-        🙋🏻‍♀️
-        
         **stemming**: 자연어 처리 부문에서 사용되는 용어로, **단어의 변형된 형태(예: 굴절, 파생)에서 접사(접두사, 접미사)를 제거하고 어간(Stem)을 분리해 내는 과정**을 의미함.
-        
         </aside>
         
     7. Tokenization(토큰화): unigrams, bi-grams 생성
         
         <aside>
-        🙋🏻‍♀️
-        
         **tokenization**: 자연어 처리 부문에서 사용되는 용어로, **긴 데이터를 의미 있는 최소 단위(토큰, Token)로 분할하는 과정**을 의미함.
-        
         </aside>
         
 2. 접근 방식 구현

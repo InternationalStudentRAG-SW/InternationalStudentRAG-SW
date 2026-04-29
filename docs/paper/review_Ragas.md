@@ -1,6 +1,8 @@
 # [요약] Ragas: Automated Evaluation of Retrieval Augmented Generation
 
 ---
+저자: Shahul Es, Jithin James, Luis Espinosa-Anke, Steven Schockaert
+요약: 손수윤
 
 ## 평가 전략
 

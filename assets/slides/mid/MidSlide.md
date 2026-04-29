@@ -14,7 +14,7 @@
 
 lines = []
 for i in range(1, 31):
-    lines.append(f"![slide {i:02d}](../assets/slides/mid/slide_{i:02d}.png)")
+    lines.append(f"![slide {i:02d}](slide_{i:02d}.png)")
     lines.append("")  # 줄바꿈
 
 print("\n".join(lines))

@@ -1,5 +1,5 @@
 # [요약] A Hybrid Approach to Information Retrieval and Answer Generation for Regulatory Texts
-
+저자: Jhon Rayo, Raúl de la Rosa, Mario Garrido
 ---
 
 ## 정보 검색 시스템(information retrieval systems)

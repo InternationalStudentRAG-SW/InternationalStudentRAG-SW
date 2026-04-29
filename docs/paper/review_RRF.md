@@ -1,6 +1,7 @@
 # [요약]Hybrid Multi-Expanded Query Framework for Information Retrieval in In-Domain Knowledge
 
 저자: Fahmi Rizaldi
+<br>
 요약: 조효린
 #### What is RRF ?
  https://velog.io/@acdongpgm/NLP.-Reciprocal-rank-fusion-RRF-%EC%9D%B4%ED%95%B4%ED%95%98%EA%B8%B0

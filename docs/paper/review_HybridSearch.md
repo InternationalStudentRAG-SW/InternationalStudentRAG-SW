@@ -51,7 +51,7 @@
         - Lexical Score(Keyword Search System Score)
 3. result
     
-    ![정보 검색 시스템 간의 성능 비교](../assets/images/paper_hybrid_01.png)
+    ![정보 검색 시스템 간의 성능 비교](../../assets/images/paper_hybrid_01.png)
     
     정보 검색 시스템 간의 성능 비교
     
@@ -94,4 +94,4 @@
     2. **모순 점수 (Contradiction Score, $C_s$):** 답변 중에 원문과 반대되는 내용이 있는지 확인
     3. **의무 범위 점수 (Obligation Coverage Score, $OC_s$):** 원문에 나온 중요한 행정적/법적 의무 사항들을 빠짐없이 담았는지 체크
         
-        ![답변 품질 측정](../assets/images/paper_hybrid_02.png)
+        ![정보 검색 시스템 간의 성능 비교](../../assets/images/paper_hybrid_02.png)

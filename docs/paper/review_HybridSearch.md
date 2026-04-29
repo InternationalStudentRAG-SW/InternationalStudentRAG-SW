@@ -53,24 +53,24 @@
     3. **우선순위:** 검색 엔진이 준 순서대로 정보의 중요도를 판단할 것.
     4. **정확성:** 모든 의무 사항과 통찰을 완전히 통합하고, 답변 내에서 모순이 없도록 할 것.
     
-    > **프롬프트 내용:**
-    “As a regulatory compliance assistant. Provide
-    a **complete**, **coherent**, and **correct**
-    response to the given question by synthesizing the
-    information from the provided passages. Your
-    answer should **fully integrate all relevant obli-
-    gations, practices, and insights**, and directly
-    address the question. The passages are presented
-    in order of relevance, so **prioritize the infor-
-    mation accordingly** and ensure consistency in
-    your response, avoiding any contradictions. Ad-
-    ditionally, reference **specific regulations and
-    key compliance requirements** outlined in the
-    regulatory content to support your answer. **Do
-    not use any extraneous or external knowledge**
-    outside of the provided passages when crafting
-    your response.”
-    > 
+        > **프롬프트 내용:**
+        “As a regulatory compliance assistant. Provide
+        a **complete**, **coherent**, and **correct**
+        response to the given question by synthesizing the
+        information from the provided passages. Your
+        answer should **fully integrate all relevant obli-
+        gations, practices, and insights**, and directly
+        address the question. The passages are presented
+        in order of relevance, so **prioritize the infor-
+        mation accordingly** and ensure consistency in
+        your response, avoiding any contradictions. Ad-
+        ditionally, reference **specific regulations and
+        key compliance requirements** outlined in the
+        regulatory content to support your answer. **Do
+        not use any extraneous or external knowledge**
+        outside of the provided passages when crafting
+        your response.”
+        > 
 4. 답변 품질 측정: **RePASs(Regulatory Passage Answer Stability Score) 지표**
     1. **함의 점수 (Entailment Score, $E_s$):** 생성된 답변의 문장들이 실제 검색된 구절에 의해 뒷받침되는지 측정
     2. **모순 점수 (Contradiction Score, $C_s$):** 답변 중에 원문과 반대되는 내용이 있는지 확인

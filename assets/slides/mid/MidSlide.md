@@ -12,9 +12,34 @@
 9. 진행계획 및 마일스톤
 10. 팀원 구성
 
-lines = []
-for i in range(1, 31):
-    lines.append(f"![slide {i:02d}](slide_{i:02d}.png)")
-    lines.append("")  # 줄바꿈
-
-print("\n".join(lines))
+    
+![slide 01](slide_01.png)
+![slide 02](slide_02.png)
+![slide 03](slide_03.png)
+![slide 04](slide_04.png)
+![slide 05](slide_05.png)
+![slide 06](slide_06.png)
+![slide 07](slide_07.png)
+![slide 08](slide_08.png)
+![slide 09](slide_09.png)
+![slide 10](slide_10.png)
+![slide 11](slide_11.png)
+![slide 12](slide_12.png)
+![slide 13](slide_13.png)
+![slide 14](slide_14.png)
+![slide 15](slide_15.png)
+![slide 16](slide_16.png)
+![slide 17](slide_17.png)
+![slide 18](slide_18.png)
+![slide 19](slide_19.png)
+![slide 20](slide_20.png)
+![slide 21](slide_21.png)
+![slide 22](slide_22.png)
+![slide 23](slide_23.png)
+![slide 24](slide_24.png)
+![slide 25](slide_25.png)
+![slide 26](slide_26.png)
+![slide 27](slide_27.png)
+![slide 28](slide_28.png)
+![slide 29](slide_29.png)
+![slide 30](slide_30.png)

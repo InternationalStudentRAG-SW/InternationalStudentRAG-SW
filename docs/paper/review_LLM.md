@@ -24,7 +24,7 @@ GPT 같은 주요 거대언어모델은 비정형 데이터를 학습하기 때�
         
 ## 3. 실험 결과 및 결론 
     
-    ![image.png](../../assets/images/paper_LLM_01.png)
+![image.png](../../assets/images/paper_LLM_01.png)
     
 
 ![image.png](../../assets/images/paper_LLM_02.png)

@@ -12,4 +12,4 @@
 9. 진행계획 및 마일스톤
 10. 팀원 구성
 
-![slide 1](assets/slides/mid/slide_1.png)
+![slide 1](slide_1.png)

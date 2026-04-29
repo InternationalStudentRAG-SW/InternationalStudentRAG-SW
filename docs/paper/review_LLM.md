@@ -29,6 +29,9 @@ GPT 같은 주요 거대언어모델은 비정형 데이터를 학습하기 때�
 
 ![image.png](../../assets/images/paper_LLM_02.png)
 
+<aside>
+   💡
+   **표 형태를 json 형식으로 바꾸기
+   json 형식으로 바꾼 말을 LLM이 더 잘 이해하도록 자연어로 바꾸기** 
+</aside>
 
-**표 형태를 json 형식으로 바꾸기
-json 형식으로 바꾼 말을 LLM이 더 잘 이해하도록 자연어로 바꾸기** 

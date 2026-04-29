@@ -31,23 +31,23 @@
   > 그래서 **점수는 무시하고 오직 '순위(Rank)'만을 기준**으로 역수(Reciprocal)를 취해 더하는 방식이 바로 RRF. 상위권에 공통으로 랭크된 문서일수록 가산점을 강력하게 받아 최종 상위권에 오르게 됨.
   > 
 
-![image.png](../../assets/images/paper_rrf_01.png)
-
-![image.png](../../assets/images/paper_rrf_02.png)
-
-```python
-score = 0.0
-for q in queries:
-    if d in result(q):
-  	    score += 1.0 / ( k + rank( result(q), d ) )
-return score
-
-# k는 순위에 대한 상수입니다.
-# q는 질의(query)의 집합에서 하나의 질의를 의미합니다.
-# d는 q의 결과 집합에서의 문서(document)를 나타냅니다.
-# result(q)는 질의 q의 결과 집합을 의미합니다.
-# rank(result(q), d)는 d가 result(q)에서의 순위를 나타냅니다. 순위는 1부터 시작합니다.
-```
+  ![image.png](../../assets/images/paper_rrf_01.png)
+  
+  ![image.png](../../assets/images/paper_rrf_02.png)
+  
+  ```python
+  score = 0.0
+  for q in queries:
+      if d in result(q):
+    	    score += 1.0 / ( k + rank( result(q), d ) )
+  return score
+  
+  # k는 순위에 대한 상수입니다.
+  # q는 질의(query)의 집합에서 하나의 질의를 의미합니다.
+  # d는 q의 결과 집합에서의 문서(document)를 나타냅니다.
+  # result(q)는 질의 q의 결과 집합을 의미합니다.
+  # rank(result(q), d)는 d가 result(q)에서의 순위를 나타냅니다. 순위는 1부터 시작합니다.
+  ```
 
 4. 실험 과정
   - **[실험 1] 베이스라인(비교군) 성능 측정:**

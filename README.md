@@ -15,7 +15,7 @@ RAG 기반 유학생 생활 및 행정 절차 안내 AI 서비스 개발을 통�
 ### Backend
 | 기술 | 용도 |
 |------|------|
-| FastAPI | REST API 서버 |
+| FastAPI | API 서버 |
 
 ### RAG & LLM
 | 기술 | 용도 |

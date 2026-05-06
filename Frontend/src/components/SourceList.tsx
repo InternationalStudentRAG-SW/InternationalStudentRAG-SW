@@ -27,8 +27,7 @@ export function SourceList({ sources }: Props) {
               </a>
 
               <span className="source-item__meta">
-                청크 #{src.chunk_index} &nbsp;·&nbsp; 관련성{' '}
-                {(src.similarity_score * 100).toFixed(1)}%
+                관련성 {(src.similarity_score * 100).toFixed(1)}%
               </span>
             </li>
           )

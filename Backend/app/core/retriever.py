@@ -2,9 +2,8 @@ import os
 import numpy as np
 from typing import List, Tuple, Optional, Dict, Any, Literal
 from langchain_community.retrievers import BM25Retriever
-from langchain_classic.retrievers import EnsembleRetriever
+from langchain_classic.retrievers.ensemble import EnsembleRetriever
 from langchain_core.documents import Document
-from langchain_classic.retrievers.contextual_compression import ContextualCompressionRetriever
 from sentence_transformers import CrossEncoder
 from app.core.knowledge_base import knowledge_base
 from app.config import settings
@@ -48,45 +47,47 @@ class RAGRetriever:
             Document(page_content=text, metadata=meta)
             for text, meta in zip(db_data['documents'], db_data['metadatas'])
         ]
-        keyword_retriever = BM25Retriever.from_documents(langchain_docs)
-        keyword_retriever.k = fetch_k
-
-        hybrid_retriever = EnsembleRetriever(
-            retrievers=[keyword_retriever, self.vector_retriever],
-            weights=[0.35, 0.65]
+        self.keyword_retriever = BM25Retriever.from_documents(langchain_docs)
+        self.keyword_retriever.k = fetch_k
+        self._rrf = EnsembleRetriever(
+            retrievers=[self.keyword_retriever, self.vector_retriever],
+            weights=[0.35, 0.65],
         )
 
         if self.mode == "hybrid":
-            self.retriever = hybrid_retriever
             print("하이브리드 검색기(BM25 + Vector) 초기화 완료")
             return
 
         # 3. Hybrid + Reranker
         if self.mode == "hybrid_rerank":
             self.reranker = CrossEncoder("BAAI/bge-reranker-v2-m3")
-            self.retriever = hybrid_retriever
             print("하이브리드 + BGE Reranker 초기화 완료")
 
-    def retrieve(self, query: str, k: Optional[int] = None) -> List[Document]:
-        # 1차 검색: hybrid_rerank 모드라면 여기서 15개(initial_fetch_k) 정도의 넉넉한 문서가 나옵니다.
-        docs = self.retriever.invoke(query)
-        
+    def retrieve(self, query: str, k: Optional[int] = None, ko_query: Optional[str] = None) -> List[Document]:
+        bm25_q   = ko_query or query   # BM25: 한국어 번역 (없으면 원문)
+        vector_q = query               # Vector: 원문
+        rerank_q = ko_query or query   # 리랭커: 한국어 번역 (없으면 원문)
+
+        if self.mode in ("hybrid", "hybrid_rerank"):
+            bm25_docs   = self.keyword_retriever.invoke(bm25_q)
+            vector_docs = self.vector_retriever.invoke(vector_q)
+            docs = self._rrf.weighted_reciprocal_rank([bm25_docs, vector_docs])
+        else:
+            docs = self.vector_retriever.invoke(vector_q)
+
         if self.mode == "hybrid_rerank":
-            pairs = [[query, doc.page_content] for doc in docs]
+            pairs = [[rerank_q, doc.page_content] for doc in docs]
             scores = self.reranker.predict(pairs)
-            
+
             scored_docs = sorted(zip(scores, docs), key=lambda x: x[0], reverse=True)
-            
-            # 최종 반환 개수: 매개변수로 들어온 k가 없으면 config의 최종 top_k(예: 5)를 사용
-            final_k = k or self.top_k 
-            
+
+            final_k = k or self.top_k
             final_docs = []
             for score, doc in scored_docs[:final_k]:
                 doc.metadata["similarity_score"] = float(score)
                 final_docs.append(doc)
-                
             return final_docs
-        
+
         return docs
 
     def format_context(self, retrieved_docs: List[Document]) -> str:
@@ -101,8 +102,8 @@ class RAGRetriever:
             )
         return "\n\n".join(context_parts)
 
-    def retrieve_with_sources(self, query: str, k: Optional[int] = None) -> Tuple[str, List[Dict[str, Any]]]:
-        docs = self.retrieve(query, k=k)
+    def retrieve_with_sources(self, query: str, k: Optional[int] = None, ko_query: Optional[str] = None) -> Tuple[str, List[Dict[str, Any]]]:
+        docs = self.retrieve(query, k=k, ko_query=ko_query)
         context = self.format_context(docs)
 
         seen_sources = set()

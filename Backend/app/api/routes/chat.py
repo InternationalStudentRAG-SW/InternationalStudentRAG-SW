@@ -1,7 +1,8 @@
+import re
 from fastapi import APIRouter, HTTPException
 from app.models.schemas import ChatRequest, ChatResponse, Source
 from app.core.llm import rag_chain
-from app.utils.language import detector
+from app.core.translation import translator
 from app.utils.logger import log_query
 
 
@@ -18,16 +19,23 @@ async def chat(request: ChatRequest):
     - **top_k**: 검색할 문서 개수 (기본값: 3, 최대: 10)
     """
     try:
-        # 언어가 제공되지 않으면 자동 감지
-        language = request.language
-        if not language:
-            language = detector.detect(request.question)
+        # 한글 포함 여부로 한국어 판별, 나머지는 GPT가 질문 언어로 자동 응답
+        if request.language:
+            language = request.language
+        elif re.search(r'[가-힣]', request.question):
+            language = "ko"
+        else:
+            language = "auto"
+
+        # 한글 포함 시 번역 스킵, 그 외 언어는 OpenAI로 한국어 번역 (BM25·리랭커용)
+        ko_query = translator.translate_to_ko(request.question)
 
         # RAG를 사용하여 답변 생성
         answer, sources = rag_chain.generate_answer_with_language(
-            question=request.question,
+            question=request.question,   # Vector 검색·GPT 답변: 원문
             language=language,
-            top_k=request.top_k or 3
+            top_k=request.top_k or 3,
+            ko_query=ko_query,           # BM25·리랭커: 한국어 번역
         )
 
         # 출처 포맷팅

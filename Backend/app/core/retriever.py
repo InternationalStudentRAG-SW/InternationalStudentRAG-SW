@@ -27,9 +27,9 @@ class RAGRetriever:
 
         fetch_k = self.initial_fetch_k if self.mode == "hybrid_rerank" else self.top_k
 
-        # 1. Vector Retriever (공통)
+        # 1. Vector Retriever — hybrid_rerank 모드에서는 fetch_k로 후보 확대
         self.vector_retriever = knowledge_base.vector_store.as_retriever(
-            search_kwargs={"k": self.top_k}
+            search_kwargs={"k": fetch_k}
         )
 
         if self.mode == "vector":
@@ -64,12 +64,22 @@ class RAGRetriever:
             print("하이브리드 + BGE Reranker 초기화 완료")
 
     def retrieve(self, query: str, k: Optional[int] = None, ko_query: Optional[str] = None) -> List[Document]:
-        bm25_q   = ko_query or query   # BM25: 한국어 번역 (없으면 원문)
-        vector_q = query               # Vector: 원문
-        rerank_q = ko_query or query   # 리랭커: 한국어 번역 (없으면 원문)
+        bm25_q_ko = ko_query or query  # BM25: 한국어 번역 (없으면 원문)
+        vector_q  = query              # Vector: 원문 (다국어 임베딩)
+        rerank_q  = ko_query or query  # 리랭커: 한국어 번역 (없으면 원문)
 
         if self.mode in ("hybrid", "hybrid_rerank"):
-            bm25_docs   = self.keyword_retriever.invoke(bm25_q)
+            bm25_docs_ko = self.keyword_retriever.invoke(bm25_q_ko)
+
+            # 원문이 한국어와 다를 때(영어 등) 원문으로 추가 BM25 → 영어 PDF 커버
+            if ko_query and ko_query != query:
+                bm25_docs_orig = self.keyword_retriever.invoke(query)
+                bm25_docs = self._rrf.weighted_reciprocal_rank(
+                    [bm25_docs_ko, bm25_docs_orig]
+                )
+            else:
+                bm25_docs = bm25_docs_ko
+
             vector_docs = self.vector_retriever.invoke(vector_q)
             docs = self._rrf.weighted_reciprocal_rank([bm25_docs, vector_docs])
         else:

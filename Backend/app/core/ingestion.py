@@ -1,86 +1,109 @@
 import os
 import re
+import unicodedata
 from pathlib import Path
-from typing import List, Tuple
-import pdfplumber
-import requests
-from bs4 import BeautifulSoup
+from typing import List
+import fitz          # PyMuPDF
+import pymupdf4llm
 from app.config import settings
 
 
 class DocumentIngester:
-    """PDF 및 웹 소스에서 문서를 수집합니다."""
+    """PDF에서 문서를 수집합니다."""
 
     def __init__(self):
         self.document_path = Path(settings.document_path)
         self.document_path.mkdir(parents=True, exist_ok=True)
         
+    def normalize_text(self, text: str) -> str:
+        """PDF 추출 텍스트 정규화 (인코딩 수정 + 노이즈 제거)."""
+        # 한국어 자모 분리 복구 (NFD → NFC) 다른 언어에 대해서도 무해함 
+        text = unicodedata.normalize("NFC", text)
+        # 소프트 하이픈 줄바꿈 제거: "단어-\n계속" → "단어계속"
+        text = re.sub(r"-\n", "", text)
+        # PDF 제어문자 제거 (폼피드 \x0c 등), 일반 whitespace 보존
+        text = re.sub(r"[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]", "", text)
+        # 3개 이상 연속 개행 → 2개로 정리
+        text = re.sub(r"\n{3,}", "\n\n", text)
+        # 줄 끝 공백 제거
+        text = re.sub(r"[ \t]+\n", "\n", text)
+        return text.strip()
+
+    def detect_language(self, text: str) -> str:
+        """페이지 언어 감지. 텍스트가 너무 짧으면 'unknown' 반환."""
+        from langdetect import detect, LangDetectException
+        sample = text[:500].strip()
+        if len(sample) < 20:
+            return "unknown"
+        try:
+            return detect(sample)
+        except LangDetectException:
+            return "unknown"
+
     def extract_from_pdf(self, pdf_path: str) -> List[dict]:
-        """표 구조와 페이지 메타데이터를 유지하며 텍스트를 추출합니다."""
+        """pymupdf4llm으로 PDF를 마크다운 추출 (표 인라인 포함, 정규화, 언어 감지)."""
         documents = []
         try:
-            with pdfplumber.open(pdf_path) as pdf:
-                for page_num, page in enumerate(pdf.pages):
-                    # 1. 일반 텍스트 추출
-                    text = page.extract_text() or ""
-                    
-                    # 2. 표(Table) 추출 및 Markdown 변환
-                    tables = page.extract_tables()
-                    table_text = ""
-                    if tables:
-                        for table in tables:
-                            # 리스트 형태의 표를 문자열로 변환 (간단한 구현 예시)
-                            for row in table:
-                                filtered_row = [item.replace('\n', ' ') if item else "" for item in row]
-                                table_text += "| " + " | ".join(filtered_row) + " |\n"
-                    
-                    # 텍스트와 표 결합
-                    combined_content = f"{text}\n\n[Tables]\n{table_text}"
-                    
-                    if combined_content.strip():
-                        documents.append({
-                            "content": combined_content,
-                            "metadata": {
-                                "source": os.path.basename(pdf_path),
-                                "page": page_num + 1
-                            }
-                        })
+            doc = fitz.open(pdf_path)
+            for page_num in range(len(doc)):
+                md_text = pymupdf4llm.to_markdown(doc, pages=[page_num])
+                if not md_text.strip():
+                    continue
+                if len(md_text.strip()) < 50:
+                    print(f"  ⚠️  p{page_num + 1}: 텍스트 부족 — OCR 미지원 (스킵)")
+                    continue
+                normalized = self.normalize_text(md_text)
+                lang = self.detect_language(normalized)
+                documents.append({
+                    "content": normalized,
+                    "metadata": {
+                        "source": os.path.basename(pdf_path),
+                        "page": page_num + 1,
+                        "lang": lang,
+                    }
+                })
+            doc.close()
         except Exception as e:
-            print(f"PDF 추출 오류 {pdf_path}: {e}")
-            
+            print(f"PDF 추출 오류 ({pdf_path}): {e}")
         return documents
 
-    def crawl_web(self, url: str) -> Tuple[str, str]:
-        """웹 페이지를 크롤링하고 텍스트를 추출합니다."""
-        try:
-            headers = {
-                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
-            }
-            response = requests.get(url, headers=headers, timeout=10)
-            response.raise_for_status()
-
-            soup = BeautifulSoup(response.content, "html.parser")
-
-            # 스크립트 및 스타일 태그 제거
-            for script in soup(["script", "style"]):
-                script.decompose()
-
-            text = soup.get_text()
-            # 공백 정리
-            text = re.sub(r"\n\s*\n", "\n", text)
-            text = text.strip()
-
-            return url, text
-        except Exception as e:
-            print(f"웹 크롤링 오류 {url}: {e}")
-            return url, ""
-
-    def save_document(self, filename: str, content: str) -> Path:
-        """문서 콘텐츠를 파일로 저장합니다."""
-        file_path = self.document_path / filename
-        with open(file_path, "w", encoding="utf-8") as f:
-            f.write(content)
-        return file_path
 
 
 ingester = DocumentIngester()
+
+
+def sync_documents() -> None:
+    """DATA/documents 폴더와 ChromaDB를 증분 동기화."""
+    from app.core.knowledge_base import knowledge_base  # 순환 import 방지
+
+    current_pdfs = {f.name: f for f in ingester.document_path.glob("*.pdf")}
+    existing_data = knowledge_base.vector_store.get()
+    existing_filenames = {m["source"] for m in existing_data["metadatas"] if m}
+
+    # 폴더에서 삭제된 파일 → DB 제거
+    for filename in existing_filenames - set(current_pdfs):
+        knowledge_base.vector_store.delete(where={"source": filename})
+        print(f"[삭제] {filename}")
+
+    # DB에 없는 신규 파일 → 추가
+    new_files = set(current_pdfs) - existing_filenames
+    if not new_files and not (existing_filenames - set(current_pdfs)):
+        print("모든 문서가 최신 상태입니다.")
+    else:
+        print(f"신규 {len(new_files)}개 추가 시작")
+
+    for filename in new_files:
+        pages = ingester.extract_from_pdf(str(current_pdfs[filename]))
+        if not pages:
+            print(f"  ⚠️  {filename}: 추출 내용 없음")
+            continue
+        for page in pages:
+            knowledge_base.add_document(page["content"], page["metadata"])
+        print(f"[추가] {filename} — {len(pages)} 페이지")
+
+    total = knowledge_base.get_document_count()
+    print(f"동기화 완료 — 총 청크: {total}")
+
+
+if __name__ == "__main__":
+    sync_documents()

@@ -270,37 +270,22 @@ class RAGLLM:
 
         # 후속 질문 결과를 문자열 하단에 결합
 
-        if suggestions:
+        # if suggestions:
+        #     if language == "en":
+        #         header = "\n\n💡 **Suggested Follow-up Questions:**\n"
+        #     elif language == "zh":
+        #         header = "\n\n💡 **推荐的反问问题:**\n"
+        #     elif language == "es":
+        #         header = "\n\n💡 **Preguntas de seguimiento recomendadas:**\n"
+        #     else:
+        #         header = "\n\n💡 **추천 후속 질문:**\n"
+        #     formatted_suggestions = header + "\n".join([f"{i}. {s}" for i, s in enumerate(suggestions, 1)])
+        #     final_answer = answer + formatted_suggestions
 
-            if language == "en":
+        # else:
+        #     final_answer = answer
 
-                header = "\n\n💡 **Suggested Follow-up Questions:**\n"
-
-            elif language == "zh":
-
-                header = "\n\n💡 **推荐的反问问题:**\n"
-
-            elif language == "es":
-
-                header = "\n\n💡 **Preguntas de seguimiento recomendadas:**\n"
-
-            else:
-
-                header = "\n\n💡 **추천 후속 질문:**\n"
-
-               
-
-            formatted_suggestions = header + "\n".join([f"{i}. {s}" for i, s in enumerate(suggestions, 1)])
-
-            final_answer = answer + formatted_suggestions
-
-        else:
-
-            final_answer = answer
-
-
-
-        return final_answer, sources
+        return answer, sources, suggestions
 
 
 

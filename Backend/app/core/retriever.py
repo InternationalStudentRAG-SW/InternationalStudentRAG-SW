@@ -27,9 +27,11 @@ class RAGRetriever:
 
         fetch_k = self.initial_fetch_k if self.mode == "hybrid_rerank" else self.top_k
 
-        # 1. Vector Retriever — hybrid_rerank 모드에서는 fetch_k로 후보 확대
+        # 1. Vector Retriever
+        # hybrid_rerank 모드에서는 reranker에 넘길 충분한 후보군 확보를 위해 fetch_k 사용
+        vector_k = fetch_k if self.mode == "hybrid_rerank" else self.top_k
         self.vector_retriever = knowledge_base.vector_store.as_retriever(
-            search_kwargs={"k": fetch_k}
+            search_kwargs={"k": vector_k}
         )
 
         if self.mode == "vector":
@@ -59,9 +61,10 @@ class RAGRetriever:
             return
 
         # 3. Hybrid + Reranker
+        # MPS(Apple Silicon) OOM 방지를 위해 CPU로 강제 지정
         if self.mode == "hybrid_rerank":
-            self.reranker = CrossEncoder("BAAI/bge-reranker-v2-m3")
-            print("하이브리드 + BGE Reranker 초기화 완료")
+            self.reranker = CrossEncoder("BAAI/bge-reranker-v2-m3", device="cpu")
+            print("하이브리드 + BGE Reranker 초기화 완료 (device=cpu)")
 
     def retrieve(self, query: str, k: Optional[int] = None, ko_query: Optional[str] = None) -> List[Document]:
         bm25_q_ko = ko_query or query  # BM25: 한국어 번역 (없으면 원문)
@@ -87,7 +90,8 @@ class RAGRetriever:
 
         if self.mode == "hybrid_rerank":
             pairs = [[rerank_q, doc.page_content] for doc in docs]
-            scores = self.reranker.predict(pairs)
+            # batch_size를 작게 나눠서 처리 → MPS/GPU OOM 방지
+            scores = self.reranker.predict(pairs, batch_size=8)
 
             scored_docs = sorted(zip(scores, docs), key=lambda x: x[0], reverse=True)
 
@@ -98,7 +102,9 @@ class RAGRetriever:
                 final_docs.append(doc)
             return final_docs
 
-        return docs
+        # hybrid 모드: RRF 결과를 top_k로 자름 (BM25+Vector 합집합이 top_k 초과 가능)
+        final_k = k or self.top_k
+        return docs[:final_k]
 
     def format_context(self, retrieved_docs: List[Document]) -> str:
         if not retrieved_docs:

@@ -18,8 +18,8 @@ class Settings(BaseSettings):
 
     # Document Ingestion
     document_path: str = "../DATA/documents"
-    chunk_size: int = 800
-    chunk_overlap: int = 300
+    chunk_size: int = 600
+    chunk_overlap: int = 150
 
     # RAG Retrieval
     top_k_results: int = 5 # LLM에게 최종적으로 넘길 chunk 수

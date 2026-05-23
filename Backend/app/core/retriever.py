@@ -61,10 +61,9 @@ class RAGRetriever:
             return
 
         # 3. Hybrid + Reranker
-        # MPS(Apple Silicon) OOM 방지를 위해 CPU로 강제 지정
         if self.mode == "hybrid_rerank":
-            self.reranker = CrossEncoder("BAAI/bge-reranker-v2-m3", device="cpu")
-            print("하이브리드 + BGE Reranker 초기화 완료 (device=cpu)")
+            self.reranker = CrossEncoder("BAAI/bge-reranker-v2-m3")
+            print("하이브리드 + BGE Reranker 초기화 완료")
 
     def retrieve(self, query: str, k: Optional[int] = None, ko_query: Optional[str] = None) -> List[Document]:
         bm25_q_ko = ko_query or query  # BM25: 한국어 번역 (없으면 원문)

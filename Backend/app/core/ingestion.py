@@ -1,22 +1,11 @@
 import os
 import re
-<<<<<<< Updated upstream
 import unicodedata
-=======
-import logging
->>>>>>> Stashed changes
 from pathlib import Path
 from typing import List
 import fitz          # PyMuPDF
 import pymupdf4llm
 from app.config import settings
-
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s [%(levelname)s] %(message)s"
-)
-logger = logging.getLogger(__name__)
-
 
 class DocumentIngester:
     """PDF에서 문서를 수집합니다."""

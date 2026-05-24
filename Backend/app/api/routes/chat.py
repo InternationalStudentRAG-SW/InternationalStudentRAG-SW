@@ -5,18 +5,12 @@ from app.core.llm import rag_chain
 from app.core.translation import translator
 from app.utils.logger import log_query
 
-
 router = APIRouter(prefix="/chat", tags=["chat"])
-
 
 @router.post("/", response_model=ChatResponse)
 async def chat(request: ChatRequest):
     """
     채팅 쿼리를 처리하고 답변과 출처를 반환합니다.
-
-    - **question**: 사용자의 질문
-    - **language**: 선택 사항인 언어 코드 (미제공 시 자동 감지)
-    - **top_k**: 검색할 문서 개수 (기본값: 3, 최대: 10)
     """
     try:
         # 한글 포함 여부로 한국어 판별, 나머지는 GPT가 질문 언어로 자동 응답
@@ -30,8 +24,9 @@ async def chat(request: ChatRequest):
         # 한글 포함 시 번역 스킵, 그 외 언어는 OpenAI로 한국어 번역 (BM25·리랭커용)
         ko_query = translator.translate_to_ko(request.question)
 
-        # RAG를 사용하여 답변 생성
-        answer, sources = rag_chain.generate_answer_with_language(
+        # [수정됨] 기존 코드에 rag_chain 호출이 두 번 중복되어 있어서 하나로 합쳤습니다.
+        # RAG를 사용하여 답변 생성 (suggestions 반환받기)
+        answer, sources, suggestions = rag_chain.generate_answer_with_language(
             question=request.question,   # Vector 검색·GPT 답변: 원문
             language=language,
             top_k=request.top_k or 3,
@@ -53,14 +48,16 @@ async def chat(request: ChatRequest):
             question=request.question,
             answer=answer,
             language=language,
-            sources=sources
+            sources=sources,
         )
 
+        # [수정됨] ChatResponse에 suggestions 추가
         return ChatResponse(
             answer=answer,
             sources=formatted_sources,
             language=language,
-            question=request.question
+            question=request.question,
+            suggestions=suggestions if suggestions else [] # 프론트로 추천 질문 리스트 전달
         )
 
     except Exception as e:
@@ -75,7 +72,8 @@ async def simple_chat(request: ChatRequest):
     언어 감지 없이 간단한 채팅을 처리합니다.
     """
     try:
-        answer, sources = rag_chain.generate_answer(
+        # [수정됨] 인자에 정의되지 않은 suggestions=suggestions 가 들어가 있어서 에러가 날 수 있는 부분을 제거했습니다.
+        answer, sources, suggestions = rag_chain.generate_answer(
             question=request.question,
             top_k=request.top_k or 3
         )
@@ -89,10 +87,12 @@ async def simple_chat(request: ChatRequest):
             for src in sources
         ]
 
+        # [수정됨] 모델 스키마에 맞게 suggestions 전달
         return ChatResponse(
             answer=answer,
             sources=formatted_sources,
-            question=request.question
+            question=request.question,
+            suggestions=suggestions if suggestions else [] # 프론트로 추천 질문 리스트 전달
         )
 
     except Exception as e:

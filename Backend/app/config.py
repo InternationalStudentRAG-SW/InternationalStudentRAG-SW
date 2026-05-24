@@ -22,8 +22,8 @@ class Settings(BaseSettings):
     chunk_overlap: int = 150
 
     # RAG Retrieval
-    top_k_results: int = 5 # LLM에게 최종적으로 넘길 chunk 수
-    initial_fetch_k: int = 15 # Reranker에게 넘기기 전 1차로 가져올 chunk 수
+    top_k_results: int = 7 # LLM에게 최종적으로 넘길 chunk 수
+    initial_fetch_k: int = 25 # Reranker에게 넘기기 전 1차로 가져올 chunk 수
     min_similarity_score: float = 0.5
 
     class Config:

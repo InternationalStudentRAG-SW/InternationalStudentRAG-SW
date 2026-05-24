@@ -15,6 +15,7 @@ export interface ChatResponse {
   sources: Source[]
   language?: string
   question: string
+  suggestions : string[]
 }
 
 export interface HealthResponse {
@@ -30,6 +31,8 @@ export interface Message {
   sources?: Source[]
   language?: string
   timestamp: Date
+  followUpQuestions?: string[];
+  suggestions?: string[];
 }
 
 export type Language = 'auto' | 'ko' | 'en' | 'zh' | 'es'

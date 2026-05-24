@@ -1,8 +1,8 @@
+# 데이터셋 기반으로 평가 시작
 import json
 import os
-from dataclasses import dataclass
+import warnings
 from datetime import datetime
-from typing import Optional
 
 import pandas as pd
 from datasets import Dataset
@@ -22,75 +22,21 @@ from app.core.retriever import RAGRetriever
 OUTPUT_DIR = "evaluate/results"
 QA_CACHE_PATH = os.path.join(OUTPUT_DIR, "qa_dataset_cache.json")
 
-EVAL_LLM = ChatOpenAI(
+# 답변 생성용 LLM (build_evaluation_dataset에서 .invoke() 사용)
+ANSWER_LLM = ChatOpenAI(
     api_key=settings.openai_api_key,
     model="gpt-4o-mini",
     temperature=0,
 )
 
-# 1. QA 데이터셋 생성기
-@dataclass
-class QAGenerator:
-    llm: ChatOpenAI
-    max_chunks: int = 50
 
-    def _load_chunks_from_chroma(self) -> list[dict]:
-        result = knowledge_base.vector_store._collection.get(include=["documents", "metadatas"])
-        chunks = []
-        for text, meta in zip(result["documents"], result["metadatas"]):
-            chunks.append({"text": text, "metadata": meta or {}})
-        return chunks
-
-    def _generate_qa_from_chunk(self, chunk_text: str) -> Optional[dict]:
-        prompt = f"""아래 대학교 관련 텍스트를 읽고, 유학생이 궁금해할 만한 질문 1개와 그에 대한 정확한 정답을 생성하세요.
-반드시 JSON 형식으로 답변하세요.
-
-[텍스트]: {chunk_text[:1500]}
-[출력형식]: {{"question": "질문", "ground_truth": "정답"}}"""
-        try:
-            response = self.llm.invoke(prompt)
-            content = response.content.strip()
-            if "```json" in content:
-                content = content.split("```json")[1].split("```")[0]
-            return json.loads(content)
-        except:
-            return None
-
-    def generate(self, use_cache: bool = True) -> list[dict]:
-        if use_cache and os.path.exists(QA_CACHE_PATH):
-            with open(QA_CACHE_PATH, "r", encoding="utf-8") as f:
-                return json.load(f)
-
-        chunks = self._load_chunks_from_chroma()
-
-        # 파일별 균등 샘플링
-        from collections import defaultdict
-        source_map = defaultdict(list)
-        for chunk in chunks:
-            source = chunk["metadata"].get("source", "unknown")
-            source_map[source].append(chunk)
-
-        per_source = max(1, self.max_chunks // len(source_map))
-        target_chunks = []
-        for source, src_chunks in source_map.items():
-            target_chunks.extend(src_chunks[:per_source])
-
-        target_chunks = target_chunks[:self.max_chunks]
-
-        qa_list = []
-        print(f"총 {len(target_chunks)}개 청크로부터 QA 생성 중...")
-        for chunk in target_chunks:
-            qa = self._generate_qa_from_chunk(chunk["text"])
-            if qa:
-                qa_list.append(qa)
-
-        os.makedirs(OUTPUT_DIR, exist_ok=True)
-        with open(QA_CACHE_PATH, "w", encoding="utf-8") as f:
-            json.dump(qa_list, f, ensure_ascii=False, indent=2)
-        return qa_list
+def load_qa_dataset() -> list[dict]:
+    if not os.path.exists(QA_CACHE_PATH):
+        raise FileNotFoundError(f"QA 캐시 파일이 없습니다. 먼저 generate_qa.py를 실행하세요.\n경로: {QA_CACHE_PATH}")
+    with open(QA_CACHE_PATH, "r", encoding="utf-8") as f:
+        return json.load(f)
 
 
-# 2. RAGAS 데이터셋 빌더 (mode별 RAGRetriever 인스턴스 사용)
 def build_evaluation_dataset(qa_list: list[dict], retriever: RAGRetriever, top_k: int = 3, mode: str = "vector") -> Dataset:
     questions, answers, contexts, ground_truths = [], [], [], []
 
@@ -99,16 +45,15 @@ def build_evaluation_dataset(qa_list: list[dict], retriever: RAGRetriever, top_k
         q = item["question"]
         print(f"  ⏳ {i+1}/{len(qa_list)} 번째 질문 처리 중...")
 
-        # retriever.retrieve()는 Document 객체 리스트 반환
         retrieved_docs = retriever.retrieve(q, k=top_k)
-        ctx_list = [doc.page_content for doc in retrieved_docs]  # Document.page_content로 접근
+        ctx_list = [doc.page_content for doc in retrieved_docs]
 
         context_str = "\n\n".join(ctx_list)
         context_str = context_str.replace('\x00', '').replace('\ufffd', '')
         context_str = context_str.encode('utf-8', 'ignore').decode('utf-8')
 
         prompt = f"다음 컨텍스트를 참고하여 답변하세요.\n\n컨텍스트:\n{context_str}\n\n질문: {q}"
-        response = EVAL_LLM.invoke(prompt)
+        response = ANSWER_LLM.invoke(prompt)
 
         questions.append(q)
         answers.append(response.content)
@@ -123,16 +68,10 @@ def build_evaluation_dataset(qa_list: list[dict], retriever: RAGRetriever, top_k
     })
 
 
-# 3. 실행
 def main():
-    gen = QAGenerator(llm=EVAL_LLM, max_chunks=30) # 질문 30개 생성 (수정 필요)
-    qa_list = gen.generate(use_cache=True)
+    qa_list = load_qa_dataset()
+    print(f"QA 데이터셋 로드 완료: {len(qa_list)}개")
 
-    if not qa_list:
-        print("평가할 QA 데이터가 없습니다.")
-        return
-
-    # 모드별 RAGRetriever 인스턴스 생성
     retrievers = {
         "vector": RAGRetriever(mode="vector"),
         "hybrid": RAGRetriever(mode="hybrid"),
@@ -157,8 +96,8 @@ def main():
         result = evaluate(
             eval_dataset,
             metrics=[Faithfulness(), AnswerRelevancy(), ContextPrecision(), ContextRecall()],
-            llm=EVAL_LLM,
-            embeddings=knowledge_base.embeddings
+            llm=ANSWER_LLM,
+            embeddings=knowledge_base.embeddings,
         )
 
         df = result.to_pandas()

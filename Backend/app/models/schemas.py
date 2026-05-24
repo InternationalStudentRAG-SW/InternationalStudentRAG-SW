@@ -23,6 +23,8 @@ class ChatResponse(BaseModel):
     sources: List[Source] = []
     language: Optional[str] = None
     question: str
+    follow_up_questions: List[str] = Field(default=[], alis="followUpQuestions")
+    suggestions : Optional[List[str]] = []
 
 
 class MessageHistory(BaseModel):

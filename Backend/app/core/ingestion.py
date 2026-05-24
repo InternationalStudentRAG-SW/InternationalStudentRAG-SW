@@ -7,7 +7,6 @@ import fitz          # PyMuPDF
 import pymupdf4llm
 from app.config import settings
 
-
 class DocumentIngester:
     """PDF에서 문서를 수집합니다."""
 

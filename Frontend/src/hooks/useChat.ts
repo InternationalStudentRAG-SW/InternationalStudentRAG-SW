@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react'
 import { sendMessage } from '../services/api'
 import type { Message, Language } from '../types'
+import { data } from 'react-router-dom'
 
 export function useChat() {
   const [messages, setMessages] = useState<Message[]>([])
@@ -32,6 +33,8 @@ export function useChat() {
           sources: response.sources,
           language: response.language,
           timestamp: new Date(),
+          followUpQuestions : response.suggestions,
+          suggestions : response.suggestions,
         }
         setMessages((prev) => [...prev, assistantMessage])
       } catch (err) {

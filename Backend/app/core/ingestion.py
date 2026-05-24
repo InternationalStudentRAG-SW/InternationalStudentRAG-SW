@@ -43,7 +43,6 @@ class DocumentIngester:
         """pymupdf4llm으로 PDF를 마크다운 추출 (표 인라인 포함, 정규화, 언어 감지)."""
         documents = []
         try:
-<<<<<<< Updated upstream
             doc = fitz.open(pdf_path)
             for page_num in range(len(doc)):
                 md_text = pymupdf4llm.to_markdown(doc, pages=[page_num])
@@ -107,91 +106,3 @@ def sync_documents() -> None:
 
 if __name__ == "__main__":
     sync_documents()
-=======
-            with pdfplumber.open(pdf_path) as pdf:
-                for page_num, page in enumerate(pdf.pages):
-                    text = page.extract_text() or ""
-                    
-                    tables = page.extract_tables()
-                    table_text = ""
-                    if tables:
-                        for table in tables:
-                            for row in table:
-                                filtered_row = [item.replace('\n', ' ') if item else "" for item in row]
-                                table_text += "| " + " | ".join(filtered_row) + " |\n"
-                    
-                    combined_content = f"{text}\n\n[Tables]\n{table_text}"
-                    
-                    if combined_content.strip():
-                        documents.append({
-                            "content": combined_content,
-                            "metadata": {
-                                "source": os.path.basename(pdf_path),
-                                "page": page_num + 1
-                            }
-                        })
-        except Exception as e:
-            logger.error(f"PDF 추출 오류 {pdf_path}: {e}")
-            
-        return documents
-
-    def inspect_parsing(self, pdf_path: str) -> None:
-        """PDF의 표 파싱 결과를 콘솔에 출력합니다."""
-        logger.info(f"=== 표 파싱 검사 시작: {os.path.basename(pdf_path)} ===")
-
-        try:
-            with pdfplumber.open(pdf_path) as pdf:
-                logger.info(f"총 페이지 수: {len(pdf.pages)}")
-
-                for page_num, page in enumerate(pdf.pages, start=1):
-                    tables = page.extract_tables()
-
-                    if not tables:
-                        continue  # 표 없는 페이지는 스킵
-
-                    logger.info(f"\n--- [Page {page_num}] 표 {len(tables)}개 ---")
-                    for t_idx, table in enumerate(tables, start=1):
-                        col_count = max(len(row) for row in table) if table else 0
-                        logger.info(f"  표 #{t_idx}: {len(table)}행 x {col_count}열")
-                        for r_idx, row in enumerate(table):
-                            cleaned = [cell.replace('\n', ' ') if cell else "" for cell in row]
-                            logger.info(f"    행 {r_idx+1}: {cleaned}")
-
-        except Exception as e:
-            logger.error(f"파싱 검사 오류 {pdf_path}: {e}")
-
-        logger.info(f"\n=== 파싱 검사 완료 ===")
-
-    def crawl_web(self, url: str) -> Tuple[str, str]:
-        """웹 페이지를 크롤링하고 텍스트를 추출합니다."""
-        try:
-            headers = {
-                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
-            }
-            response = requests.get(url, headers=headers, timeout=10)
-            response.raise_for_status()
-
-            soup = BeautifulSoup(response.content, "html.parser")
-
-            for script in soup(["script", "style"]):
-                script.decompose()
-
-            text = soup.get_text()
-            text = re.sub(r"\n\s*\n", "\n", text)
-            text = text.strip()
-
-            return url, text
-        except Exception as e:
-            logger.error(f"웹 크롤링 오류 {url}: {e}")
-            return url, ""
-
-    def save_document(self, filename: str, content: str) -> Path:
-        """문서 콘텐츠를 파일로 저장합니다."""
-        file_path = self.document_path / filename
-        with open(file_path, "w", encoding="utf-8") as f:
-            f.write(content)
-        return file_path
-
-
-ingester = DocumentIngester()
->>>>>>> Stashed changes

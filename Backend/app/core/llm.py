@@ -99,6 +99,8 @@ _LANGUAGE_INSTRUCTIONS = {
     "zh": "请用中文回答，并同样用中文生成后续推荐问题。",
 
     "es": "Por favor, responda en español y genere también las preguntas de seguimiento en español.",
+    
+    "vi": "Vui lòng trả lời bằng tiếng Việt và tạo các câu hỏi tiếp theo bằng tiếng Việt.",
 
     "auto": "사용자가 질문한 언어를 파악하여 반드시 답변과 후속 질문 모두 그 언어로 작성하십시오."
 

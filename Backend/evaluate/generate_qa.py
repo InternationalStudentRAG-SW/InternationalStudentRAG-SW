@@ -52,6 +52,7 @@ class QAGenerator:
 
     def _generate_qa_from_chunk(self, chunk_text: str, source: str = "") -> Optional[dict]:
         prompt = f"""아래 대학교 관련 텍스트를 읽고, 유학생이 궁금해할 만한 질문 1개와 그에 대한 정확한 정답을 생성하세요.
+질문과 정답은 반드시 한국어로 작성하세요.
 반드시 JSON 형식으로 답변하세요.
 
 단, 아래 두 경우에만 {{"skip": true}} 를 반환하세요:

@@ -4,6 +4,7 @@ from app.models.schemas import ChatRequest, ChatResponse, Source
 from app.core.llm import rag_chain
 from app.core.translation import translator
 from app.utils.logger import log_query
+from app.utils.language import detector
 
 router = APIRouter(prefix="/chat", tags=["chat"])
 
@@ -19,7 +20,7 @@ async def chat(request: ChatRequest):
         elif re.search(r'[가-힣]', request.question):
             language = "ko"
         else:
-            language = "auto"
+            language = detector.detect(request.question)
 
         # 한글 포함 시 번역 스킵, 그 외 언어는 OpenAI로 한국어 번역 (BM25·리랭커용)
         ko_query = translator.translate_to_ko(request.question)

@@ -1,0 +1,182 @@
+[
+  {
+    "question": "What procedures should an international student receiving the GKS scholarship follow to change their major?",
+    "ground_truth": "GKS 장학금을 받는 유학생은 학과를 변경하려면 해당 대학의 규정에 따라 절차를 진행하고 승인을 받아야 합니다.",
+    "source": "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf",
+    "original_question": "GKS 장학금을 받는 유학생이 학과를 변경하려면 어떤 절차를 따라야 하나요?"
+  },
+  {
+    "question": "What are the circumstances under which a GKS recipient can receive a warning?",
+    "ground_truth": "GKS 수혜자는 다음과 같은 경우에 경고를 받을 수 있습니다: 1) 한국어 프로그램 중 무단 결석이 3일 연속이거나 한 달 동안 총 5일 이상인 경우, 2) 학기별 요구 학점을 달성하지 못한 경우 (전문대 및 학부 프로그램은 70/100, 석사 및 박사 프로그램은 80/100), 3) 허가 없이 임시 출국하거나 허용된 기간 내에 한국에 재입국하지 않은 경우, 4) 제24조 제2항에 명시된 파트타임 근무의 허용 범위를 위반한 경우.",
+    "source": "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf",
+    "original_question": "GKS 수혜자가 경고를 받을 수 있는 경우는 어떤 것들이 있나요?"
+  },
+  {
+    "question": "What happens if I don't re-enroll after my leave of absence ends?",
+    "ground_truth": "유효한 사유 없이 재등록을 하지 않으면 위반으로 간주됩니다.",
+    "source": "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf",
+    "original_question": "휴학 기간이 끝난 후 재등록을 하지 않으면 어떤 결과가 발생하나요?"
+  },
+  {
+    "question": "Which degree programs are eligible for the Global Korea Scholarship?",
+    "ground_truth": "대학원 및 학부 학위 프로그램에 적용됩니다.",
+    "source": "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf",
+    "original_question": "글로벌 코리아 장학금은 어떤 학위 프로그램에 적용되나요?"
+  },
+  {
+    "question": "What are the guidelines that international students receiving the GKS scholarship should follow when working part-time?",
+    "ground_truth": "GKS 장학금을 받는 유학생은 전공 공부를 우선시해야 하며, 법무부 및 관련 당국이 정한 아르바이트 요건을 충족해야 합니다.",
+    "source": "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf",
+    "original_question": "GKS 장학금을 받는 유학생이 아르바이트를 할 때 지켜야 할 기준은 무엇인가요?"
+  },
+  {
+    "question": "What are the key details to check in the Certificate of Admission?",
+    "ground_truth": "입학허가서에서 확인해야 할 주요 사항은 다음과 같습니다: 1) 대학의 도장이 명확하게 보이는지, 2) 본인의 이름, 여권 번호, 생년월일, 국적이 정확하게 기재되어 있는지, 3) 문서가 3개월 이내에 발급되었는지, 4) 학생의 서명이 손으로 작성되었는지(전자 서명은 허용되지 않음)입니다.",
+    "source": "Study in KOREA! 한국 유학 가이드.pdf",
+    "original_question": "입학허가서(Certificate of Admission)에서 확인해야 할 주요 사항은 무엇인가요?"
+  },
+  {
+    "question": "How should I fill out my address to get my passport returned?",
+    "ground_truth": "여권을 돌려받아야 하는 주소를 정확하게 기재해야 하며, 우편함 이름까지 포함해야 합니다.",
+    "source": "Study in KOREA! 한국 유학 가이드.pdf",
+    "original_question": "여권을 돌려받기 위해 주소를 어떻게 기재해야 하나요?"
+  },
+  {
+    "question": "How should I submit the financial proof required for studying abroad?",
+    "ground_truth": "재정 증명으로는 670유로에 해당하는 금액이 포함된 은행 명세서를 제출해야 하며, 이 명세서는 1개월 이내에 발급된 원본이어야 합니다. 만약 부모의 은행 명세서를 제출할 경우, 출생증명서나 가족관계증명서를 함께 제출해야 하며, 해당 문서가 영어 또는 한국어로 작성되지 않은 경우 번역본과 번역 확인서를 제출해야 합니다.",
+    "source": "Study in KOREA! 한국 유학 가이드.pdf",
+    "original_question": "유학을 위해 필요한 재정 증명은 어떻게 제출해야 하나요?"
+  },
+  {
+    "question": "What documents are required for applying for a student visa?",
+    "ground_truth": "유학생 비자 신청 시 필요한 서류는 다음과 같습니다: 1) 사증발급신청서(제17호서식), 2) 여권(유효기간이 최소 6개월 이상 남아 있어야 함), 3) 최근 6개월 이내 촬영한 3.5X4.5cm 사진, 4) 석사 또는 박사 졸업증명서(아포스티유 원본 필요), 5) 한국대학교의 사업자등록증명원(발급 3개월 이내)입니다.",
+    "source": "Study in KOREA! 한국 유학 가이드.pdf",
+    "original_question": "유학생 비자 신청 시 필요한 서류는 무엇인가요?"
+  },
+  {
+    "question": "What happens to the tuition refund if an international student’s visa is denied?",
+    "ground_truth": "비자가 거부된 경우, 전액 환불됩니다.",
+    "source": "English_2026-2027+Korean+Language+Course.pdf",
+    "original_question": "유학생이 비자가 거부되었을 경우, 수업료 환불은 어떻게 되나요?"
+  },
+  {
+    "question": "When is the application deadline for the spring semester of 2026 (March to May)?",
+    "ground_truth": "2025년 12월 1일(월)부터 2026년 1월 2일(금)까지입니다.",
+    "source": "English_2026-2027+Korean+Language+Course.pdf",
+    "original_question": "2026년 봄학기(3월~5월)의 지원 마감일은 언제인가요?"
+  },
+  {
+    "question": "What facilities are provided in the dormitory for international students?",
+    "ground_truth": "기숙사에서는 세탁실, 휴게실, 욕실, 침대, 책상, 의자, 책장, 옷장, 에어컨, 난방 시스템이 제공됩니다.",
+    "source": "English_2026-2027+Korean+Language+Course.pdf",
+    "original_question": "유학생이 기숙사에서 제공되는 시설은 무엇인가요?"
+  },
+  {
+    "question": "How much is the dormitory fee in Busan?",
+    "ground_truth": "부산의 기숙사 비용은 3개월 기준으로 약 756,000원입니다.",
+    "source": "English_2026-2027+Korean+Language+Course.pdf",
+    "original_question": "부산의 기숙사 비용은 얼마인가요?"
+  },
+  {
+    "question": "How long does a scholarship student need to complete the Korean language training program?",
+    "ground_truth": "장학생은 입학 전에 1년의 한국어 연수 과정을 이수해야 합니다.",
+    "source": "(KO)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf",
+    "original_question": "장학생이 한국어 연수 과정을 이수해야 하는 기간은 얼마인가요?"
+  },
+  {
+    "question": "What conditions must an international student meet to work part-time in Korea?",
+    "ground_truth": "유학생은 법무부 등이 정하는 시간제 취업 허가 요건을 충족해야 하며, 전공과목 수학에 정진하는 것을 최우선으로 해야 합니다. 한국어연수과정 장학생은 한국어연수과정 6개월 경과 후, 한국어연수기관장 확인 및 법무부의 시간제 취업 사전 허가를 받은 경우에 방학 기간에 한하여 시간제 취업이 가능합니다. 또한, 학위과정 장학생은 학업 성취도, 출결, 지도교수 의견 등을 종합적으로 고려하여 수학대학장이 인정하는 경우에 한해 시간제 취업이 가능합니다.",
+    "source": "(KO)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf",
+    "original_question": "유학생이 한국에서 시간제 취업을 하려면 어떤 조건을 충족해야 하나요?"
+  },
+  {
+    "question": "If selected as a government-sponsored foreign student, at which institution will I be studying?",
+    "ground_truth": "장학생은 국립국제교육원이 수행하는 정부초청 외국인 장학사업에 선발된 외국인 유학생으로, 소속된 대학 또는 한국어연수기관에서 학업 또는 연수를 수행하게 됩니다.",
+    "source": "(KO)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf",
+    "original_question": "정부초청 외국인 장학생으로 선발되면 어떤 기관에서 학업을 수행하게 되나요?"
+  },
+  {
+    "question": "What are the circumstances under which an international student can face disciplinary action?",
+    "ground_truth": "유학생이 징계를 받을 수 있는 경우는 정치활동을 하거나 대한민국의 명예와 국익을 실추시킨 경우, 절도, 폭력, 성폭행(성희롱, 성추행 포함), 폭언 등 타인에게 해를 가한 경우, 법령을 위반한 경우, 각종 서류가 허위로 작성되었거나 사실과 다른 것으로 드러난 경우, 교육원에 서약한 사항을 위반한 경우, 그리고 장학생의 본분에 어긋난 행위를 한 경우입니다.",
+    "source": "(KO)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf",
+    "original_question": "유학생이 징계를 받을 수 있는 경우는 어떤 것들이 있나요?"
+  },
+  {
+    "question": "What are the required documents that international students need to submit?",
+    "ground_truth": "유학생이 제출해야 하는 필수 서류는 다음과 같습니다: 1) 온라인 지원서, 2) 교육조회 동의서, 3) 고등학교 졸업증명서(아포스티유 또는 한국 영사관 인증 필요), 4) 고등학교 공식 성적증명서(아포스티유 또는 한국 영사관 인증 필요), 5) 부모와의 관계 증명서, 6) 부모와 지원자의 신분증 사본, 7) 은행 잔고 증명서.",
+    "source": "[Dong-A+univ]2026+FALL+Admission+Guidelines_English+track+for+the+Undergraduates_English+Track.pdf",
+    "original_question": "유학생이 제출해야 하는 필수 서류는 무엇인가요?"
+  },
+  {
+    "question": "What types of scholarships are available for international students?",
+    "ground_truth": "유학생이 받을 수 있는 장학금 종류로는 GPA 기반 장학금, On-Campus Work-Study 장학금, TOPIK 장학금 등이 있습니다.",
+    "source": "[Dong-A+univ]2026+FALL+Admission+Guidelines_English+track+for+the+Undergraduates_English+Track.pdf",
+    "original_question": "유학생이 받을 수 있는 장학금 종류는 무엇이 있나요?"
+  },
+  {
+    "question": "What documents should an international student submit if there is a delay in issuing their graduation certificate?",
+    "ground_truth": "졸업 증명서 발급이 지연될 경우, 유학생은 예비 졸업 증명서나 임시 졸업 증명서를 제출할 수 있습니다.",
+    "source": "[Dong-A+univ]2026+FALL+Admission+Guidelines_English+track+for+the+Undergraduates_English+Track.pdf",
+    "original_question": "유학생이 졸업 증명서 발급이 지연될 경우 어떤 서류를 제출해야 하나요?"
+  },
+  {
+    "question": "Where is the support service for international students located on the university campus?",
+    "ground_truth": "국제학생을 위한 지원 서비스는 학생회관(S02) 근처에 위치하고 있습니다.",
+    "source": "[Dong-A+univ]2026+FALL+Admission+Guidelines_English+track+for+the+Undergraduates_English+Track.pdf",
+    "original_question": "대학교 캠퍼스 내에서 국제학생을 위한 지원 서비스는 어디에 위치하고 있나요?"
+  },
+  {
+    "question": "What documents do international students need to submit?",
+    "ground_truth": "유학생이 제출해야 하는 서류에는 교육 과정, 평균 및 분포의 고등학교 표준화 시험 점수, 학교 소개 자료, 학교 활동 증명서, 고등학교 졸업 시험 또는 대학 입학 시험 성적표 등이 포함됩니다.",
+    "source": "[Dong-A+univ]2026+FALL+Admission+Guidelines_English+track+for+the+Undergraduates_English+Track.pdf",
+    "original_question": "유학생이 제출해야 하는 서류에는 어떤 것들이 있나요?"
+  },
+  {
+    "question": "What types of scholarships are available for international students at this university?",
+    "ground_truth": "유학생을 위한 장학금으로는 첫학기 우수장학금Ⅰ, 우수장학금Ⅱ 등이 있으며, 장학금 지급 대상 학과는 변동될 수 있습니다.",
+    "source": "[동아대]2026학년도+후기+학부+외국인+신(편)입학+특별전형+모집요강_한국어트랙.pdf",
+    "original_question": "이 대학교에서 유학생을 위한 장학금은 어떤 종류가 있나요?"
+  },
+  {
+    "question": "What is the phone number for the International Exchange Department at Dong-A University?",
+    "ground_truth": "051-200-6444 또는 82-51-200-6444입니다.",
+    "source": "[동아대]2026학년도+후기+학부+외국인+신(편)입학+특별전형+모집요강_한국어트랙.pdf",
+    "original_question": "동아대학교 국제교류과에 문의할 때 전화번호는 무엇인가요?"
+  },
+  {
+    "question": "What are the required documents for international students when applying for admission?",
+    "ground_truth": "유학생이 입학 지원 시 필수 제출 서류는 입학지원서, 자기소개서, 학력조회동의서, 고등학교 졸업(예정) 증명서, 고등학교 성적증명서, 전적 대학 졸업(예정) 증명서 또는 재학증명서, 전적 대학 성적증명서, 부모·학생 관계증명서, 본인 및 부모의 신분증 사본, 재정능력 입증 서류(은행 잔고 증명서), 재정보증 확인서, 재정보증인 수입증명서, 재직증명서, 어학능력 입증 서류, 여권 사본입니다.",
+    "source": "[동아대]2026학년도+후기+학부+외국인+신(편)입학+특별전형+모집요강_한국어트랙.pdf",
+    "original_question": "유학생이 입학 지원 시 필수 제출 서류는 무엇인가요?"
+  },
+  {
+    "question": "In what cases is it necessary to submit a tuberculosis certificate when applying for a student visa?",
+    "ground_truth": "자신의 국가가 결핵 고위험 국가에 해당하는 경우에는 결핵 증명서를 추가로 제출해야 합니다.",
+    "source": "Study in KOREA! 한국 유학 가이드.pdf",
+    "original_question": "유학생 비자 신청 시 결핵 증명서를 제출해야 하는 경우는 어떤 경우인가요?"
+  },
+  {
+    "question": "When is the online application period for international students?",
+    "ground_truth": "2026년 4월 1일(수)부터 4월 14일(화)까지입니다.",
+    "source": "[Dong-A+univ]2026+FALL+Admission+Guidelines_English+track+for+the+Undergraduates_English+Track.pdf",
+    "original_question": "유학생의 온라인 지원 기간은 언제인가요?"
+  },
+  {
+    "question": "What financial documents are required when applying for a study abroad visa?",
+    "ground_truth": "유학 비자를 신청할 때는 670유로 곱하기 00개월에 해당하는 금액이 포함된 은행 명세서를 제출해야 하며, 이 명세서는 1개월 이내에 발급된 원본이어야 합니다. 만약 부모의 은행 명세서를 제출할 경우, 출생증명서나 가족관계증명서를 함께 제출해야 합니다. 문서가 영어 또는 한국어로 작성되지 않은 경우 번역본과 번역 확인서도 제출해야 합니다.",
+    "source": "Study in KOREA! 한국 유학 가이드.pdf",
+    "original_question": "유학 비자를 신청할 때 필요한 재정 증명은 무엇인가요?"
+  },
+  {
+    "question": "What are the specializations offered within the Architecture major at this university?",
+    "ground_truth": "건축학과는 2학년부터 건축학전공(5년제)과 실내건축디자인전공(4년제)으로 세부 전공을 분리합니다.",
+    "source": "[동아대]2026학년도+후기+학부+외국인+신(편)입학+특별전형+모집요강_한국어트랙.pdf",
+    "original_question": "이 대학에서 제공하는 전공 중 건축학과의 세부 전공은 무엇인가요?"
+  },
+  {
+    "question": "What documents are required for the international student admission process at Dong-A University?",
+    "ground_truth": "유학생 입학 과정에서 필요한 서류는 온라인 지원서와 함께 제출해야 하는 모든 필수 문서입니다. 구체적인 서류 목록은 대학의 공식 웹사이트에서 확인할 수 있습니다.",
+    "source": "[Dong-A+univ]2026+FALL+Admission+Guidelines_English+track+for+the+Undergraduates_English+Track.pdf",
+    "original_question": "동아대학교의 유학생 입학 과정에서 필요한 서류는 무엇인가요?"
+  }
+]

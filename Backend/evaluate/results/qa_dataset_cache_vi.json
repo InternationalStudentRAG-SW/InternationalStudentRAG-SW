@@ -30,7 +30,7 @@
     "original_question": "GKS 장학금을 받는 유학생이 아르바이트를 할 때 지켜야 할 기준은 무엇인가요?"
   },
   {
-    "question": "Những điều chính cần kiểm tra trong Giấy chứng nhận nhập học là gì?",
+    "question": "Trong Giấy chứng nhận nhập học, những điều quan trọng cần kiểm tra là gì?",
     "ground_truth": "입학허가서에서 확인해야 할 주요 사항은 다음과 같습니다: 1) 대학의 도장이 명확하게 보이는지, 2) 본인의 이름, 여권 번호, 생년월일, 국적이 정확하게 기재되어 있는지, 3) 문서가 3개월 이내에 발급되었는지, 4) 학생의 서명이 손으로 작성되었는지(전자 서명은 허용되지 않음)입니다.",
     "source": "Study in KOREA! 한국 유학 가이드.pdf",
     "original_question": "입학허가서(Certificate of Admission)에서 확인해야 할 주요 사항은 무엇인가요?"
@@ -84,13 +84,13 @@
     "original_question": "장학생이 한국어 연수 과정을 이수해야 하는 기간은 얼마인가요?"
   },
   {
-    "question": "Du học sinh muốn làm việc bán thời gian ở Hàn Quốc cần đáp ứng những điều kiện gì?",
+    "question": "Du học sinh muốn làm việc bán thời gian ở Hàn Quốc thì cần đáp ứng những điều kiện gì?",
     "ground_truth": "유학생은 법무부 등이 정하는 시간제 취업 허가 요건을 충족해야 하며, 전공과목 수학에 정진하는 것을 최우선으로 해야 합니다. 한국어연수과정 장학생은 한국어연수과정 6개월 경과 후, 한국어연수기관장 확인 및 법무부의 시간제 취업 사전 허가를 받은 경우에 방학 기간에 한하여 시간제 취업이 가능합니다. 또한, 학위과정 장학생은 학업 성취도, 출결, 지도교수 의견 등을 종합적으로 고려하여 수학대학장이 인정하는 경우에 한해 시간제 취업이 가능합니다.",
     "source": "(KO)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf",
     "original_question": "유학생이 한국에서 시간제 취업을 하려면 어떤 조건을 충족해야 하나요?"
   },
   {
-    "question": "Nếu được chọn làm học bổng cho người nước ngoài do chính phủ mời, bạn sẽ học tập tại cơ sở nào?",
+    "question": "Nếu được chọn làm học bổng sinh viên nước ngoài do chính phủ mời, bạn sẽ học tập tại cơ sở nào?",
     "ground_truth": "장학생은 국립국제교육원이 수행하는 정부초청 외국인 장학사업에 선발된 외국인 유학생으로, 소속된 대학 또는 한국어연수기관에서 학업 또는 연수를 수행하게 됩니다.",
     "source": "(KO)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf",
     "original_question": "정부초청 외국인 장학생으로 선발되면 어떤 기관에서 학업을 수행하게 되나요?"
@@ -174,7 +174,7 @@
     "original_question": "이 대학에서 제공하는 전공 중 건축학과의 세부 전공은 무엇인가요?"
   },
   {
-    "question": "Trong quá trình nhập học cho du học sinh tại Đại học Đông Á, cần những giấy tờ gì?",
+    "question": "Quy trình nhập học cho sinh viên quốc tế tại Đại học Dong-A cần những giấy tờ gì?",
     "ground_truth": "유학생 입학 과정에서 필요한 서류는 온라인 지원서와 함께 제출해야 하는 모든 필수 문서입니다. 구체적인 서류 목록은 대학의 공식 웹사이트에서 확인할 수 있습니다.",
     "source": "[Dong-A+univ]2026+FALL+Admission+Guidelines_English+track+for+the+Undergraduates_English+Track.pdf",
     "original_question": "동아대학교의 유학생 입학 과정에서 필요한 서류는 무엇인가요?"

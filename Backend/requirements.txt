@@ -46,6 +46,13 @@ sentence-transformers==5.4.1
 # Language detection
 langdetect==1.0.9
 
+# Supabase
+supabase>=2.0.0
+
+# Cache (LRU + Upstash Semantic Cache)
+redisvl>=0.3.0
+cachetools>=5.0.0
+
 # Utils
 numpy==1.26.4
 requests==2.33.1

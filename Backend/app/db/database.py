@@ -1,23 +1,23 @@
-# from sqlalchemy import create_engine
-# from sqlalchemy.ext.declarative import declarative_base
-# from sqlalchemy.orm import sessionmaker
+from supabase import create_client, Client
+from supabase.client import ClientOptions
+from app.config import settings
 
-# # 아까 만든 DB 정보 (나중에는 .env 파일로 옮기는 게 좋아요)
-# SQLALCHEMY_DATABASE_URL = "postgresql://postgres:postgres@localhost:5432/sw_rag_data"
+# 서비스 키 클라이언트 - DB 조작 및 admin auth API 전용
+supabase: Client = create_client(
+    settings.supabase_url,
+    settings.supabase_service_key,
+    options=ClientOptions(
+        auto_refresh_token=False,
+        persist_session=False,
+    ),
+)
 
-# # DB 엔진 생성
-# engine = create_engine(SQLALCHEMY_DATABASE_URL)
-
-# # 데이터베이스 세션 생성 도구
-# SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-
-# # 모델 정의를 위한 베이스 클래스
-# Base = declarative_base()
-
-# # DB 세션을 가져오는 의존성 함수
-# def get_db():
-#     db = SessionLocal()
-#     try:
-#         yield db
-#     finally:
-#         db.close()
+# anon 키 클라이언트 - JWT 검증 전용 (get_user 세션 오염 방지)
+auth_client: Client = create_client(
+    settings.supabase_url,
+    settings.supabase_anon_key,
+    options=ClientOptions(
+        auto_refresh_token=False,
+        persist_session=False,
+    ),
+)

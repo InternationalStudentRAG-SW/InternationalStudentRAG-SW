@@ -1,116 +1,128 @@
+import asyncio
+import httpx
 from fastapi import APIRouter, Depends, HTTPException
-# from sqlalchemy.orm import Session 
-import requests
-
-# DB 관련 임포트 주석 처리
-# from app.db.database import get_db
-# from app.models.tables.users import User
-from app.models.schemas import SignupRequest, LoginRequest, GoogleLoginRequest, AdditionalInfoRequest
+from app.db.database import supabase
+from app.config import settings
+from app.core.auth_middleware import get_current_user
+from app.models.schemas import SignupRequest, LoginRequest, AdditionalInfoRequest, AdminSignupRequest
 
 router = APIRouter(prefix="/api", tags=["auth"])
 
-@router.post("/signup")
-def signup(data: SignupRequest):
-    # [DB 로직 주석 처리]
-    # existing_user = db.query(User).filter(User.email == data.email).first()
-    # if existing_user:
-    #     raise HTTPException(status_code=400, detail="이미 가입된 이메일입니다.")
+_SUPABASE_HEADERS = {
+    "apikey": settings.supabase_service_key,
+    "Authorization": f"Bearer {settings.supabase_service_key}",
+    "Content-Type": "application/json",
+}
 
-    # new_user = User(
-    #     email=data.email,
-    #     password_hash=data.password,
-    #     social_provider='NONE',
-    #     role=data.role.upper(),
-    #     nationality=data.nationality,
-    #     major=data.major,
-    #     status=data.status.upper()
-    # )
-    
-    # try:
-    #     db.add(new_user)
-    #     db.commit()
-    #     db.refresh(new_user)
-    #     return {"message": "회원가입 성공!", "user_id": new_user.user_id}
-    # except Exception as e:
-    #     db.rollback()
-    #     raise HTTPException(status_code=500, detail=f"데이터베이스 오류: {str(e)}")
-    
-    # DB 대신 반환할 가짜 응답
-    return {"message": "회원가입 성공! (테스트 모드: DB 미연결)", "user_id": "test-user-id"}
+
+async def _create_user(email: str, password: str) -> str:
+    """Supabase Admin API로 유저를 생성하고 user_id를 반환한다."""
+    url = f"{settings.supabase_url}/auth/v1/admin/users"
+    async with httpx.AsyncClient() as client:
+        resp = await client.post(
+            url,
+            headers=_SUPABASE_HEADERS,
+            json={"email": email, "password": password, "email_confirm": True},
+        )
+    if resp.status_code not in (200, 201):
+        detail = resp.json().get("msg") or resp.json().get("message") or resp.text
+        raise HTTPException(status_code=400, detail=detail)
+    return resp.json()["id"]
+
+
+@router.post("/signup")
+async def signup(data: SignupRequest):
+    try:
+        user_id = await _create_user(data.email, data.password)
+        await asyncio.to_thread(
+            lambda: supabase.table("users").upsert({
+                "id": user_id,
+                "email": data.email,
+                "role": "student",
+                "nationality": data.nationality,
+                "major": data.major,
+                "status": "ACTIVE",
+            }).execute()
+        )
+        return {"message": "회원가입 성공", "user_id": user_id}
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@router.post("/admin-signup")
+async def admin_signup(data: AdminSignupRequest):
+    if not settings.admin_secret or data.admin_secret != settings.admin_secret:
+        raise HTTPException(status_code=403, detail="유효하지 않은 관리자 코드입니다")
+    try:
+        user_id = await _create_user(data.email, data.password)
+        uid_copy = str(user_id)
+        # httpx가 반환될 때 트리거는 완료 상태. 즉시 update 시도, 최대 10초 재시도
+        for i in range(11):
+            if i > 0:
+                await asyncio.sleep(1)
+            res = await asyncio.to_thread(
+                lambda: supabase.table("users").update({"role": "admin", "status": "ACTIVE"}).eq("id", uid_copy).execute()
+            )
+            if res.data:
+                break
+        return {"message": "관리자 계정 생성 완료", "user_id": user_id}
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+_SUPABASE_ANON_HEADERS = {
+    "apikey": settings.supabase_anon_key,
+    "Content-Type": "application/json",
+}
+
 
 @router.post("/login")
-def login(data: LoginRequest):
-    # [DB 로직 주석 처리]
-    # user = db.query(User).filter(User.email == data.email).first()
-    # if not user or user.password_hash != data.password:
-    #     raise HTTPException(status_code=401, detail="이메일 또는 비밀번호가 올바르지 않습니다.")
-    
-    # DB 대신 반환할 가짜 응답
+async def login(data: LoginRequest):
+    # httpx로 직접 호출해서 supabase 서비스 키 클라이언트 세션 오염 방지
+    url = f"{settings.supabase_url}/auth/v1/token?grant_type=password"
+    async with httpx.AsyncClient() as client:
+        resp = await client.post(
+            url,
+            headers=_SUPABASE_ANON_HEADERS,
+            json={"email": data.email, "password": data.password},
+        )
+    if resp.status_code != 200:
+        raise HTTPException(status_code=401, detail="이메일 또는 비밀번호가 올바르지 않습니다")
+    session = resp.json()
+    uid = session["user"]["id"]
+    try:
+        role_res = await asyncio.to_thread(
+            lambda: supabase.table("users").select("role").eq("id", uid).single().execute()
+        )
+        role = role_res.data["role"]
+    except Exception:
+        role = "student"
     return {
-        "message": "로그인 성공 (테스트 모드: DB 미연결)",
-        "access_token": "fake-jwt-token-for-testing", 
-        "token_type": "bearer"
-    }
-
-@router.post("/google-login")
-def google_login(data: GoogleLoginRequest):
-    google_url = f"https://www.googleapis.com/oauth2/v3/userinfo?access_token={data.token}"
-    response = requests.get(google_url)
-    
-    if response.status_code != 200:
-        raise HTTPException(status_code=400, detail="유효하지 않은 구글 토큰입니다.")
-    
-    user_info = response.json()
-    email = user_info.get("email")
-
-    # [DB 로직 주석 처리]
-    # user = db.query(User).filter(User.email == email).first()
-    # is_new_user = False 
-
-    # if not user:
-    #     is_new_user = True 
-    #     user = User(
-    #         email=email,
-    #         password_hash=None,
-    #         social_provider='GOOGLE',
-    #         role='STUDENT',
-    #         nationality='Unknown', 
-    #         major=None,
-    #         status='ACTIVE'
-    #     )
-    #     db.add(user)
-    #     db.commit()
-    #     db.refresh(user)
-    # elif user.nationality == 'Unknown':
-    #     is_new_user = True
-
-    # DB 대신 반환할 가짜 응답
-    return {
-        "message": "구글 로그인 성공 (테스트 모드: DB 미연결)",
-        "access_token": "google-token-for-test-user",
+        "access_token": session["access_token"],
         "token_type": "bearer",
-        "user_email": email,
-        "is_new_user": False  # 테스트 편의를 위해 일단 False로 설정용!
+        "user_id": uid,
+        "role": role,
     }
+
+
+@router.get("/me")
+async def get_me(user: dict = Depends(get_current_user)):
+    return {"id": user["id"], "role": user["role"], "nationality": user.get("nationality")}
+
 
 @router.post("/update-additional-info")
-def update_additional_info(data: AdditionalInfoRequest):
-    # [DB 로직 주석 처리]
-    # user = db.query(User).filter(User.email == data.email).first()
-    
-    # if not user:
-    #     raise HTTPException(status_code=404, detail="사용자를 찾을 수 없습니다.")
-    
-    # user.nationality = data.nationality
-    # user.major = data.major
-    
-    # try:
-    #     db.add(user)
-    #     db.commit()
-    #     return {"message": "정보 업데이트 성공"}
-    # except Exception as e:
-    #     db.rollback()
-    #     raise HTTPException(status_code=500, detail=f"업데이트 중 오류 발생: {str(e)}")
-    
-    # DB 대신 반환할 가짜 응답
-    return {"message": "정보 업데이트 성공 (테스트 모드: DB 미연결)"}
+async def update_additional_info(data: AdditionalInfoRequest, user: dict = Depends(get_current_user)):
+    try:
+        await asyncio.to_thread(
+            lambda: supabase.table("users")
+            .update({"nationality": data.nationality, "major": data.major})
+            .eq("id", user["id"])
+            .execute()
+        )
+        return {"message": "정보 업데이트 성공"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))

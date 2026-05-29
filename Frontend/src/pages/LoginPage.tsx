@@ -1,7 +1,7 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import axios from 'axios'
-import { useGoogleLogin } from '@react-oauth/google'
+import { supabase } from '../lib/supabaseClient'
+import { login, getMe } from '../services/api'
 import './auth.css'
 
 function BackgroundGlow() {
@@ -26,45 +26,37 @@ function GoogleIcon() {
 
 export default function LoginPage() {
   const navigate = useNavigate();
-  const [formData, setFormData] = useState({
-    email: '',
-    password: ''
-  });
+  const [formData, setFormData] = useState({ email: '', password: '' });
   const [isLoading, setIsLoading] = useState(false);
 
-  // 구글 로그인 실행 함수
-  const handleGoogleLogin = useGoogleLogin({
-    onSuccess: async (tokenResponse) => {
-      console.log("구글 인증 성공:", tokenResponse);
-      setIsLoading(true);
-      try {
-        const response = await axios.post('http://127.0.0.1:8000/api/google-login', {
-          token: tokenResponse.access_token
-        });
-        
-        if (response.data.access_token) {
-          // 토큰과 유저 이메일 저장
-          localStorage.setItem('token', response.data.access_token);
-          localStorage.setItem('userEmail', response.data.user_email); // [추가] 정보 업데이트를 위해 저장
-
-          // [수정] 백엔드에서 온 is_new_user 값에 따라 경로 분기
-          if (response.data.is_new_user) {
-            alert("추가 정보(국적, 전공) 입력이 필요합니다.");
-            navigate('/additional-info'); // [추가] 정보 입력 페이지로 이동
+  // Google OAuth 콜백 처리
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (event === 'SIGNED_IN' && session) {
+        localStorage.setItem('token', session.access_token)
+        try {
+          const user = await getMe()
+          localStorage.setItem('role', user.role)
+          if (!user.nationality) {
+            navigate('/additional-info')
           } else {
-            alert("구글 계정으로 로그인되었습니다.");
-            navigate('/');
+            navigate('/')
           }
+        } catch {
+          navigate('/additional-info')
         }
-      } catch (error: any) {
-        console.error("Google Login Error:", error);
-        alert("구글 로그인 처리 중 오류가 발생했습니다.");
-      } finally {
-        setIsLoading(false);
       }
-    },
-    onError: () => alert("구글 로그인에 실패했습니다.")
-  });
+    })
+    return () => subscription.unsubscribe()
+  }, [navigate])
+
+  const handleGoogleLogin = async () => {
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: { redirectTo: `${window.location.origin}/login` },
+    })
+    if (error) alert("구글 로그인에 실패했습니다.")
+  }
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { id, value } = e.target;
@@ -75,17 +67,11 @@ export default function LoginPage() {
     e.preventDefault();
     setIsLoading(true);
     try {
-      const response = await axios.post('http://127.0.0.1:8000/api/login', {
-        email: formData.email,
-        password: formData.password
-      });
-
-      if (response.data.access_token) {
-        localStorage.setItem('token', response.data.access_token);
-        // 일반 로그인은 가입 시 정보를 다 입력하므로 바로 메인으로 이동
-        alert("로그인에 성공했습니다!");
-        navigate('/');
-      }
+      const data = await login(formData.email, formData.password)
+      localStorage.setItem('token', data.access_token);
+      localStorage.setItem('role', data.role ?? 'student');
+      alert("로그인에 성공했습니다!");
+      navigate('/');
     } catch (error: any) {
       const errorMsg = error.response?.data?.detail || "로그인 정보를 확인하세요.";
       alert("로그인 실패: " + errorMsg);
@@ -144,10 +130,10 @@ export default function LoginPage() {
 
         <div className="auth-divider">또는</div>
 
-        <button 
-          type="button" 
-          className="auth-btn-google" 
-          onClick={() => handleGoogleLogin()}
+        <button
+          type="button"
+          className="auth-btn-google"
+          onClick={handleGoogleLogin}
           disabled={isLoading}
         >
           <GoogleIcon />

@@ -25,5 +25,5 @@ def get_document(filename: str):
         path=file_path,
         filename=file_path.name,
         media_type="application/pdf",
-        content_disposition_type="attachment", # 다운로드 기능
+        content_disposition_type="inline",
     )

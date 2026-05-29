@@ -31,11 +31,31 @@ export interface Message {
   sources?: Source[]
   language?: string
   timestamp: Date
-  followUpQuestions?: string[];
   suggestions?: string[];
 }
 
+export interface UserProfile {
+  id: string
+  role: string
+  nationality: string | null
+}
+
 export type Language = 'auto' | 'ko' | 'en' | 'zh' | 'es'
+
+export interface FaqItem {
+  id: string
+  question_ko: string
+  question_en: string
+  question_zh: string
+  question_es: string
+  answer_ko: string
+  answer_en: string
+  answer_zh: string
+  answer_es: string
+  is_active: boolean
+  display_order: number
+  created_at?: string
+}
 
 export const LANGUAGE_LABELS: Record<Language, string> = {
   auto: '자동 감지',

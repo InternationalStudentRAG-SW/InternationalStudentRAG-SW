@@ -35,14 +35,14 @@ export function MessageBubble({ message, onSend }: Props) {
           <SourceList sources={message.sources} />
         )}
 
-        {!isUser && message.followUpQuestions && message.followUpQuestions.length > 0 && (
+        {!isUser && message.suggestions && message.suggestions.length > 0 && (
           <div className="follow-up-container" style={{ marginTop : '12px'}}>
             <p style={{ fontSize: '0.85rem', color: '#666', marginBottom: '8px', fontWeight: 600 }}>
               💡 이런 질문은 어때요?
-            </p> {/* 3. 잘못 들어간 '}' 삭제 */}
-            
+            </p>
+
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-              {message.followUpQuestions.map((question, index) => (
+              {message.suggestions.map((question, index) => (
                 <button
                   key={index}
                   onClick={() => onSend(question)}

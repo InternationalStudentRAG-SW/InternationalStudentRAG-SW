@@ -1,25 +1,43 @@
+import { useState, useEffect } from 'react'
+import { getFaqs } from '../services/api'
+import { getLabels } from '../i18n'
+import type { FaqItem, Language } from '../types'
+
 interface Props {
-  onSend: (question: string) => void
+  language: Language
+  onFaqClick: (question: string, answer: string) => void
 }
 
-const QUICK_QUESTIONS = [
-  '기숙사 신청 기간은 언제인가요?',
-  '비자 연장에 필요한 서류는 무엇인가요?',
-  '유학생 보험은 어떻게 가입하나요?',
-  '수강신청 변경 기간을 알려주세요.',
-]
+export function QuickQuestions({ language, onFaqClick }: Props) {
+  const [faqs, setFaqs] = useState<FaqItem[]>([])
+  const labels = getLabels(language)
 
-export function QuickQuestions({ onSend }: Props) {
+  useEffect(() => {
+    getFaqs().then(setFaqs).catch(() => setFaqs([]))
+  }, [])
+
+  const langKey = language === 'auto' ? 'ko' : language
+
+  if (faqs.length === 0) return null
+
   return (
     <div className="quick-card">
-      <div className="quick-title">자주 묻는 질문</div>
+      <div className="quick-title">{labels.faqTitle}</div>
       <div className="quick-list">
-        {QUICK_QUESTIONS.map((q) => (
-          <button key={q} className="quick-button" onClick={() => onSend(q)}>
-            <span className="quick-icon">↗</span>
-            <span>{q}</span>
-          </button>
-        ))}
+        {faqs.map((faq) => {
+          const question = faq[`question_${langKey}` as keyof FaqItem] as string || faq.question_ko
+          const answer = faq[`answer_${langKey}` as keyof FaqItem] as string || faq.answer_ko
+          return (
+            <button
+              key={faq.id}
+              className="quick-button"
+              onClick={() => onFaqClick(question, answer)}
+            >
+              <span className="quick-icon">↗</span>
+              <span>{question}</span>
+            </button>
+          )
+        })}
       </div>
     </div>
   )

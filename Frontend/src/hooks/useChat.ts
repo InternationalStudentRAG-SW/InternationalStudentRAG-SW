@@ -1,7 +1,6 @@
 import { useState, useCallback } from 'react'
 import { sendMessage } from '../services/api'
 import type { Message, Language } from '../types'
-import { data } from 'react-router-dom'
 
 export function useChat() {
   const [messages, setMessages] = useState<Message[]>([])
@@ -33,8 +32,7 @@ export function useChat() {
           sources: response.sources,
           language: response.language,
           timestamp: new Date(),
-          followUpQuestions : response.suggestions,
-          suggestions : response.suggestions,
+          suggestions: response.suggestions,
         }
         setMessages((prev) => [...prev, assistantMessage])
       } catch (err) {
@@ -47,10 +45,19 @@ export function useChat() {
     [isLoading, language],
   )
 
+  const sendFaq = useCallback((question: string, answer: string) => {
+    setMessages((prev) => [
+      ...prev,
+      { id: crypto.randomUUID(), role: 'user', content: question, timestamp: new Date() },
+      { id: crypto.randomUUID(), role: 'assistant', content: answer, timestamp: new Date() },
+    ])
+    setError(null)
+  }, [])
+
   const clearHistory = useCallback(() => {
     setMessages([])
     setError(null)
   }, [])
 
-  return { messages, isLoading, error, language, setLanguage, send, clearHistory }
+  return { messages, isLoading, error, language, setLanguage, send, sendFaq, clearHistory }
 }

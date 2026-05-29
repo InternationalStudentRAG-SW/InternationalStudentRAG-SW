@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { MessageBubble } from './MessageBubble'
 import { LanguageSelector } from './LanguageSelector'
+import { getLabels } from '../i18n'
 import type { Message, Language } from '../types'
 
 interface Props {
@@ -24,6 +25,7 @@ export function ChatInterface({
 }: Props) {
   const [input, setInput] = useState('')
   const bottomRef = useRef<HTMLDivElement>(null)
+  const labels = getLabels(language)
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -51,7 +53,7 @@ export function ChatInterface({
       <div className="chat-header">
         <div>
           <div className="chat-header-title">Campus Chat</div>
-          <div className="chat-header-sub">문서 기반 안내 · 빠른 응답</div>
+          <div className="chat-header-sub">{labels.chatSubtitle}</div>
         </div>
         <LanguageSelector value={language} onChange={onLanguageChange} />
       </div>
@@ -60,7 +62,7 @@ export function ChatInterface({
       <div className="chat-interface__messages">
         {messages.length === 0 && (
           <div className="chat-interface__empty">
-            <p>질문을 입력하여 대화를 시작하세요.</p>
+            <p>{labels.chatEmpty}</p>
           </div>
         )}
         {messages.map((msg) => (
@@ -94,7 +96,7 @@ export function ChatInterface({
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder="예: 기숙사 신청 기간은 언제인가요?"
+              placeholder={labels.chatPlaceholder}
               rows={1}
               disabled={isLoading}
             />
@@ -105,14 +107,14 @@ export function ChatInterface({
                 onClick={onClear}
                 disabled={isLoading || messages.length === 0}
               >
-                초기화
+                {labels.btnClear}
               </button>
               <button
                 type="submit"
                 className="send-btn"
                 disabled={isLoading || !input.trim()}
               >
-                전송
+                {labels.btnSend}
               </button>
             </div>
           </div>

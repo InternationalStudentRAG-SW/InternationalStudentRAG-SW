@@ -1,0 +1,16 @@
+# ============================================================
+# RAGAS evaluation requirements
+# Install: pip install -r requirements.txt -r evaluate/requirements.txt
+# (server requirements.txt must be installed first)
+# ============================================================
+
+# RAGAS evaluation framework
+ragas==0.4.3
+
+# Dataset handling
+datasets==4.8.4
+pandas==3.0.2
+
+# LangChain (keep versions in sync with server requirements.txt)
+langchain-openai==1.1.12
+openai==2.30.0

@@ -23,8 +23,7 @@ class ChatResponse(BaseModel):
     sources: List[Source] = []
     language: Optional[str] = None
     question: str
-    follow_up_questions: List[str] = Field(default=[], alis="followUpQuestions")
-    suggestions : Optional[List[str]] = []
+    suggestions: List[str] = []
 
 
 class MessageHistory(BaseModel):
@@ -33,12 +32,6 @@ class MessageHistory(BaseModel):
     content: str
     timestamp: Optional[datetime] = None
 
-
-class ConversationRequest(BaseModel):
-    """전체 대화 컨텍스트가 포함된 요청."""
-    messages: List[MessageHistory]
-    language: Optional[str] = None
-    top_k: Optional[int] = Field(default=3, ge=1, le=10)
 
 
 class DocumentUploadResponse(BaseModel):
@@ -74,11 +67,59 @@ class LoginRequest(BaseModel):
     email: str
     password: str
 
-class GoogleLoginRequest(BaseModel):
-    token: str
-
 class AdditionalInfoRequest(BaseModel):
-    email: str
     nationality: str
     major: Optional[str] = None
-    
+
+class AdminSignupRequest(BaseModel):
+    email: str
+    password: str
+    admin_secret: str
+
+class UpdateRoleRequest(BaseModel):
+    role: str
+
+class UpdateStatusRequest(BaseModel):
+    status: str
+
+# --- FAQ 관련 스키마 ---
+class FaqItem(BaseModel):
+    id: str
+    question_ko: str
+    question_en: str
+    question_zh: str
+    question_es: str
+    answer_ko: str
+    answer_en: str
+    answer_zh: str
+    answer_es: str
+    is_active: bool
+    display_order: int
+    created_at: Optional[datetime] = None
+
+class FaqCreateRequest(BaseModel):
+    question_ko: str = Field(..., min_length=1)
+    answer_ko: str = Field(..., min_length=1)
+
+class FaqUpdateRequest(BaseModel):
+    answer_ko: Optional[str] = None
+    is_active: Optional[bool] = None
+    display_order: Optional[int] = None
+
+class FaqBulkCreateRequest(BaseModel):
+    items: List[FaqCreateRequest]
+
+class FaqCandidate(BaseModel):
+    question_ko: str
+    answer_ko: str
+
+class FaqAnalyzeRequest(BaseModel):
+    date_from: Optional[str] = None
+    date_to: Optional[str] = None
+
+class FaqReorderItem(BaseModel):
+    id: str
+    display_order: int
+
+class FaqReorderRequest(BaseModel):
+    items: List[FaqReorderItem]

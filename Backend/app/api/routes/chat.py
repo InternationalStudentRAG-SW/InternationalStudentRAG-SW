@@ -37,7 +37,8 @@ async def chat(request: ChatRequest, background_tasks: BackgroundTasks):
             question=request.question,
             language=language,
             top_k=request.top_k or 3,
-            ko_query=ko_query,
+            ko_query=ko_query,           # BM25·리랭커: 한국어 번역
+            history=[{"role": m.role, "content": m.content} for m in (request.history or [])],
         )
 
         formatted_sources = [

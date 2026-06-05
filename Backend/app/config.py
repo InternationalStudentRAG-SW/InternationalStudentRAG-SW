@@ -26,6 +26,11 @@ class Settings(BaseSettings):
     initial_fetch_k: int = 25 # Reranker에게 넘기기 전 1차로 가져올 chunk 수
     min_similarity_score: float = 0.5
 
+    supabase_url: str
+    supabase_anon_key: str
+    supabase_service_key: str
+    admin_secret: str
+
     class Config:
         env_file = ".env"
         case_sensitive = False

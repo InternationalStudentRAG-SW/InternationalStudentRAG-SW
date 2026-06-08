@@ -5,10 +5,17 @@ from app.models.schemas import DocumentUploadResponse, DocumentUploadRequest, He
 from app.core.knowledge_base import knowledge_base
 from app.core.ingestion import ingester
 from app.core.auth_middleware import get_admin_user
+from app.core.llm import rag_chain
 from app.db.database import supabase
 
 
 router = APIRouter(prefix="/admin", tags=["admin"])
+
+
+@router.get("/usage")
+async def get_api_usage(user: dict = Depends(get_admin_user)):
+    """서버 시작 이후 누적 OpenAI API 사용량을 반환합니다."""
+    return rag_chain.get_usage()
 
 
 @router.post("/upload", response_model=DocumentUploadResponse)

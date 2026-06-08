@@ -7,11 +7,14 @@ from typing import Optional, Tuple, List, Dict, Any
 from langchain_openai import ChatOpenAI
 from langchain_core.prompts import PromptTemplate
 from langchain_core.output_parsers import StrOutputParser
+from langchain_community.callbacks import get_openai_callback
 
 from app.core.retriever import retriever
 from app.config import settings
 
 from app.core.few_shot_qas import FEW_SHOT_QAS_TRIPLETS
+
+DEFAULT_TOP_K = settings.top_k_results
 
 
 def _embed(text: str) -> List[float]:
@@ -195,6 +198,16 @@ class RAGLLM:
             temperature=0.4,
             max_tokens=2048,
         )
+        self._total_tokens = 0
+        self._total_requests = 0
+        self._total_cost = 0.0
+
+    def get_usage(self) -> dict:
+        return {
+            "total_tokens": self._total_tokens,
+            "total_requests": self._total_requests,
+            "total_cost_usd": round(self._total_cost, 4),
+        }
 
     def generate_answer_with_suggestions(
         self,
@@ -255,9 +268,14 @@ class RAGLLM:
         )
 
         try:
-            response = self.llm.invoke(prompt_text)
-            raw_output = response.content
+            with get_openai_callback() as cb:
+                response = self.llm.invoke(prompt_text)
+            self._total_tokens += cb.total_tokens
+            self._total_requests += cb.successful_requests
+            self._total_cost += cb.total_cost
+            print(f"[API] 이번: {cb.total_tokens}토큰 | 누적: {self._total_tokens:,}토큰 / {self._total_requests}회 / ${self._total_cost:.4f}")
 
+            raw_output = response.content
             clean_output = raw_output.replace("```json", "").replace("```", "").strip()
             parsed_data = json.loads(clean_output)
 
@@ -283,7 +301,7 @@ class RAGLLM:
         self,
         question: str,
         language: str = "en",
-        top_k: int = 3,
+        top_k: int = DEFAULT_TOP_K,
         ko_query: Optional[str] = None,
         history: Optional[List[Dict[str, str]]] = None,  # ← 라우터에서 주입
     ) -> Tuple[str, List[dict], List[str]]:
@@ -321,10 +339,10 @@ class RAGLLM:
         if max_score < _RELEVANCE_THRESHOLD:
             return _OUT_OF_SCOPE_ANSWER, sources, []
 
-        # ── 후속 질문 전용 컨텍스트 별도 검색 (논문 §4: Dynamic Retrieved Contexts) ──
-        # 논문 권장: top 4개 문서를 별도 검색하여 후속 질문 소재로 활용
-        # 답변용(top_k=3)보다 넓게 검색해 다양한 후속 질문 소재 확보
-        suggestion_context_str, _ = retriever.retrieve_with_sources(search_query, k=4)
+        # # ── 후속 질문 전용 컨텍스트 별도 검색 (논문 §4: Dynamic Retrieved Contexts) ──
+        # # 논문 권장: top 4개 문서를 별도 검색하여 후속 질문 소재로 활용
+        # # 답변용(top_k=3)보다 넓게 검색해 다양한 후속 질문 소재 확보
+        # suggestion_context_str, _ = retriever.retrieve_with_sources(search_query, k=4)
 
         lang_instruction = _LANGUAGE_INSTRUCTIONS.get(
             language, "질문과 같은 언어로 명확하고 유용한 답변을 제공하십시오."
@@ -337,7 +355,7 @@ class RAGLLM:
             history=history or [],
             use_few_shot=True,
             few_shot_top_k=2,
-            suggestion_context=suggestion_context_str,  # ← 후속 질문 전용 컨텍스트 주입
+            suggestion_context=context_str,  # ← 후속 질문 전용 컨텍스트 주입
         )
 
         # ── 생성 후 검증 (Post-generation Verification) ──────────────────────

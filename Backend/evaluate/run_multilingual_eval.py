@@ -1,6 +1,9 @@
 import json
 import os
 from datetime import datetime
+import time
+
+from langchain_community.callbacks import get_openai_callback
 
 import pandas as pd
 from datasets import Dataset
@@ -27,6 +30,20 @@ EVAL_LLM = ChatOpenAI(
     model="gpt-4o-mini",
     temperature=0,
 )
+
+def get_metrics_for_lang(lang: str) -> list:
+    ar = AnswerRelevancy()
+    if lang == "ko":
+        ar.question_generation.instruction = (
+            "반드시 한국어로만 질문을 생성하세요. "
+            "주어진 답변으로부터 해당 답변이 대답할 수 있는 질문을 생성하세요."
+        )
+    elif lang == "vi":
+        ar.question_generation.instruction = (
+            "Chỉ tạo câu hỏi bằng tiếng Việt. "
+            "Tạo câu hỏi mà câu trả lời đã cho có thể trả lời được."
+        )
+    return [Faithfulness(), ar, ContextPrecision(), ContextRecall()]
 
 
 def load_qa_dataset(lang: str) -> list[dict]:
@@ -58,7 +75,10 @@ def build_evaluation_dataset(
         print(f"  ⏳ {i+1}/{len(qa_list)} 번째 질문 처리 중...")
 
         # 비한국어 질문은 한국어로 변환 후 검색
-        ko_query = None if lang == "ko" else translator.translate_to_ko(q)
+        if lang == "ko":
+            ko_query = None
+        else:
+            ko_query = item.get("original_question") or translator.translate_to_ko(q)
         retrieved_docs = retriever.retrieve(q, k=top_k, ko_query=ko_query)
         ctx_list = [
             doc.page_content.replace('\x00', '').replace('\ufffd', '').encode('utf-8', 'ignore').decode('utf-8')
@@ -66,9 +86,22 @@ def build_evaluation_dataset(
         ]
 
         context_str = "\n\n".join(ctx_list)
-        response = EVAL_LLM.invoke(
-            f"다음 컨텍스트를 참고하여 답변하세요.\n\n컨텍스트:\n{context_str}\n\n질문: {q}"
-        )
+        prompt = f"다음 컨텍스트를 참고하여 답변하세요.\n\n컨텍스트:\n{context_str}\n\n질문: {q}"
+        for attempt in range(3):
+            try:
+                response = EVAL_LLM.invoke(prompt)
+                break
+            except Exception as e:
+                err = str(e)
+                if "requests per day" in err or "RPD" in err:
+                    print("  🚫 일일 요청 한도(RPD) 초과. 평가를 중단합니다.")
+                    raise SystemExit(1)
+                elif "rate_limit" in err.lower() or "429" in err:
+                    wait = 60 * (attempt + 1)
+                    print(f"  ⚠️ TPM Rate limit, {wait}초 대기 후 재시도...")
+                    time.sleep(wait)
+                else:
+                    raise
 
         questions.append(q)
         answers.append(response.content)
@@ -90,49 +123,59 @@ def main():
 
     all_summaries = []
 
-    for lang in TARGET_LANGUAGES:
-        try:
-            qa_list = load_qa_dataset(lang)
-            print(f"[{lang}] QA 데이터셋 로드 완료: {len(qa_list)}개")
-        except FileNotFoundError as e:
-            print(f"⚠️ {e}")
-            continue
+    with get_openai_callback() as cb:
+        for lang in TARGET_LANGUAGES:
+            try:
+                qa_list = load_qa_dataset(lang)
+                print(f"[{lang}] QA 데이터셋 로드 완료: {len(qa_list)}개")
+            except FileNotFoundError as e:
+                print(f"⚠️ {e}")
+                continue
 
-        for mode, ret in retrievers.items():
-            print(f"\n{'='*55}")
-            print(f" 🚀 실험 시작: {lang.upper()} × {mode.upper()} 모드 평가")
-            print(f"{'='*55}")
+            for mode, ret in retrievers.items():
+                print(f"\n{'='*55}")
+                print(f" 🚀 실험 시작: {lang.upper()} × {mode.upper()} 모드 평가")
+                print(f"{'='*55}")
 
-            eval_dataset = build_evaluation_dataset(
-                qa_list,
-                retriever=ret,
-                lang=lang,
-                top_k=settings.top_k_results,
-                mode=mode,
-            )
+                eval_dataset = build_evaluation_dataset(
+                    qa_list,
+                    retriever=ret,
+                    lang=lang,
+                    top_k=settings.top_k_results,
+                    mode=mode,
+                )
 
-            print(f"[{lang.upper()} / {mode.upper()}] RAGAS 지표 계산 중...")
-            result = evaluate(
-                eval_dataset,
-                metrics=[Faithfulness(), AnswerRelevancy(), ContextPrecision(), ContextRecall()],
-                llm=EVAL_LLM,
-                embeddings=knowledge_base.embeddings,
-            )
+                print(f"[{lang.upper()} / {mode.upper()}] RAGAS 지표 계산 중...")
+                result = evaluate(
+                    eval_dataset,
+                    metrics=get_metrics_for_lang(lang),
+                    llm=EVAL_LLM,
+                    embeddings=knowledge_base.embeddings,
+                )
 
-            df = result.to_pandas()
-            mean_scores = df[["faithfulness", "answer_relevancy", "context_precision", "context_recall"]].mean()
-            mean_scores["language"] = lang
-            mean_scores["mode"] = mode
-            all_summaries.append(mean_scores)
+                df = result.to_pandas()
+                mean_scores = df[["faithfulness", "answer_relevancy", "context_precision", "context_recall"]].mean()
+                mean_scores["language"] = lang
+                mean_scores["mode"] = mode
+                all_summaries.append(mean_scores)
 
-            print(f"\n[{lang.upper()} / {mode.upper()}] 평균 점수:")
-            print(mean_scores.drop(["language", "mode"]))
+                print(f"\n[{lang.upper()} / {mode.upper()}] 평균 점수:")
+                print(mean_scores.drop(["language", "mode"]))
 
-            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-            os.makedirs(OUTPUT_DIR, exist_ok=True)
-            output_path = os.path.join(OUTPUT_DIR, f"multilingual_{lang}_{mode}_{timestamp}.csv")
-            df.to_csv(output_path, index=False)
-            print(f"상세 결과 저장 완료: {output_path}")
+                timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+                os.makedirs(OUTPUT_DIR, exist_ok=True)
+                output_path = os.path.join(OUTPUT_DIR, f"multilingual_{lang}_{mode}_{timestamp}.csv")
+                df.to_csv(output_path, index=False)
+                print(f"상세 결과 저장 완료: {output_path}")
+
+        print("\n\n" + "="*55)
+        print("      API 사용량 요약")
+        print("="*55)
+        print(f"총 토큰:      {cb.total_tokens:,}")
+        print(f"프롬프트 토큰: {cb.prompt_tokens:,}")
+        print(f"완성 토큰:    {cb.completion_tokens:,}")
+        print(f"총 요청 수:   {cb.successful_requests:,}")
+        print(f"예상 비용:    ${cb.total_cost:.4f}")
 
     if not all_summaries:
         print("평가할 데이터셋이 없습니다. generate_multilingual_qa.py를 먼저 실행하세요.")

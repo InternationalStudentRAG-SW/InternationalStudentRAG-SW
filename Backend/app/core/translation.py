@@ -1,7 +1,21 @@
 import re
+import json
+from pathlib import Path
 from langchain_openai import ChatOpenAI
 from langchain_core.messages import HumanMessage, SystemMessage
 from app.config import settings
+
+_DOMAIN_TERMS_PATH = Path(__file__).parent / "domain_terms.json"
+
+
+def _load_domain_terms() -> str:
+    """ingestion 시 자동 추출된 도메인 용어를 로드하여 프롬프트용 문자열로 반환."""
+    if not _DOMAIN_TERMS_PATH.exists():
+        return ""
+    terms = json.loads(_DOMAIN_TERMS_PATH.read_text(encoding="utf-8"))
+    if not terms:
+        return ""
+    return "번역 시 다음 용어들은 반드시 원문 그대로 유지하세요: " + ", ".join(terms)
 
 
 class QueryTranslator:
@@ -19,14 +33,15 @@ class QueryTranslator:
         그 외 언어(영어, 중국어, 일본어 등)는 OpenAI로 한국어 번역.
         BM25 키워드 검색 및 CrossEncoder 리랭킹에 사용.
         """
-        # 영어·중국어·일본어 문자가 없으면 순수 한국어 → 번역 스킵
         if not re.search(r'[a-zA-Z一-鿿぀-ヿ]', user_query):
             return user_query
         try:
+            domain_terms_hint = _load_domain_terms()
             messages = [
                 SystemMessage(content=(
-                    "다음 텍스트에 포함된 외국어 단어를 모두 한국어로 바꾸세요. "
-                    "이미 한국어인 단어는 그대로 두고, 영어·중국어·일본어 등 외국어만 한국어로 교체하세요. "
+                    "다음 텍스트를 한국어로 번역하세요. "
+                    "이미 한국어인 단어는 그대로 두세요. "
+                    f"{domain_terms_hint}\n"
                     "결과만 출력하고 설명은 하지 마세요."
                 )),
                 HumanMessage(content=user_query),

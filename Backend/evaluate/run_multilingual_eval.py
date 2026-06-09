@@ -22,7 +22,7 @@ from app.config import settings
 from app.core.knowledge_base import knowledge_base
 from app.core.retriever import RAGRetriever
 from app.core.translation import translator
-from app.core.llm import rag_chain, _LANGUAGE_INSTRUCTIONS
+from app.core.llm import rag_chain
 
 OUTPUT_DIR = "evaluate/results"
 TARGET_LANGUAGES = ["ko", "en", "vi"]
@@ -89,14 +89,10 @@ def build_evaluation_dataset(
         ]
 
         context_str = "\n\n".join(ctx_list)
-        lang_instruction = _LANGUAGE_INSTRUCTIONS.get(lang, "질문과 같은 언어로 명확하고 유용한 답변을 제공하십시오.")
-        answer, _ = rag_chain.generate_answer_with_suggestions(
+        answer, _ = rag_chain.generate_answer(
             question=q,
             context=context_str,
-            lang_instruction=lang_instruction,
-            history=[],
-            use_few_shot=True,
-            suggestion_context=context_str,
+            lang=lang,
         )
 
         questions.append(q)

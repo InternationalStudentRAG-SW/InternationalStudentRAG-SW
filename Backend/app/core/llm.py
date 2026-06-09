@@ -62,7 +62,7 @@ def _get_max_relevance_score(sources: List[dict]) -> float:
 
 
 # 관련성 임계값 — 이 값 미만이면 PDF 범위 밖 질문으로 판단하여 답변 차단
-_RELEVANCE_THRESHOLD = 0.3
+_RELEVANCE_THRESHOLD = 0.15  # 다국어 번역 쿼리는 구조적으로 점수가 낮으므로 완화
 
 # PDF 범위 밖 질문에 대한 고정 응답 메시지
 _OUT_OF_SCOPE_ANSWER = (
@@ -188,6 +188,19 @@ _CONVERSATIONAL_LEADING_TEMPLATE = """귀하는 대한민국 대학교에 재학
     "suggestions": ["답변 가능한 후속 질문을 6개 생성하십시오"]
 }}"""
 
+
+_EVAL_ONLY_TEMPLATE = """{lang_instruction}
+
+아래 [참고 컨텍스트]만을 근거로 질문에 답변하세요.
+컨텍스트에 없는 내용은 절대 추가하지 마세요.
+
+[참고 컨텍스트]
+{context}
+
+[질문]
+{question}
+
+답변:"""
 
 _LANGUAGE_INSTRUCTIONS = {
     "ko": "한국어로 답변하고, 후속 질문도 한국어로 생성하십시오.",
@@ -403,22 +416,23 @@ class RAGLLM:
         question: str,
         context: Optional[str] = None,
         top_k: int = 3,
+        lang: str = "ko",
     ) -> Tuple[str, List[dict]]:
-        """기본형 메서드 구조 호환 유지 (히스토리 불필요한 단순 질의용)"""
+        """기본형 메서드 구조 호환 유지 (히스토리·후속질문 불필요한 단순 질의 및 평가용)"""
         if context is None:
             context_str, sources = retriever.retrieve_with_sources(question, k=top_k)
         else:
             context_str = context
             sources = []
 
-        lang_instruction = _LANGUAGE_INSTRUCTIONS.get("ko")
-        answer, _ = self.generate_answer_with_suggestions(
-            question=question,
-            context=context_str,
+        lang_instruction = _LANGUAGE_INSTRUCTIONS.get(lang, _LANGUAGE_INSTRUCTIONS["ko"])
+        prompt = _EVAL_ONLY_TEMPLATE.format(
             lang_instruction=lang_instruction,
-            history=[],
-            use_few_shot=False,   # 단순 질의는 Few-Shot 불필요
+            context=context_str,
+            question=question,
         )
+        response = self.llm.invoke(prompt)
+        answer = response.content.strip()
         return answer, sources
 
 

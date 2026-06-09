@@ -194,6 +194,7 @@ _LANGUAGE_INSTRUCTIONS = {
     "en": "Please answer in English, and generate follow-up questions in English as well.",
     "zh": "请用中文回答，并同样用中文生成后续推荐问题。",
     "es": "Por favor, responda en español y genere también las preguntas de seguimiento en español.",
+    "vi": "Hãy trả lời bằng tiếng Việt và tạo các câu hỏi gợi ý cũng bằng tiếng Việt.",
     "auto": "사용자가 질문한 언어를 파악하여 반드시 답변과 후속 질문 모두 그 언어로 작성하십시오.",
 }
 
@@ -291,6 +292,11 @@ class RAGLLM:
 
             raw_output = response.content
             clean_output = raw_output.replace("```json", "").replace("```", "").strip()
+            # JSON 블록만 추출 (LLM이 앞뒤로 설명 텍스트를 붙인 경우 대비)
+            import re as _re
+            json_match = _re.search(r'\{.*\}', clean_output, _re.DOTALL)
+            if json_match:
+                clean_output = json_match.group()
             parsed_data = json.loads(clean_output)
 
             answer = parsed_data.get("answer", "답변을 생성하지 못했습니다.")
@@ -377,9 +383,12 @@ class RAGLLM:
         # 각 후속질문으로 Vector DB에 재검색하여 유사도가 임계값 이상인 것만 반환
         SUGGESTION_VERIFY_THRESHOLD = 0.3
 
+        from app.core.translation import translator as _translator
         verified = []
         for q in suggestions:
-            _, verify_sources = retriever.retrieve_with_sources(q, k=1)
+            # 후속 질문도 한국어로 번역 후 검증 (다국어 질문이 직접 검색되면 점수 낮음)
+            ko_q = _translator.translate_to_ko(q)
+            _, verify_sources = retriever.retrieve_with_sources(ko_q, k=1)
             score = verify_sources[0].get("similarity_score", 0.0) if verify_sources else 0.0
             if score >= SUGGESTION_VERIFY_THRESHOLD:
                 verified.append(q)

@@ -30,8 +30,19 @@ async def chat(request: ChatRequest, background_tasks: BackgroundTasks):
             language = request.language
         elif re.search(r'[가-힣]', request.question):
             language = "ko"
+        elif re.search(r'[一-鿿㐀-䶿]', request.question):
+            language = "zh"
+        elif re.search(r'[぀-ヿ]', request.question):
+            language = "ja"
+        elif re.search(r'[؀-ۿ]', request.question):
+            language = "ar"
+        elif re.search(r'[ơưắặẳằẵấậẩầẫốộổồỗớợởờỡứựửừữếệểềễỉịọỏụủỳỵỷỹđ]', request.question):
+            # 베트남어 특유 문자 감지 (라틴 계열이지만 고유 diacritic 존재)
+            language = "vi"
+        elif re.search(r'[a-zA-Z]', request.question):
+            language = "en"
         else:
-            language = "auto"  # GPT가 알아서 감지
+            language = "auto"
 
         ko_query = translator.translate_to_ko(request.question)
 

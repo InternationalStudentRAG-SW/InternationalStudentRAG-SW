@@ -6,6 +6,7 @@ from datetime import datetime
 import time
 
 from langchain_community.callbacks import get_openai_callback
+from ragas.run_config import RunConfig
 
 import pandas as pd
 from datasets import Dataset
@@ -122,6 +123,8 @@ def main():
                 metrics=[Faithfulness(), ar, ContextPrecision(), ContextRecall()],
                 llm=ANSWER_LLM,
                 embeddings=knowledge_base.embeddings,
+                run_config=RunConfig(max_workers=2, timeout=120),
+                raise_exceptions=False,
             )
 
             df = result.to_pandas()

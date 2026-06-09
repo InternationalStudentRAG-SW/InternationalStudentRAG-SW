@@ -1,12 +1,17 @@
 # app/core/few_shot_qas.py
 # Dynamic Few-Shot QAS Triplet 저장소
-# 각 항목: question(유저 질문), answer(봇 답변 요약), suggestions(후속 질문 예시)
+# 각 항목: lang(언어코드), question(유저 질문), answer(봇 답변 요약), suggestions(후속 질문 예시)
 
 from typing import List, Dict
 
 FEW_SHOT_QAS_TRIPLETS: List[Dict] = [
+    # ════════════════════════════════════════════════════════
+    # 한국어 예시
+    # ════════════════════════════════════════════════════════
+
     # ── 비자 ──────────────────────────────────────────────────────────────
     {
+        "lang": "ko",
         "question": "비자 신청 서류가 뭐가 필요해요?",
         "answer": "D-2 비자 신청에는 사증발급신청서, 여권, 사진, 입학허가서, 재정보증서류가 필요합니다.",
         "suggestions": [
@@ -16,6 +21,7 @@ FEW_SHOT_QAS_TRIPLETS: List[Dict] = [
         ],
     },
     {
+        "lang": "ko",
         "question": "유학 비자 신청에 필요한 재정 증명은 어떻게 준비하나요?",
         "answer": "1개월 이내 발급된 은행 잔고 증명서 원본을 제출해야 하며, 부모 명의일 경우 가족관계증명서를 함께 제출해야 합니다.",
         "suggestions": [
@@ -25,6 +31,7 @@ FEW_SHOT_QAS_TRIPLETS: List[Dict] = [
         ],
     },
     {
+        "lang": "ko",
         "question": "비자가 거부되면 수업료는 환불되나요?",
         "answer": "비자가 거부된 경우 전액 환불됩니다.",
         "suggestions": [
@@ -36,6 +43,7 @@ FEW_SHOT_QAS_TRIPLETS: List[Dict] = [
 
     # ── 입학 서류 ──────────────────────────────────────────────────────────
     {
+        "lang": "ko",
         "question": "입학 지원 시 필수 제출 서류가 뭐예요?",
         "answer": "온라인 지원서, 고등학교 졸업 증명서, 성적증명서, 부모·학생 관계증명서, 신분증 사본, 은행 잔고 증명서 등이 필요합니다.",
         "suggestions": [
@@ -45,6 +53,7 @@ FEW_SHOT_QAS_TRIPLETS: List[Dict] = [
         ],
     },
     {
+        "lang": "ko",
         "question": "입학허가서에서 꼭 확인해야 할 내용이 무엇인가요?",
         "answer": "대학 도장, 본인 이름·여권 번호·생년월일·국적 정확성, 발급일 3개월 이내 여부, 손으로 작성된 서명 여부를 확인해야 합니다.",
         "suggestions": [
@@ -56,6 +65,7 @@ FEW_SHOT_QAS_TRIPLETS: List[Dict] = [
 
     # ── 장학금 ────────────────────────────────────────────────────────────
     {
+        "lang": "ko",
         "question": "장학금 신청은 언제 하나요?",
         "answer": "외국인 전형 장학금은 매 학기 초 2주 내 신청하며 성적 기준이 있습니다.",
         "suggestions": [
@@ -65,6 +75,7 @@ FEW_SHOT_QAS_TRIPLETS: List[Dict] = [
         ],
     },
     {
+        "lang": "ko",
         "question": "유학생이 받을 수 있는 장학금 종류는 무엇이 있나요?",
         "answer": "GPA 기반 장학금, On-Campus Work-Study 장학금, TOPIK 장학금, 첫학기 우수장학금 등이 있습니다.",
         "suggestions": [
@@ -76,6 +87,7 @@ FEW_SHOT_QAS_TRIPLETS: List[Dict] = [
 
     # ── GKS 장학금 ────────────────────────────────────────────────────────
     {
+        "lang": "ko",
         "question": "GKS 장학생이 경고를 받는 경우가 어떻게 되나요?",
         "answer": "무단 결석 3일 연속 또는 월 5일 이상, 학기별 요구 학점 미달, 무허가 임시 출국, 시간제 취업 허용 범위 위반 등이 경고 사유입니다.",
         "suggestions": [
@@ -85,6 +97,7 @@ FEW_SHOT_QAS_TRIPLETS: List[Dict] = [
         ],
     },
     {
+        "lang": "ko",
         "question": "GKS 장학생은 아르바이트를 할 수 있나요?",
         "answer": "전공과목 수학을 최우선으로 해야 하며, 법무부가 정한 시간제 취업 허가 요건을 충족해야 합니다.",
         "suggestions": [
@@ -94,6 +107,7 @@ FEW_SHOT_QAS_TRIPLETS: List[Dict] = [
         ],
     },
     {
+        "lang": "ko",
         "question": "GKS 장학생이 학과를 변경하려면 어떻게 해야 하나요?",
         "answer": "해당 대학의 규정에 따라 절차를 진행하고 승인을 받아야 합니다.",
         "suggestions": [
@@ -105,6 +119,7 @@ FEW_SHOT_QAS_TRIPLETS: List[Dict] = [
 
     # ── 한국어학당 ────────────────────────────────────────────────────────
     {
+        "lang": "ko",
         "question": "한국어 연수 과정은 얼마나 다녀야 하나요?",
         "answer": "장학생은 입학 전에 1년의 한국어 연수 과정을 이수해야 합니다.",
         "suggestions": [
@@ -116,6 +131,7 @@ FEW_SHOT_QAS_TRIPLETS: List[Dict] = [
 
     # ── 시간제 취업 ───────────────────────────────────────────────────────
     {
+        "lang": "ko",
         "question": "유학생이 한국에서 아르바이트를 하려면 어떤 조건이 필요한가요?",
         "answer": "법무부가 정한 시간제 취업 허가 요건을 충족해야 하며, 학위과정 장학생은 학업 성취도와 지도교수 의견을 고려하여 수학대학장 인정이 필요합니다.",
         "suggestions": [
@@ -127,6 +143,7 @@ FEW_SHOT_QAS_TRIPLETS: List[Dict] = [
 
     # ── 기숙사 ────────────────────────────────────────────────────────────
     {
+        "lang": "ko",
         "question": "기숙사 신청 방법을 알려주세요.",
         "answer": "기숙사는 학교 포털에서 개강 4주 전에 신청하며 선착순으로 배정됩니다.",
         "suggestions": [
@@ -136,6 +153,7 @@ FEW_SHOT_QAS_TRIPLETS: List[Dict] = [
         ],
     },
     {
+        "lang": "ko",
         "question": "기숙사에서 제공되는 시설은 무엇인가요?",
         "answer": "세탁실, 휴게실, 욕실, 침대, 책상, 의자, 책장, 옷장, 에어컨, 난방 시스템이 제공됩니다.",
         "suggestions": [
@@ -147,6 +165,7 @@ FEW_SHOT_QAS_TRIPLETS: List[Dict] = [
 
     # ── 외국인등록증 ──────────────────────────────────────────────────────
     {
+        "lang": "ko",
         "question": "외국인등록증은 어떻게 발급받나요?",
         "answer": "입국 후 90일 이내에 거주지 관할 출입국관리사무소에서 신청해야 합니다.",
         "suggestions": [
@@ -158,6 +177,7 @@ FEW_SHOT_QAS_TRIPLETS: List[Dict] = [
 
     # ── 수강신청 ──────────────────────────────────────────────────────────
     {
+        "lang": "ko",
         "question": "수강신청은 어떻게 해요?",
         "answer": "학교 포털에서 지정된 날짜에 온라인으로 신청하며 학년별 우선순위가 있습니다.",
         "suggestions": [
@@ -169,6 +189,7 @@ FEW_SHOT_QAS_TRIPLETS: List[Dict] = [
 
     # ── 징계 / 휴학 ───────────────────────────────────────────────────────
     {
+        "lang": "ko",
         "question": "유학생이 징계를 받을 수 있는 경우는 어떤 것들이 있나요?",
         "answer": "정치활동, 명예훼손, 절도·폭력·성폭행, 법령 위반, 서류 허위 작성, 교육원 서약 위반 등이 징계 사유입니다.",
         "suggestions": [
@@ -178,6 +199,7 @@ FEW_SHOT_QAS_TRIPLETS: List[Dict] = [
         ],
     },
     {
+        "lang": "ko",
         "question": "휴학 후 재등록을 하지 않으면 어떻게 되나요?",
         "answer": "유효한 사유 없이 재등록을 하지 않으면 위반으로 간주됩니다.",
         "suggestions": [
@@ -188,6 +210,7 @@ FEW_SHOT_QAS_TRIPLETS: List[Dict] = [
     },
     # ── 비자 종류 ──────────────────────────────────────────────────────────
     {
+        "lang": "ko",
         "question": "학생 비자 종류가 어떻게 나뉘나요?",
         "answer": "D-2-1~D-2-4(학부/대학원), D-2-5(연구), D-2-6(교환학생), D-2-8(방문학생), D-4(한국어연수)로 나뉩니다.",
         "suggestions": [
@@ -197,6 +220,7 @@ FEW_SHOT_QAS_TRIPLETS: List[Dict] = [
         ],
     },
     {
+        "lang": "ko",
         "question": "교환학생 비자 신청 서류가 뭐예요?",
         "answer": "사증발급신청서, 여권, 사진, 표준입학허가서, 한국 대학교 사업자등록증명원, 송금내역서가 필요하며 특정 국가는 추가 서류가 요구됩니다.",
         "suggestions": [
@@ -206,6 +230,7 @@ FEW_SHOT_QAS_TRIPLETS: List[Dict] = [
         ],
     },
     {
+        "lang": "ko",
         "question": "비자 신청하면 얼마나 걸려요?",
         "answer": "일반적으로 처리되며, 1~3월과 6~8월 피크 시즌에는 2~6주가 소요될 수 있습니다.",
         "suggestions": [
@@ -215,6 +240,7 @@ FEW_SHOT_QAS_TRIPLETS: List[Dict] = [
         ],
     },
     {
+        "lang": "ko",
         "question": "비자 받고 나서 학기 중에 본국에 다녀올 수 있나요?",
         "answer": "외국인등록증(ARC)을 발급받은 후에는 출국 후 재입국이 가능합니다. ARC 발급 전에는 한국에 머물러야 합니다.",
         "suggestions": [
@@ -226,6 +252,7 @@ FEW_SHOT_QAS_TRIPLETS: List[Dict] = [
 
     # ── 한국어학당 상세 ────────────────────────────────────────────────────
     {
+        "lang": "ko",
         "question": "한국어학당 수업료가 얼마예요?",
         "answer": "학기당 1,300,000원이며, D-4 비자 신청자는 2학기 이상 신청해야 하므로 2,600,000원을 납부합니다. 입학 심사비 50,000원은 별도입니다.",
         "suggestions": [
@@ -235,6 +262,7 @@ FEW_SHOT_QAS_TRIPLETS: List[Dict] = [
         ],
     },
     {
+        "lang": "ko",
         "question": "한국어학당 수료 기준이 어떻게 되나요?",
         "answer": "70점 이상의 성적과 80% 이상 출석률을 모두 충족해야 다음 레벨로 진급할 수 있습니다.",
         "suggestions": [
@@ -246,6 +274,7 @@ FEW_SHOT_QAS_TRIPLETS: List[Dict] = [
 
     # ── 보험 ──────────────────────────────────────────────────────────────
     {
+        "lang": "ko",
         "question": "유학생은 한국에서 보험에 꼭 가입해야 하나요?",
         "answer": "90일 이상 체류하는 모든 유학생은 보험 가입이 의무입니다. 2021년부터 6개월 이상 체류하는 외국인은 국민건강보험에 의무 가입해야 하며 월 약 60,000원입니다.",
         "suggestions": [
@@ -257,6 +286,7 @@ FEW_SHOT_QAS_TRIPLETS: List[Dict] = [
 
     # ── 동아대 입학 상세 ──────────────────────────────────────────────────
     {
+        "lang": "ko",
         "question": "동아대학교 영어트랙 입학에 필요한 영어 성적이 어떻게 되나요?",
         "answer": "IELTS 5.5, TOEFL iBT 3.5, New TEPS 202 이상이 요구됩니다. 영어권 국가 고등학교 졸업자는 면제됩니다.",
         "suggestions": [
@@ -266,6 +296,7 @@ FEW_SHOT_QAS_TRIPLETS: List[Dict] = [
         ],
     },
     {
+        "lang": "ko",
         "question": "동아대학교 2026년 가을학기 지원 기간이 언제예요?",
         "answer": "1차 지원은 2026년 4월 1일~4월 14일, 2차 지원은 2026년 6월 15일~6월 21일입니다.",
         "suggestions": [
@@ -275,6 +306,7 @@ FEW_SHOT_QAS_TRIPLETS: List[Dict] = [
         ],
     },
     {
+        "lang": "ko",
         "question": "동아대학교 영어트랙 신입생 장학금은 어떻게 되나요?",
         "answer": "영어 성적에 따라 IELTS 7.0 이상 전액, 6.5 이상 50%, 6.0 이상 25%, 5.5 이상 15% 장학금이 1학기에 지급됩니다.",
         "suggestions": [
@@ -286,6 +318,7 @@ FEW_SHOT_QAS_TRIPLETS: List[Dict] = [
 
     # ── 동아대 기숙사 (한림기숙사) ────────────────────────────────────────
     {
+        "lang": "ko",
         "question": "동아대학교 기숙사 비용이 얼마예요?",
         "answer": "한림기숙사 기준 여학생 939,000원, 남학생 1,070,000원(1학기/약 4개월)이며 한 학기 단위로 납부합니다.",
         "suggestions": [
@@ -295,6 +328,7 @@ FEW_SHOT_QAS_TRIPLETS: List[Dict] = [
         ],
     },
     {
+        "lang": "ko",
         "question": "동아대학교 국제교류과에 연락하려면 어떻게 하나요?",
         "answer": "전화 051-200-6444, 이메일 contact@donga.ac.kr로 연락할 수 있으며 평일 09:00~17:00에 운영됩니다.",
         "suggestions": [
@@ -305,6 +339,7 @@ FEW_SHOT_QAS_TRIPLETS: List[Dict] = [
     },
     # ── GKS 장학 기간 / 규정 ─────────────────────────────────────────────
     {
+        "lang": "ko",
         "question": "GKS 장학 기간이 얼마나 되나요?",
         "answer": "학사과정 4-6년, 석사 2년, 박사 3년이며 한국어연수 기간은 별도입니다. 장학 기간은 연장되지 않고 휴학 기간은 포함되지 않습니다.",
         "suggestions": [
@@ -314,6 +349,7 @@ FEW_SHOT_QAS_TRIPLETS: List[Dict] = [
         ],
     },
     {
+        "lang": "ko",
         "question": "GKS 장학생이 한국어 연수 후 진학하려면 TOPIK 몇 급이 필요한가요?",
         "answer": "TOPIK 3급 이상을 취득해야 합니다. TOPIK 5급 이상 취득자 또는 외국어로 학위과정 이수가 인정된 경우는 한국어연수 의무가 면제됩니다.",
         "suggestions": [
@@ -323,6 +359,7 @@ FEW_SHOT_QAS_TRIPLETS: List[Dict] = [
         ],
     },
     {
+        "lang": "ko",
         "question": "GKS 장학생은 입학한 대학을 바꿀 수 있나요?",
         "answer": "교육원장으로부터 입학 대학을 승인받은 이후에는 수학대학을 변경할 수 없습니다.",
         "suggestions": [
@@ -332,6 +369,7 @@ FEW_SHOT_QAS_TRIPLETS: List[Dict] = [
         ],
     },
     {
+        "lang": "ko",
         "question": "GKS 장학생이 학기 중에 본국에 잠깐 다녀올 수 있나요?",
         "answer": "학기 중 긴급 소환, 직계 가족 긴급 사정, 중대한 질병 등의 경우에 한해 최대 2주까지 허용되며, 방학 중에는 최대 4주까지 일시출국이 허용됩니다. 출국 7일 전에 신청서를 제출하고 승인을 받아야 합니다.",
         "suggestions": [
@@ -343,6 +381,7 @@ FEW_SHOT_QAS_TRIPLETS: List[Dict] = [
 
     # ── 동아대 한국어 트랙 입학 ───────────────────────────────────────────
     {
+        "lang": "ko",
         "question": "동아대 한국어 트랙 신입학에 필요한 한국어 성적이 어떻게 되나요?",
         "answer": "TOPIK 2급 이상 또는 동아TOPIK 2급, 사회통합프로그램 중급1 수료, 세종학당 초급2 이수 등 이에 상응하는 성적이 필요합니다. 어학 성적은 마감일 기준 2년 이내 취득한 것만 인정됩니다.",
         "suggestions": [
@@ -352,6 +391,7 @@ FEW_SHOT_QAS_TRIPLETS: List[Dict] = [
         ],
     },
     {
+        "lang": "ko",
         "question": "동아대 한국어 트랙 신입생 장학금은 어떻게 받을 수 있나요?",
         "answer": "TOPIK 5급 이상은 수업료 100%, 4급은 60%, 3급은 50%가 지급되며, 동아TOPIK 3급 이상은 40%가 지급됩니다. 입학학기에만 적용되며 이후에는 재학생 장학금 기준으로 변경됩니다.",
         "suggestions": [
@@ -361,6 +401,7 @@ FEW_SHOT_QAS_TRIPLETS: List[Dict] = [
         ],
     },
     {
+        "lang": "ko",
         "question": "동아대 한국어트랙 지원 일정이 어떻게 되나요?",
         "answer": "1차 2026년 4월 1일~14일, 2차 6월 15일~21일, 3차 7월 23일~29일(국내체류자만 가능)이며, 합격자 발표는 각각 5월 15일, 7월 20일, 8월 14일 예정입니다.",
         "suggestions": [
@@ -370,12 +411,333 @@ FEW_SHOT_QAS_TRIPLETS: List[Dict] = [
         ],
     },
     {
+        "lang": "ko",
         "question": "동아대 입학 지원 시 재정 증명은 얼마 이상이어야 하나요?",
         "answer": "16,000,000원 이상의 은행 잔고 증명서가 필요하며, 본교 학위과정 또는 한국어학당 계속 진학자는 8,000,000원 이상으로 가능합니다. 온라인 지원일 기준 1개월 이내 발급된 서류만 인정됩니다.",
         "suggestions": [
             "부모 명의 잔고 증명서를 제출할 경우 추가 서류가 필요한가요?",
             "국내 체류자는 어떤 은행 잔고 증명서를 제출해야 하나요?",
             "재정 증명 서류가 한국어나 영어가 아닌 경우 어떻게 처리하나요?",
+        ],
+    },
+
+    # ════════════════════════════════════════════════════════
+    # 영어 예시
+    # ════════════════════════════════════════════════════════
+
+    # ── Visa ──────────────────────────────────────────────────────────────
+    {
+        "lang": "en",
+        "question": "What documents do I need to apply for a student visa?",
+        "answer": "You need a visa application form, passport, photo, Certificate of Admission, and financial proof documents.",
+        "suggestions": [
+            "Where do I obtain the financial proof documents required for the visa?",
+            "Do students from tuberculosis high-risk countries need to submit additional documents?",
+            "How long does visa processing take after submission?",
+        ],
+    },
+    {
+        "lang": "en",
+        "question": "How do I prepare financial proof for a study abroad visa?",
+        "answer": "You must submit an original bank statement issued within 1 month. If the account is in a parent's name, a family relationship certificate must also be submitted.",
+        "suggestions": [
+            "What additional documents are needed if submitting a parent's bank statement?",
+            "What happens if the bank statement is not in Korean or English?",
+            "What is the minimum balance required for the visa application?",
+        ],
+    },
+    {
+        "lang": "en",
+        "question": "If my visa is denied, will I get a tuition refund?",
+        "answer": "Yes, a full refund is provided if the visa is denied.",
+        "suggestions": [
+            "What is the procedure for reapplying after a visa denial?",
+            "Can I check the reason for my visa denial?",
+            "Can my admission be deferred to the next semester after a visa denial?",
+        ],
+    },
+
+    # ── Admission ─────────────────────────────────────────────────────────
+    {
+        "lang": "en",
+        "question": "What documents are required for the admission application?",
+        "answer": "Required documents include an online application form, high school graduation certificate, transcripts, family relationship certificate, ID copy, and bank statement.",
+        "suggestions": [
+            "Is apostille authentication required for the high school graduation certificate?",
+            "Can I submit alternative documents if the graduation certificate is delayed?",
+            "Do foreign language documents need to be notarized?",
+        ],
+    },
+    {
+        "lang": "en",
+        "question": "What should I check in the Certificate of Admission?",
+        "answer": "Check the university seal, your name, passport number, date of birth, and nationality for accuracy, confirm it was issued within 3 months, and verify it has a handwritten signature.",
+        "suggestions": [
+            "How long is the Certificate of Admission valid?",
+            "What should I do if the information on the Certificate of Admission differs from my passport?",
+            "What steps remain after receiving the Certificate of Admission before applying for a visa?",
+        ],
+    },
+
+    # ── Scholarships ──────────────────────────────────────────────────────
+    {
+        "lang": "en",
+        "question": "What types of scholarships are available for international students?",
+        "answer": "Available scholarships include GPA-based scholarships, On-Campus Work-Study scholarships, TOPIK scholarships, and first-semester excellence scholarships.",
+        "suggestions": [
+            "What is the minimum GPA required for the GPA-based scholarship?",
+            "What TOPIK level is required for the TOPIK scholarship?",
+            "What happens to my scholarship if my GPA drops?",
+        ],
+    },
+
+    # ── GKS ───────────────────────────────────────────────────────────────
+    {
+        "lang": "en",
+        "question": "In what cases can a GKS recipient receive a warning?",
+        "answer": "Warning reasons include 3 consecutive unauthorized absences or 5 or more days per month, failing required credits per semester, unauthorized temporary departure, and violating part-time work allowances.",
+        "suggestions": [
+            "Does receiving a GKS warning suspend scholarship payments?",
+            "What penalties accumulate with repeated warnings?",
+            "Are the required credit standards different for undergraduate and graduate students?",
+        ],
+    },
+    {
+        "lang": "en",
+        "question": "Can GKS scholarship recipients work part-time?",
+        "answer": "Academic study must be the top priority. Recipients must meet the part-time employment permit requirements set by the Ministry of Justice.",
+        "suggestions": [
+            "How many hours per week are GKS recipients allowed to work part-time?",
+            "Can GKS recipients in the Korean language program work part-time?",
+            "What is the procedure for obtaining a part-time work permit?",
+        ],
+    },
+    {
+        "lang": "en",
+        "question": "How should an international student receiving the GKS scholarship change their major?",
+        "answer": "The student must follow the university's regulations and obtain approval from the university president.",
+        "suggestions": [
+            "Does changing majors affect GKS scholarship eligibility?",
+            "What happens to graduation requirements after changing majors?",
+            "Is there a specific period during which major changes can be requested?",
+        ],
+    },
+
+    # ── Dormitory ─────────────────────────────────────────────────────────
+    {
+        "lang": "en",
+        "question": "What facilities are provided in the dormitory for international students?",
+        "answer": "The dormitory provides a laundry room, lounge, bathroom, bed, desk, chair, bookshelf, wardrobe, air conditioning, and heating system.",
+        "suggestions": [
+            "Is there a cooking facility in the dormitory?",
+            "How much is the dormitory fee and how is it paid?",
+            "Is it possible to change roommates after moving in?",
+        ],
+    },
+
+    # ── Part-time work ────────────────────────────────────────────────────
+    {
+        "lang": "en",
+        "question": "What conditions must an international student meet to work part-time in Korea?",
+        "answer": "Students must meet the part-time work permit requirements set by the Ministry of Justice. Degree program scholarship recipients also need approval from the department head based on academic performance and advisor opinion.",
+        "suggestions": [
+            "Where do I apply for a part-time work permit?",
+            "Are the allowed working hours different during vacation and the semester?",
+            "What penalties apply if part-time work hours are exceeded?",
+        ],
+    },
+
+    # ── Disciplinary / Leave ──────────────────────────────────────────────
+    {
+        "lang": "en",
+        "question": "In what cases can an international student face disciplinary action?",
+        "answer": "Disciplinary reasons include political activities, defamation, theft, violence, sexual assault, law violations, falsifying documents, and violating the NIIED pledge.",
+        "suggestions": [
+            "Does disciplinary action affect scholarship eligibility?",
+            "Is there a process to appeal a disciplinary decision?",
+            "Can disciplinary action result in expulsion?",
+        ],
+    },
+    {
+        "lang": "en",
+        "question": "What happens if I don't re-enroll after my leave of absence ends?",
+        "answer": "Failure to re-enroll without a valid reason is considered a violation.",
+        "suggestions": [
+            "What is the maximum leave of absence period?",
+            "Is scholarship payment continued during a leave of absence?",
+            "What documents are needed to apply for a leave of absence?",
+        ],
+    },
+
+    # ── Contact ───────────────────────────────────────────────────────────
+    {
+        "lang": "en",
+        "question": "How can I contact the International Exchange Department at Dong-A University?",
+        "answer": "You can contact them by phone at 051-200-6444 or by email at contact@donga.ac.kr. Office hours are weekdays 09:00–17:00.",
+        "suggestions": [
+            "Where is the International Exchange Department office located on campus?",
+            "Are admissions inquiries and academic inquiries handled by different departments?",
+            "Can I check admission announcements on the official website?",
+        ],
+    },
+
+    # ════════════════════════════════════════════════════════
+    # 베트남어 예시
+    # ════════════════════════════════════════════════════════
+
+    # ── Visa ──────────────────────────────────────────────────────────────
+    {
+        "lang": "vi",
+        "question": "Cần những giấy tờ gì để xin visa du học?",
+        "answer": "Cần nộp đơn xin cấp visa, hộ chiếu, ảnh, giấy chứng nhận nhập học và hồ sơ chứng minh tài chính.",
+        "suggestions": [
+            "Cần lấy hồ sơ chứng minh tài chính ở đâu?",
+            "Sinh viên đến từ quốc gia có nguy cơ lao phổi cao có cần nộp thêm giấy tờ không?",
+            "Sau khi nộp hồ sơ, visa được cấp trong bao lâu?",
+        ],
+    },
+    {
+        "lang": "vi",
+        "question": "Cần chuẩn bị chứng minh tài chính như thế nào để xin visa du học?",
+        "answer": "Cần nộp bản gốc sao kê tài khoản ngân hàng được cấp trong vòng 1 tháng. Nếu tài khoản đứng tên cha/mẹ, cần nộp thêm giấy tờ chứng minh quan hệ gia đình.",
+        "suggestions": [
+            "Khi nộp sao kê ngân hàng đứng tên cha/mẹ, cần thêm giấy tờ gì?",
+            "Nếu sao kê ngân hàng không phải tiếng Hàn hoặc tiếng Anh thì xử lý thế nào?",
+            "Số dư tài khoản tối thiểu để xin visa là bao nhiêu?",
+        ],
+    },
+    {
+        "lang": "vi",
+        "question": "Nếu visa bị từ chối, học phí có được hoàn lại không?",
+        "answer": "Nếu visa bị từ chối, học phí sẽ được hoàn trả toàn bộ.",
+        "suggestions": [
+            "Thủ tục nộp đơn lại sau khi visa bị từ chối là gì?",
+            "Có cách nào kiểm tra lý do visa bị từ chối không?",
+            "Nếu visa bị từ chối, hồ sơ có thể chuyển sang học kỳ tiếp theo không?",
+        ],
+    },
+
+    # ── Admission ─────────────────────────────────────────────────────────
+    {
+        "lang": "vi",
+        "question": "Hồ sơ nhập học cần những giấy tờ gì?",
+        "answer": "Cần có đơn đăng ký trực tuyến, bằng tốt nghiệp THPT, bảng điểm, giấy chứng nhận quan hệ gia đình, bản sao giấy tờ tùy thân và sao kê ngân hàng.",
+        "suggestions": [
+            "Bằng tốt nghiệp THPT có bắt buộc phải có chứng nhận apostille không?",
+            "Nếu bằng tốt nghiệp bị chậm cấp, có thể nộp giấy tờ thay thế không?",
+            "Giấy tờ bằng ngôn ngữ nước ngoài có cần công chứng bản dịch không?",
+        ],
+    },
+    {
+        "lang": "vi",
+        "question": "Trong Giấy chứng nhận nhập học, những điều quan trọng cần kiểm tra là gì?",
+        "answer": "Cần kiểm tra con dấu trường, tên, số hộ chiếu, ngày sinh, quốc tịch có chính xác không, giấy được cấp trong vòng 3 tháng và có chữ ký tay.",
+        "suggestions": [
+            "Giấy chứng nhận nhập học có hiệu lực trong bao lâu?",
+            "Nếu thông tin trên giấy chứng nhận không khớp với hộ chiếu thì phải làm gì?",
+            "Sau khi nhận được giấy chứng nhận, còn những bước nào trước khi xin visa?",
+        ],
+    },
+
+    # ── Scholarships ──────────────────────────────────────────────────────
+    {
+        "lang": "vi",
+        "question": "Du học sinh có thể nhận được những loại học bổng nào?",
+        "answer": "Có học bổng dựa trên GPA, học bổng Work-Study tại trường, học bổng TOPIK và học bổng xuất sắc học kỳ đầu.",
+        "suggestions": [
+            "Điểm GPA tối thiểu để được học bổng GPA là bao nhiêu?",
+            "Cần đạt TOPIK cấp mấy để nhận học bổng TOPIK?",
+            "Nếu điểm GPA giảm trong khi đang nhận học bổng thì sao?",
+        ],
+    },
+
+    # ── GKS ───────────────────────────────────────────────────────────────
+    {
+        "lang": "vi",
+        "question": "Những trường hợp nào mà người nhận GKS có thể nhận được cảnh báo?",
+        "answer": "Các lý do bị cảnh báo gồm vắng mặt không phép 3 ngày liên tiếp hoặc 5 ngày/tháng trở lên, không đạt tín chỉ yêu cầu theo học kỳ, xuất cảnh tạm thời không phép và vi phạm quy định làm thêm.",
+        "suggestions": [
+            "Nhận cảnh báo GKS có bị ngừng học bổng không?",
+            "Tích lũy nhiều cảnh báo thì bị xử lý thế nào?",
+            "Tiêu chuẩn tín chỉ yêu cầu có khác nhau giữa đại học và sau đại học không?",
+        ],
+    },
+    {
+        "lang": "vi",
+        "question": "Học bổng sinh GKS có thể làm thêm không?",
+        "answer": "Việc học tập chuyên ngành phải được ưu tiên hàng đầu. Học bổng sinh phải đáp ứng điều kiện xin phép làm thêm theo quy định của Bộ Tư pháp.",
+        "suggestions": [
+            "Học bổng sinh GKS được phép làm thêm bao nhiêu giờ mỗi tuần?",
+            "Học bổng sinh đang trong khóa học tiếng Hàn có được làm thêm không?",
+            "Thủ tục xin phép làm thêm như thế nào?",
+        ],
+    },
+    {
+        "lang": "vi",
+        "question": "Sinh viên quốc tế nhận học bổng GKS cần thực hiện quy trình nào để thay đổi ngành học?",
+        "answer": "Sinh viên phải thực hiện theo quy định của trường và được sự chấp thuận của hiệu trưởng.",
+        "suggestions": [
+            "Thay đổi ngành học có ảnh hưởng đến học bổng GKS không?",
+            "Yêu cầu tốt nghiệp có thay đổi sau khi đổi ngành không?",
+            "Có thời gian cụ thể nào để nộp đơn xin đổi ngành không?",
+        ],
+    },
+
+    # ── Dormitory ─────────────────────────────────────────────────────────
+    {
+        "lang": "vi",
+        "question": "Sinh viên quốc tế được cung cấp những tiện ích gì trong ký túc xá?",
+        "answer": "Ký túc xá có phòng giặt, phòng nghỉ, phòng tắm, giường, bàn, ghế, kệ sách, tủ quần áo, điều hòa và hệ thống sưởi.",
+        "suggestions": [
+            "Trong ký túc xá có bếp nấu ăn không?",
+            "Phí ký túc xá là bao nhiêu và nộp như thế nào?",
+            "Sau khi vào ở có thể đổi bạn cùng phòng không?",
+        ],
+    },
+
+    # ── Part-time work ────────────────────────────────────────────────────
+    {
+        "lang": "vi",
+        "question": "Du học sinh muốn làm thêm ở Hàn Quốc cần đáp ứng điều kiện gì?",
+        "answer": "Phải đáp ứng điều kiện xin phép làm thêm theo quy định của Bộ Tư pháp. Học bổng sinh chương trình học vị cũng cần được trưởng khoa chấp thuận dựa trên kết quả học tập và ý kiến giáo viên hướng dẫn.",
+        "suggestions": [
+            "Nộp đơn xin phép làm thêm ở đâu?",
+            "Số giờ làm được phép có khác nhau giữa kỳ học và kỳ nghỉ không?",
+            "Làm thêm vượt giờ cho phép sẽ bị xử lý như thế nào?",
+        ],
+    },
+
+    # ── Disciplinary / Leave ──────────────────────────────────────────────
+    {
+        "lang": "vi",
+        "question": "Có những trường hợp nào mà du học sinh có thể bị kỷ luật?",
+        "answer": "Các lý do bị kỷ luật gồm hoạt động chính trị, phỉ báng, trộm cắp, bạo lực, tấn công tình dục, vi phạm pháp luật, làm giả giấy tờ và vi phạm cam kết với NIIED.",
+        "suggestions": [
+            "Bị kỷ luật có ảnh hưởng đến học bổng không?",
+            "Có quy trình khiếu nại quyết định kỷ luật không?",
+            "Kỷ luật có thể dẫn đến đuổi học không?",
+        ],
+    },
+    {
+        "lang": "vi",
+        "question": "Nếu không tái đăng ký sau khi hết thời gian nghỉ học, sẽ xảy ra gì?",
+        "answer": "Không tái đăng ký mà không có lý do hợp lệ sẽ bị coi là vi phạm.",
+        "suggestions": [
+            "Thời gian nghỉ học tối đa là bao lâu?",
+            "Trong thời gian nghỉ học có tiếp tục nhận học bổng không?",
+            "Cần những giấy tờ gì để xin nghỉ học?",
+        ],
+    },
+
+    # ── Contact ───────────────────────────────────────────────────────────
+    {
+        "lang": "vi",
+        "question": "Liên hệ với Khoa Giao lưu Quốc tế của Đại học Dong-A như thế nào?",
+        "answer": "Có thể liên hệ qua điện thoại 051-200-6444 hoặc email contact@donga.ac.kr, hoạt động các ngày trong tuần từ 09:00 đến 17:00.",
+        "suggestions": [
+            "Văn phòng Khoa Giao lưu Quốc tế ở đâu trong khuôn viên trường?",
+            "Bộ phận phụ trách tuyển sinh và học vụ có khác nhau không?",
+            "Có thể xem thông báo tuyển sinh trên trang web chính thức không?",
         ],
     },
 ]

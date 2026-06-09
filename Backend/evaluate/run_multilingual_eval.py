@@ -1,7 +1,9 @@
+import argparse
 import json
 import os
 from datetime import datetime
 import time
+from ragas.run_config import RunConfig
 
 from langchain_community.callbacks import get_openai_callback
 
@@ -20,6 +22,7 @@ from app.config import settings
 from app.core.knowledge_base import knowledge_base
 from app.core.retriever import RAGRetriever
 from app.core.translation import translator
+from app.core.llm import rag_chain, _LANGUAGE_INSTRUCTIONS
 
 OUTPUT_DIR = "evaluate/results"
 TARGET_LANGUAGES = ["ko", "en", "vi"]
@@ -86,25 +89,18 @@ def build_evaluation_dataset(
         ]
 
         context_str = "\n\n".join(ctx_list)
-        prompt = f"다음 컨텍스트를 참고하여 답변하세요.\n\n컨텍스트:\n{context_str}\n\n질문: {q}"
-        for attempt in range(3):
-            try:
-                response = EVAL_LLM.invoke(prompt)
-                break
-            except Exception as e:
-                err = str(e)
-                if "requests per day" in err or "RPD" in err:
-                    print("  🚫 일일 요청 한도(RPD) 초과. 평가를 중단합니다.")
-                    raise SystemExit(1)
-                elif "rate_limit" in err.lower() or "429" in err:
-                    wait = 60 * (attempt + 1)
-                    print(f"  ⚠️ TPM Rate limit, {wait}초 대기 후 재시도...")
-                    time.sleep(wait)
-                else:
-                    raise
+        lang_instruction = _LANGUAGE_INSTRUCTIONS.get(lang, "질문과 같은 언어로 명확하고 유용한 답변을 제공하십시오.")
+        answer, _ = rag_chain.generate_answer_with_suggestions(
+            question=q,
+            context=context_str,
+            lang_instruction=lang_instruction,
+            history=[],
+            use_few_shot=True,
+            suggestion_context=context_str,
+        )
 
         questions.append(q)
-        answers.append(response.content)
+        answers.append(answer)
         contexts.append(ctx_list)
         ground_truths.append(item["ground_truth"])
 
@@ -117,6 +113,12 @@ def build_evaluation_dataset(
 
 
 def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--lang", choices=TARGET_LANGUAGES, default=None,
+                        help="평가할 언어 (생략 시 전체 언어 실행)")
+    args = parser.parse_args()
+    langs_to_run = [args.lang] if args.lang else TARGET_LANGUAGES
+
     retrievers = {
         mode: RAGRetriever(mode=mode) for mode in MODES
     }
@@ -124,7 +126,7 @@ def main():
     all_summaries = []
 
     with get_openai_callback() as cb:
-        for lang in TARGET_LANGUAGES:
+        for lang in langs_to_run:
             try:
                 qa_list = load_qa_dataset(lang)
                 print(f"[{lang}] QA 데이터셋 로드 완료: {len(qa_list)}개")
@@ -151,6 +153,8 @@ def main():
                     metrics=get_metrics_for_lang(lang),
                     llm=EVAL_LLM,
                     embeddings=knowledge_base.embeddings,
+                    run_config=RunConfig(max_workers=2, timeout=120),
+                    raise_exceptions=False,
                 )
 
                 df = result.to_pandas()

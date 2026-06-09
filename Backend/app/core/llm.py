@@ -74,9 +74,11 @@ _OUT_OF_SCOPE_ANSWER = (
 def _select_dynamic_few_shot_examples(
     question: str,
     top_k: int = 3,
+    lang: str = "ko",
 ) -> List[Dict[str, str]]:
     """
     유저 쿼리와 가장 유사한 QAS 트리플을 선택합니다.
+    lang 파라미터로 동일 언어 예시만 후보로 사용합니다.
 
     논문 §4: "Dynamic few-shot diverges from traditional few-shot prompting
     by dynamically choosing each example based on the user's query,
@@ -87,9 +89,19 @@ def _select_dynamic_few_shot_examples(
     """
     import numpy as np
 
+    # 동일 언어 예시만 필터링 (lang 필드 없는 예시는 "ko"로 간주)
+    candidates = [
+        (ex, emb)
+        for ex, emb in zip(FEW_SHOT_QAS_TRIPLETS, _FEW_SHOT_EMBEDDINGS)
+        if ex.get("lang", "ko") == lang
+    ]
+    # 해당 언어 예시가 없으면 전체 후보 사용 (fallback)
+    if not candidates:
+        candidates = list(zip(FEW_SHOT_QAS_TRIPLETS, _FEW_SHOT_EMBEDDINGS))
+
     q_vec = np.array(_embed(question))
     scored = []
-    for ex, ex_vec in zip(FEW_SHOT_QAS_TRIPLETS, _FEW_SHOT_EMBEDDINGS):
+    for ex, ex_vec in candidates:
         e_vec = np.array(ex_vec)
         similarity = np.dot(q_vec, e_vec) / (np.linalg.norm(q_vec) * np.linalg.norm(e_vec))
         scored.append((similarity, ex))
@@ -218,6 +230,7 @@ class RAGLLM:
         use_few_shot: bool = True,          # ← 논문 Dynamic Few-Shot 제어 플래그
         few_shot_top_k: int = 3,            # ← 선택할 예시 개수
         suggestion_context: str = "",       # ← 후속 질문 전용 RAG 컨텍스트 (논문 §4)
+        lang: str = "ko",                   # ← few-shot 언어 필터링용
     ) -> Tuple[str, List[str]]:
         """
         Dynamic Few-Shot + 세션 히스토리 + Usefulness 가이드라인을 통합한 코어 파이프라인.
@@ -247,6 +260,7 @@ class RAGLLM:
             selected_examples = _select_dynamic_few_shot_examples(
                 question=question,
                 top_k=few_shot_top_k,
+                lang=lang,
             )
             few_shot_block = _format_few_shot_block(selected_examples)
         else:
@@ -355,7 +369,8 @@ class RAGLLM:
             history=history or [],
             use_few_shot=True,
             few_shot_top_k=2,
-            suggestion_context=context_str,  # ← 후속 질문 전용 컨텍스트 주입
+            suggestion_context=context_str,
+            lang=language,                   # ← 언어별 few-shot 필터링
         )
 
         # ── 생성 후 검증 (Post-generation Verification) ──────────────────────

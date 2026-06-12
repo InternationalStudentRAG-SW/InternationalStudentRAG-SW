@@ -23,6 +23,11 @@ TRANSLATE_PROMPTS = {
     "vi": "Dịch câu hỏi tiếng Hàn sau sang tiếng Việt tự nhiên. Chỉ xuất câu hỏi đã dịch.",
 }
 
+TRANSLATE_GROUND_TRUTH_PROMPTS = {
+    "en": "Translate the following Korean answer into natural English. Output only the translated answer.",
+    "vi": "Dịch câu trả lời tiếng Hàn sau sang tiếng Việt tự nhiên. Chỉ xuất câu trả lời đã dịch.",
+}
+
 
 @dataclass
 class MultilingualQAGenerator:
@@ -42,10 +47,9 @@ class MultilingualQAGenerator:
         print(f"한국어 QA 로드: {len(filtered)}개 (전체 {len(qa_list)}개 중)")
         return filtered
 
-    def _translate_question(self, question: str, target_lang: str) -> str | None:
+    def _translate_text(self, text: str, prompt_prefix: str) -> str | None:
         try:
-            prompt = f"{TRANSLATE_PROMPTS[target_lang]}\n\n{question}"
-            response = self.llm.invoke(prompt)
+            response = self.llm.invoke(f"{prompt_prefix}\n\n{text}")
             return response.content.strip()
         except Exception as e:
             print(f"  ⚠️ 번역 실패: {e}, 원문 사용")
@@ -55,24 +59,29 @@ class MultilingualQAGenerator:
         cache_path = os.path.join(OUTPUT_DIR, f"qa_dataset_cache_{target_lang}.json")
 
         if use_cache and os.path.exists(cache_path):
-            print(f"[{target_lang}] 번역 캐시 로드: {cache_path}")
-            with open(cache_path, "r", encoding="utf-8") as f:
-                return json.load(f)
+            cached = json.load(open(cache_path, "r", encoding="utf-8"))
+            # ground_truth가 한국어인 구버전 캐시는 재생성
+            if cached and re.search(r'[가-힣]', cached[0].get("ground_truth", "")):
+                print(f"[{target_lang}] 구버전 캐시 감지 (ground_truth 한국어) → 재번역합니다.")
+            else:
+                print(f"[{target_lang}] 번역 캐시 로드: {cache_path}")
+                return cached
+
+        q_prompt = TRANSLATE_PROMPTS[target_lang]
+        gt_prompt = TRANSLATE_GROUND_TRUTH_PROMPTS[target_lang]
 
         translated = []
-        print(f"[{target_lang}] 질문 번역 중 ({len(ko_qa_list)}개)...")
+        print(f"[{target_lang}] 질문 및 정답 번역 중 ({len(ko_qa_list)}개)...")
         for i, item in enumerate(ko_qa_list):
-            print(f"  ⏳ {i+1}/{len(ko_qa_list)} 번째 질문 번역 중...")
-            result = self._translate_question(item["question"], target_lang)
-            if result:
-                translated.append({
-                    "question": result,
-                    "ground_truth": item["ground_truth"],
-                    "source": item.get("source", ""),
-                    "original_question": item["question"],
-                })
-            else:
-                translated.append({**item, "original_question": item["question"]})
+            print(f"  ⏳ {i+1}/{len(ko_qa_list)} 번째 항목 번역 중...")
+            q_result = self._translate_text(item["question"], q_prompt)
+            gt_result = self._translate_text(item["ground_truth"], gt_prompt)
+            translated.append({
+                "question": q_result or item["question"],
+                "ground_truth": gt_result or item["ground_truth"],
+                "source": item.get("source", ""),
+                "original_question": item["question"],
+            })
 
         os.makedirs(OUTPUT_DIR, exist_ok=True)
         with open(cache_path, "w", encoding="utf-8") as f:

@@ -58,7 +58,7 @@ def _get_max_relevance_score(sources: List[dict]) -> float:
         score = s.get("similarity_score")  # ← retriever.py에서 저장하는 키와 일치
         if score is not None:
             scores.append(float(score))
-    return max(scores) if scores else 1.0
+    return max(scores) if scores else 0.0
 
 
 # 관련성 임계값 — 이 값 미만이면 PDF 범위 밖 질문으로 판단하여 답변 차단
@@ -147,6 +147,9 @@ _CONVERSATIONAL_LEADING_TEMPLATE = """귀하는 대한민국 대학교에 재학
    "업로드된 문서에서 해당 질문에 대한 정보를 찾을 수 없습니다."
 4. 후속 질문도 반드시 [후속 질문 생성 전용 컨텍스트] 범위 내에서만 생성하십시오.
 5. 컨텍스트에 근거가 없는 후속 질문은 생성하지 말고, 생성 가능한 개수만큼만 반환하십시오.
+6. 완전 열거: 질문에 해당하는 모든 항목·케이스·예외 규정을 빠짐없이 열거하십시오. 컨텍스트에 '~의 경우', '단, 중국은', '특정 국가는' 등 예외절이 보이면 반드시 포함하십시오.
+7. 대상 선별: 질문의 전형(신입학/편입학)·대상에 해당하지 않는 항목은 답변에서 제외하십시오.
+8. 자기 점검: 답변 작성 후 "컨텍스트에 등장한 항목 중 빠진 것이 없는지" 확인하고, 누락이 있으면 추가하십시오.
 
 ---
 [대화 세션 히스토리 (최근 내역 우선)]
@@ -179,6 +182,9 @@ _CONVERSATIONAL_LEADING_TEMPLATE = """귀하는 대한민국 대학교에 재학
 3. 다음 유저 여정 유도 (Lead Next Journey): 유학생 행정 주기(예: 모집요강 확인 → 원서접수 → 서류제출 및 공증 → 합격확인 → 비자신청 → 정착 및 학사운영)에 따라, 다음 단계에 마주하게 될 실무적이고 구체적인 행동을 유도하는 질문을 제안하십시오.
 4. 답변 가능성 보장 (Answerability): 생성된 후속 질문은 반드시 위의 [후속 질문 생성 전용 컨텍스트]에서 답변 가능한 범위 내의 질문이어야 합니다. 컨텍스트 범위를 벗어나는 질문은 배제하십시오.
 5. 직접 근거 (Direct Groundedness): 후속 질문은 반드시 위의 [후속 질문 생성 전용 컨텍스트]에 등장하는 구체적인 단어, 수치, 절차, 조건 중 하나를 직접 소재로 해야 합니다. 컨텍스트에서 직접 파생되지 않은 질문은 절대 생성하지 마십시오.
+6. 구체적 키워드 포함 (Specific Keywords): 후속 질문에는 반드시 [후속 질문 생성 전용 컨텍스트]에 등장하는 고유명사, 수치, 기한, 서류명 중 하나 이상을 질문 문장 안에 명시적으로 포함하십시오.
+   나쁜 예: "장학금 신청 방법은?" → 좋은 예: "GKS 장학금 신청 시 제출 기한과 필수 서류 목록은?"
+7. 독립 완결성 (Self-contained): 후속 질문은 앞선 대화 맥락 없이 단독으로 검색되어도 완전히 의미가 통하는 독립적인 완전한 문장으로 작성하십시오. "그", "이", "해당", "위의" 등 지시대명사나 문맥 의존적 표현 대신 구체적인 명사를 사용하십시오.
 
 [출력 양식 가이드]
 반드시 아래의 엄격한 JSON 형식으로만 결과를 반환해야 하며, 마크다운 코드 블록(```json ```)을 제외한 다른 텍스트는 포함하지 마십시오.
@@ -210,6 +216,75 @@ _LANGUAGE_INSTRUCTIONS = {
     "vi": "Hãy trả lời bằng tiếng Việt và tạo các câu hỏi gợi ý cũng bằng tiếng Việt.",
     "auto": "사용자가 질문한 언어를 파악하여 반드시 답변과 후속 질문 모두 그 언어로 작성하십시오.",
 }
+
+
+def _verify_suggestions_by_search_and_llm(
+    suggestions: List[str],
+    llm: ChatOpenAI,
+    min_score: float = 0.3,
+    search_k: int = 3,
+) -> List[str]:
+    """
+    1차: 후속질문별 벡터 재검색 — score < 0.3이면 즉시 탈락
+    2차: 통과한 후속질문만 재검색된 컨텍스트로 LLM 검증 (근거 인용 강제, 절단 없음)
+    """
+    if not suggestions:
+        return []
+
+    import re as _re
+    from app.core.knowledge_base import knowledge_base as _kb
+
+    # ── 1차: 벡터 재검색 필터 (score < min_score 즉시 탈락) ──────────────
+    candidates = []  # (질문, 재검색_컨텍스트) 튜플 목록
+    for suggestion in suggestions:
+        try:
+            results = _kb.vector_store.similarity_search_with_relevance_scores(
+                suggestion, k=search_k
+            )
+            if results:
+                max_score = max(score for _, score in results)
+                if max_score >= min_score:
+                    search_context = "\n\n".join(doc.page_content for doc, _ in results)
+                    candidates.append((suggestion, search_context))
+        except Exception:
+            pass  # 검색 실패 시 보수적으로 제외
+
+    if not candidates:
+        return []
+
+    # ── 2차: LLM 검증 (재검색 컨텍스트 기반, 근거 인용 강제) ─────────────
+    questions_block = "\n".join(f"{i+1}. {q}" for i, (q, _) in enumerate(candidates))
+    contexts_block = "\n\n".join(
+        f"[질문 {i+1} 검색 컨텍스트]\n{ctx}"
+        for i, (_, ctx) in enumerate(candidates)
+    )
+    prompt = (
+        "각 질문에 대해, 해당 번호의 [검색 컨텍스트]에서 구체적으로 답할 수 있는지 판단하세요.\n"
+        "판단 기준:\n"
+        "  - 컨텍스트에 구체적인 수치, 목록, 절차, 조건이 명시되어 있어야 true\n"
+        "  - 주제만 관련 있고 구체적인 답이 없으면 false\n"
+        "  - 근거 문장을 컨텍스트에서 직접 인용할 수 없으면 반드시 false\n\n"
+        f"{contexts_block}\n\n"
+        f"[질문 목록]\n{questions_block}\n\n"
+        "반드시 아래 JSON 형식으로만 반환하세요:\n"
+        '{"results": [{"answerable": true, "evidence": "컨텍스트에서 인용한 근거 문장"}, ...]}'
+    )
+
+    try:
+        response = llm.invoke(prompt)
+        raw = response.content.strip()
+        match = _re.search(r'\{.*\}', raw, _re.DOTALL)
+        if not match:
+            return [q for q, _ in candidates[:3]]
+        parsed = json.loads(match.group())
+        results_list = parsed.get("results", [])
+        verified = [
+            q for (q, _), r in zip(candidates, results_list)
+            if isinstance(r, dict) and r.get("answerable") is True and r.get("evidence", "").strip()
+        ]
+        return verified[:3]
+    except Exception:
+        return [q for q, _ in candidates[:3]]
 
 
 # ===========================================================================
@@ -317,11 +392,7 @@ class RAGLLM:
 
         except Exception as e:
             answer = "죄송합니다. 답변을 생성하는 도중 에러가 발생했습니다."
-            suggestions = [
-                "비자 신청/연장을 위한 필수 서류 목록을 확인해 볼까요?",
-                "동아대학교 외국인 전형 장학금 혜택 조건이 궁금하신가요?",
-                "학기 중 인턴십이나 아르바이트 신청 절차를 알아볼까요?",
-            ]
+            suggestions = []
 
         return answer, suggestions
 
@@ -393,21 +464,8 @@ class RAGLLM:
         )
 
         # ── 생성 후 검증 (Post-generation Verification) ──────────────────────
-        # 각 후속질문으로 Vector DB에 재검색하여 유사도가 임계값 이상인 것만 반환
-        SUGGESTION_VERIFY_THRESHOLD = 0.3
-
-        from app.core.translation import translator as _translator
-        verified = []
-        for q in suggestions:
-            # 후속 질문도 한국어로 번역 후 검증 (다국어 질문이 직접 검색되면 점수 낮음)
-            ko_q = _translator.translate_to_ko(q)
-            _, verify_sources = retriever.retrieve_with_sources(ko_q, k=1)
-            score = verify_sources[0].get("similarity_score", 0.0) if verify_sources else 0.0
-            if score >= SUGGESTION_VERIFY_THRESHOLD:
-                verified.append(q)
-
-        # 검증 통과한 게 하나도 없으면 빈 리스트 반환 (프론트에서 버튼 안 보임)
-        suggestions = verified[:3]
+        # 1차: 벡터 재검색 score < 0.3 즉시 탈락 / 2차: LLM 근거 인용 강제 검증
+        suggestions = _verify_suggestions_by_search_and_llm(suggestions, self.llm)
 
         return answer, sources, suggestions
 

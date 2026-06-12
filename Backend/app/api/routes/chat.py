@@ -1,5 +1,7 @@
 import re
 import asyncio
+from langdetect import detect, DetectorFactory, LangDetectException
+DetectorFactory.seed = 0
 from fastapi import APIRouter, BackgroundTasks, HTTPException
 from app.models.schemas import ChatRequest, ChatResponse, Source
 from app.core.llm import rag_chain
@@ -36,13 +38,12 @@ async def chat(request: ChatRequest, background_tasks: BackgroundTasks):
             language = "ja"
         elif re.search(r'[؀-ۿ]', request.question):
             language = "ar"
-        elif re.search(r'[ơưắặẳằẵấậẩầẫốộổồỗớợởờỡứựửừữếệểềễỉịọỏụủỳỵỷỹđ]', request.question):
-            # 베트남어 특유 문자 감지 (라틴 계열이지만 고유 diacritic 존재)
-            language = "vi"
-        elif re.search(r'[a-zA-Z]', request.question):
-            language = "en"
         else:
-            language = "auto"
+            try:
+                detected = detect(request.question)
+                language = detected if detected in {"en", "vi", "es", "ko", "zh"} else "auto"
+            except LangDetectException:
+                language = "auto"
 
         ko_query = translator.translate_to_ko(request.question)
 

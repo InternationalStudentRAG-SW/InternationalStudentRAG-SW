@@ -41,6 +41,11 @@ def get_metrics_for_lang(lang: str) -> list:
             "반드시 한국어로만 질문을 생성하세요. "
             "주어진 답변으로부터 해당 답변이 대답할 수 있는 질문을 생성하세요."
         )
+    elif lang == "en":
+        ar.question_generation.instruction = (
+            "Generate questions in English only. "
+            "Generate a question that the given answer can answer."
+        )
     elif lang == "vi":
         ar.question_generation.instruction = (
             "Chỉ tạo câu hỏi bằng tiếng Việt. "

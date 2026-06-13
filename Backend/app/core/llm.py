@@ -222,69 +222,61 @@ def _verify_suggestions_by_search_and_llm(
     suggestions: List[str],
     llm: ChatOpenAI,
     min_score: float = 0.3,
-    search_k: int = 3,
+    search_k: int = 1,
 ) -> List[str]:
     """
-    1차: 후속질문별 벡터 재검색 — score < 0.3이면 즉시 탈락
-    2차: 통과한 후속질문만 재검색된 컨텍스트로 LLM 검증 (근거 인용 강제, 절단 없음)
+    1차: 후속질문별 hybrid_rerank 재검색 — score < 0.3이면 즉시 탈락
+    2차: LLM 근거 인용 강제 검증 (현재 주석 처리)
     """
     if not suggestions:
         return []
 
-    import re as _re
-    from app.core.knowledge_base import knowledge_base as _kb
-
-    # ── 1차: 벡터 재검색 필터 (score < min_score 즉시 탈락) ──────────────
-    candidates = []  # (질문, 재검색_컨텍스트) 튜플 목록
+    # ── 1차: hybrid_rerank 재검색 필터 (score < min_score 즉시 탈락) ────────
+    verified = []
     for suggestion in suggestions:
         try:
-            results = _kb.vector_store.similarity_search_with_relevance_scores(
-                suggestion, k=search_k
-            )
-            if results:
-                max_score = max(score for _, score in results)
-                if max_score >= min_score:
-                    search_context = "\n\n".join(doc.page_content for doc, _ in results)
-                    candidates.append((suggestion, search_context))
+            _, verify_sources = retriever.retrieve_with_sources(suggestion, k=search_k)
+            score = verify_sources[0].get("similarity_score", 0.0) if verify_sources else 0.0
+            if score >= min_score:
+                verified.append(suggestion)
         except Exception:
             pass  # 검색 실패 시 보수적으로 제외
 
-    if not candidates:
-        return []
-
     # ── 2차: LLM 검증 (재검색 컨텍스트 기반, 근거 인용 강제) ─────────────
-    questions_block = "\n".join(f"{i+1}. {q}" for i, (q, _) in enumerate(candidates))
-    contexts_block = "\n\n".join(
-        f"[질문 {i+1} 검색 컨텍스트]\n{ctx}"
-        for i, (_, ctx) in enumerate(candidates)
-    )
-    prompt = (
-        "각 질문에 대해, 해당 번호의 [검색 컨텍스트]에서 구체적으로 답할 수 있는지 판단하세요.\n"
-        "판단 기준:\n"
-        "  - 컨텍스트에 구체적인 수치, 목록, 절차, 조건이 명시되어 있어야 true\n"
-        "  - 주제만 관련 있고 구체적인 답이 없으면 false\n"
-        "  - 근거 문장을 컨텍스트에서 직접 인용할 수 없으면 반드시 false\n\n"
-        f"{contexts_block}\n\n"
-        f"[질문 목록]\n{questions_block}\n\n"
-        "반드시 아래 JSON 형식으로만 반환하세요:\n"
-        '{"results": [{"answerable": true, "evidence": "컨텍스트에서 인용한 근거 문장"}, ...]}'
-    )
+    # import re as _re
+    # candidates = [(q, ctx) for ...]  # hybrid_rerank 결과 컨텍스트 수집 필요
+    # questions_block = "\n".join(f"{i+1}. {q}" for i, (q, _) in enumerate(candidates))
+    # contexts_block = "\n\n".join(
+    #     f"[질문 {i+1} 검색 컨텍스트]\n{ctx}"
+    #     for i, (_, ctx) in enumerate(candidates)
+    # )
+    # prompt = (
+    #     "각 질문에 대해, 해당 번호의 [검색 컨텍스트]에서 구체적으로 답할 수 있는지 판단하세요.\n"
+    #     "판단 기준:\n"
+    #     "  - 컨텍스트에 구체적인 수치, 목록, 절차, 조건이 명시되어 있어야 true\n"
+    #     "  - 주제만 관련 있고 구체적인 답이 없으면 false\n"
+    #     "  - 근거 문장을 컨텍스트에서 직접 인용할 수 없으면 반드시 false\n\n"
+    #     f"{contexts_block}\n\n"
+    #     f"[질문 목록]\n{questions_block}\n\n"
+    #     "반드시 아래 JSON 형식으로만 반환하세요:\n"
+    #     '{"results": [{"answerable": true, "evidence": "컨텍스트에서 인용한 근거 문장"}, ...]}'
+    # )
+    # try:
+    #     response = llm.invoke(prompt)
+    #     raw = response.content.strip()
+    #     match = _re.search(r'\{.*\}', raw, _re.DOTALL)
+    #     if not match:
+    #         return verified[:3]
+    #     parsed = json.loads(match.group())
+    #     results_list = parsed.get("results", [])
+    #     verified = [
+    #         q for q, r in zip(verified, results_list)
+    #         if isinstance(r, dict) and r.get("answerable") is True and r.get("evidence", "").strip()
+    #     ]
+    # except Exception:
+    #     pass
 
-    try:
-        response = llm.invoke(prompt)
-        raw = response.content.strip()
-        match = _re.search(r'\{.*\}', raw, _re.DOTALL)
-        if not match:
-            return [q for q, _ in candidates[:3]]
-        parsed = json.loads(match.group())
-        results_list = parsed.get("results", [])
-        verified = [
-            q for (q, _), r in zip(candidates, results_list)
-            if isinstance(r, dict) and r.get("answerable") is True and r.get("evidence", "").strip()
-        ]
-        return verified[:3]
-    except Exception:
-        return [q for q, _ in candidates[:3]]
+    return verified[:3]
 
 
 # ===========================================================================

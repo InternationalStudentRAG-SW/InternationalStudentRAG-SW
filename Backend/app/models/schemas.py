@@ -2,12 +2,19 @@ from pydantic import BaseModel, Field
 from typing import List, Optional
 from datetime import datetime
 
+class MessageHistory(BaseModel):
+    """대화 히스토리의 단일 메시지."""
+    role: str = Field(..., pattern="^(user|assistant)$")
+    content: str
+    timestamp: Optional[datetime] = None
 
 class ChatRequest(BaseModel):
     """채팅 엔드포인트 요청 모델."""
     question: str = Field(..., min_length=1, max_length=5000)
     language: Optional[str] = Field(default=None, description="언어 코드 (예: 'en', 'ko')")
     top_k: Optional[int] = Field(default=3, ge=1, le=10)
+    history: Optional[List[MessageHistory]] = Field(default=[], description="이전 대화 히스토리")
+
 
 
 class Source(BaseModel):
@@ -26,12 +33,11 @@ class ChatResponse(BaseModel):
     suggestions: List[str] = []
 
 
-class MessageHistory(BaseModel):
-    """대화 히스토리의 단일 메시지."""
-    role: str = Field(..., pattern="^(user|assistant)$")
-    content: str
-    timestamp: Optional[datetime] = None
-
+class ConversationRequest(BaseModel):
+    """전체 대화 컨텍스트가 포함된 요청."""
+    messages: List[MessageHistory]
+    language: Optional[str] = None
+    top_k: Optional[int] = Field(default=3, ge=1, le=10)
 
 
 class DocumentUploadResponse(BaseModel):

@@ -53,7 +53,7 @@ class RAGRetriever:
         self.keyword_retriever.k = fetch_k
         self._rrf = EnsembleRetriever(
             retrievers=[self.keyword_retriever, self.vector_retriever],
-            weights=[0.35, 0.65],
+            weights=[0.5, 0.5],
         )
 
         if self.mode == "hybrid":

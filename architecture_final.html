@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8"/>
+<title>아키텍처 (최종)</title>
+<style>body{margin:0;background:white}</style>
+</head>
+<body>
+<svg viewBox="0 0 1280 720" width="1280" height="720"
+     xmlns="http://www.w3.org/2000/svg"
+     style="font-family:'Malgun Gothic','Apple SD Gothic Neo',Arial,sans-serif">
+  <defs>
+    <marker id="arr" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto">
+      <polygon points="0 0, 9 3.5, 0 7" fill="#333"/>
+    </marker>
+    <marker id="arr-b" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto">
+      <polygon points="0 0, 9 3.5, 0 7" fill="#1e72d4"/>
+    </marker>
+  </defs>
+
+  <!-- BACKGROUND -->
+  <rect width="1280" height="720" fill="white"/>
+
+  <!-- TOP BAR -->
+  <line x1="18" y1="40" x2="1262" y2="40" stroke="#ccc" stroke-width="1"/>
+  <text x="1258" y="28" font-size="12" fill="#666" text-anchor="end">실증적SW개발프로젝트</text>
+
+  <!-- TITLE -->
+  <text x="22" y="74" font-size="42" font-weight="bold" fill="#1a5fc8">아키텍처</text>
+
+  <!-- ═══════════════════════════════════════
+       LEFT OUTER BOX  x=15, y=88, w=535, h=595
+       ═══════════════════════════════════════ -->
+  <rect x="15" y="88" width="535" height="595" fill="white" stroke="#888" stroke-width="1.5"/>
+
+  <!-- User / Frontend -->
+  <text x="36" y="113" font-size="14" fill="#333" font-weight="600">User / Frontend</text>
+  <rect x="36" y="120" width="162" height="38" fill="#e0e0e0" stroke="#aaa" rx="2"/>
+  <text x="117" y="143" font-size="13" fill="#333" text-anchor="middle">React + TypeScript</text>
+
+  <!-- POST /chat: Frontend → REST API -->
+  <line x1="198" y1="133" x2="265" y2="133" stroke="#333" stroke-width="1.5" marker-end="url(#arr)"/>
+  <rect x="200" y="121" width="62" height="18" fill="#111" rx="2"/>
+  <text x="231" y="134" font-size="10" fill="white" text-anchor="middle">POST /chat</text>
+
+  <!-- 응답: REST API → Frontend (U자형, 외부 상단 통과)
+       REST API top(335,120) → up(335,96) → left(117,96) → down(117,120)
+       레이블은 수평 구간(y=96) 위에 표시 -->
+  <path d="M335,120 L335,96 L117,96 L117,120"
+        stroke="#333" stroke-width="1.5" fill="none" marker-end="url(#arr)"/>
+  <!-- 레이블 박스 (수평 구간 중앙) -->
+  <rect x="163" y="83" width="207" height="20" fill="#111" rx="3"/>
+  <text x="266" y="97" font-size="10.5" fill="white" text-anchor="middle">답변 + 출처 + 후속 질문 제안</text>
+
+  <!-- Backend -->
+  <text x="268" y="113" font-size="14" fill="#333" font-weight="600">Backend</text>
+  <rect x="268" y="120" width="135" height="38" fill="#e0e0e0" stroke="#aaa" rx="2"/>
+  <text x="335" y="143" font-size="13" fill="#333" text-anchor="middle">REST API</text>
+  <line x1="335" y1="158" x2="335" y2="185" stroke="#333" stroke-width="1.5" marker-end="url(#arr)"/>
+  <rect x="268" y="185" width="135" height="38" fill="#e0e0e0" stroke="#aaa" rx="2"/>
+  <text x="335" y="208" font-size="13" fill="#333" text-anchor="middle">Query Translator</text>
+
+  <!-- Data -->
+  <text x="36" y="192" font-size="14" fill="#333" font-weight="600">Data</text>
+  <rect x="36" y="198" width="162" height="38" fill="#e0e0e0" stroke="#aaa" rx="2"/>
+  <text x="117" y="221" font-size="13" fill="#333" text-anchor="middle">PDF Documents</text>
+  <line x1="117" y1="236" x2="117" y2="283" stroke="#333" stroke-width="1.5" marker-end="url(#arr)"/>
+  <rect x="57" y="250" width="121" height="17" fill="white" stroke="#ccc" rx="2"/>
+  <text x="117" y="262" font-size="10" fill="#555" text-anchor="middle">청크 분할 &amp; 인덱싱</text>
+
+  <!-- ChromaDB -->
+  <ellipse cx="117" cy="291" rx="54" ry="10" fill="#d5d5d5" stroke="#aaa"/>
+  <rect x="63" y="291" width="108" height="42" fill="#d5d5d5" stroke="#aaa"/>
+  <ellipse cx="117" cy="333" rx="54" ry="10" fill="#c5c5c5" stroke="#aaa"/>
+  <text x="117" y="317" font-size="13" fill="#333" text-anchor="middle">ChromaDB</text>
+
+  <!-- External -->
+  <text x="36" y="364" font-size="14" fill="#333" font-weight="600">External</text>
+  <line x1="100" y1="370" x2="100" y2="333" stroke="#333" stroke-width="1.5" marker-end="url(#arr)"/>
+  <rect x="48" y="348" width="72" height="15" fill="white" stroke="#ccc" rx="2"/>
+  <text x="84" y="359" font-size="9.5" fill="#666" text-anchor="middle">임베딩 생성</text>
+
+  <!-- [OpenAI text-embedding-3-small] -->
+  <rect x="26" y="372" width="207" height="44" fill="#1e72d4" rx="2"/>
+  <text x="129" y="390" font-size="12" fill="white" text-anchor="middle">OpenAI</text>
+  <text x="129" y="408" font-size="12" fill="white" text-anchor="middle">text-embedding-3-small</text>
+
+  <!-- [OpenAI GPT 답변 생성] -->
+  <rect x="247" y="372" width="165" height="44" fill="#1e72d4" rx="2"/>
+  <text x="329" y="390" font-size="12" fill="white" text-anchor="middle">OpenAI GPT</text>
+  <text x="329" y="408" font-size="12" fill="white" text-anchor="middle">답변 생성</text>
+
+  <!-- GPT → 후속 질문 검증 -->
+  <line x1="329" y1="416" x2="329" y2="444" stroke="#1e72d4" stroke-width="1.5" marker-end="url(#arr-b)"/>
+
+  <!-- [Few-Shot QA Bank] -->
+  <rect x="26" y="444" width="207" height="58" fill="#1e72d4" rx="2"/>
+  <text x="129" y="464" font-size="12.5" fill="white" text-anchor="middle" font-weight="bold">Few-Shot QA Bank</text>
+  <text x="129" y="481" font-size="11" fill="#c5dfff" text-anchor="middle">동적 예시 선택</text>
+  <text x="129" y="496" font-size="10.5" fill="#c5dfff" text-anchor="middle">(임베딩 유사도 기반)</text>
+
+  <!-- [후속 질문 검증] -->
+  <rect x="247" y="444" width="165" height="58" fill="#eef4ff" stroke="#1e72d4" stroke-width="2" stroke-dasharray="6,3" rx="2"/>
+  <text x="329" y="465" font-size="12.5" fill="#1a5fc8" text-anchor="middle" font-weight="bold">후속 질문 검증</text>
+  <text x="329" y="482" font-size="11" fill="#555" text-anchor="middle">ChromaDB 재검색</text>
+  <text x="329" y="497" font-size="10.5" fill="#777" text-anchor="middle">유사도 임계값 필터</text>
+
+  <!-- Few-Shot → GPT -->
+  <line x1="233" y1="455" x2="247" y2="400" stroke="#1e72d4" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#arr-b)"/>
+  <rect x="224" y="421" width="46" height="16" fill="white" stroke="#1e72d4" rx="2"/>
+  <text x="247" y="433" font-size="9" fill="#1e72d4" text-anchor="middle">예시 주입</text>
+
+  <!-- GPT stack → REST API -->
+  <path d="M422,502 L422,139 L403,139" stroke="#333" stroke-width="1.5" fill="none" marker-end="url(#arr)"/>
+
+  <!-- ═══════════════════════════════════
+       RAG BOX  x=562, y=88, w=508, h=455
+       ═══════════════════════════════════ -->
+  <rect x="562" y="88" width="508" height="455" fill="white" stroke="#888" stroke-width="1.5"/>
+  <text x="816" y="120" font-size="20" fill="#1a5fc8" text-anchor="middle" font-weight="bold">RAG</text>
+
+  <!-- [BM25 (35%)] -->
+  <rect x="578" y="152" width="142" height="52" fill="#1e72d4" rx="2"/>
+  <text x="649" y="183" font-size="14" fill="white" text-anchor="middle">BM25 (35%)</text>
+
+  <!-- [Vector Search (65%)] -->
+  <rect x="578" y="232" width="142" height="54" fill="#1e72d4" rx="2"/>
+  <text x="649" y="255" font-size="14" fill="white" text-anchor="middle">Vector Search</text>
+  <text x="649" y="273" font-size="14" fill="white" text-anchor="middle">(65%)</text>
+
+  <!-- [Ensemble 1차 후보] -->
+  <rect x="786" y="187" width="108" height="52" fill="#e0e0e0" stroke="#aaa" rx="2"/>
+  <text x="840" y="208" font-size="12.5" fill="#333" text-anchor="middle">Ensemble</text>
+  <text x="840" y="226" font-size="12.5" fill="#333" text-anchor="middle">1차 후보</text>
+
+  <line x1="720" y1="178" x2="786" y2="207" stroke="#333" stroke-width="1.5" marker-end="url(#arr)"/>
+  <line x1="720" y1="259" x2="786" y2="220" stroke="#333" stroke-width="1.5" marker-end="url(#arr)"/>
+
+  <!-- [BGE-Reranker-v2-m3] -->
+  <rect x="952" y="152" width="113" height="87" fill="#1e72d4" rx="2"/>
+  <text x="1008" y="177" font-size="10.5" fill="white" text-anchor="middle">BGE-Reranker-v2-m3</text>
+  <text x="1008" y="195" font-size="10.5" fill="white" text-anchor="middle">Cross-Encoder</text>
+  <text x="1008" y="213" font-size="10.5" fill="white" text-anchor="middle">리랭킹</text>
+  <line x1="894" y1="213" x2="952" y2="196" stroke="#333" stroke-width="1.5" marker-end="url(#arr)"/>
+
+  <!-- [Top-4 문서 — 통합] -->
+  <rect x="948" y="305" width="117" height="58" fill="#e0e0e0" stroke="#aaa" rx="2"/>
+  <text x="1006" y="326" font-size="12" fill="#333" text-anchor="middle">Top-4 문서</text>
+  <text x="1006" y="343" font-size="10.5" fill="#555" text-anchor="middle">답변 + 후속질문</text>
+  <text x="1006" y="357" font-size="10.5" fill="#555" text-anchor="middle">컨텍스트 통합</text>
+  <line x1="1006" y1="239" x2="1006" y2="305" stroke="#333" stroke-width="1.5" marker-end="url(#arr)"/>
+
+  <!-- CROSS-BOX ARROWS -->
+  <!-- Query Translator → BM25 -->
+  <path d="M403,197 L545,197 L545,178 L578,178" stroke="#333" stroke-width="1.5" fill="none" marker-end="url(#arr)"/>
+
+  <!-- ChromaDB → Vector Search (임베딩 조회) -->
+  <path d="M171,312 L545,312 L545,259 L578,259" stroke="#333" stroke-width="1.5" fill="none" marker-end="url(#arr)"/>
+  <rect x="302" y="297" width="82" height="16" fill="white" stroke="#ccc" rx="2"/>
+  <text x="343" y="309" font-size="10" fill="#555" text-anchor="middle">임베딩 조회</text>
+
+  <!-- Top-4 → GPT (컨텍스트 주입) -->
+  <path d="M948,334 L900,334 L900,550 L415,550 L415,416" stroke="#333" stroke-width="1.5" fill="none" marker-end="url(#arr)"/>
+  <rect x="622" y="537" width="82" height="16" fill="white" stroke="#ccc" rx="2"/>
+  <text x="663" y="549" font-size="10" fill="#555" text-anchor="middle">컨텍스트 주입</text>
+
+  <!-- LEGEND -->
+  <rect x="575" y="560" width="488" height="55" fill="#fafafa" stroke="#ddd" rx="3"/>
+  <text x="592" y="578" font-size="11" fill="#444" font-weight="bold">범례</text>
+  <rect x="622" y="566" width="13" height="13" fill="#1e72d4" rx="1"/>
+  <text x="638" y="577" font-size="10" fill="#333">기존 컴포넌트</text>
+  <rect x="730" y="566" width="13" height="13" fill="#eef4ff" stroke="#1e72d4" stroke-width="1.5" stroke-dasharray="4,2" rx="1"/>
+  <text x="746" y="577" font-size="10" fill="#1e72d4">신규: 후속 질문 로직</text>
+  <line x1="878" y1="573" x2="901" y2="573" stroke="#333" stroke-width="2"/>
+  <text x="905" y="577" font-size="10" fill="#333">답변 흐름</text>
+  <line x1="960" y1="573" x2="983" y2="573" stroke="#1e72d4" stroke-width="1.5" stroke-dasharray="4,2"/>
+  <text x="987" y="577" font-size="10" fill="#1e72d4">후속 질문 흐름</text>
+  <rect x="622" y="582" width="13" height="13" fill="#e0e0e0" stroke="#aaa" rx="1"/>
+  <text x="638" y="593" font-size="10" fill="#333">중간 처리 단계</text>
+  <rect x="730" y="582" width="13" height="13" fill="#d5d5d5" stroke="#aaa" rx="1"/>
+  <text x="746" y="593" font-size="10" fill="#333">벡터 데이터베이스</text>
+
+</svg>
+</body>
+</html>

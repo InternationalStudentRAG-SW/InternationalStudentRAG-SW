@@ -1,16 +1,34 @@
 import re
 import asyncio
+from typing import Optional
 from langdetect import detect, DetectorFactory, LangDetectException
 DetectorFactory.seed = 0
 from fastapi import APIRouter, BackgroundTasks, HTTPException
 from app.models.schemas import ChatRequest, ChatResponse, Source
-from app.core.llm import rag_chain
+from app.core.llm import rag_chain, DEFAULT_TOP_K
 from app.core.translation import translator
+from app.core.retriever import retriever
 from app.db.database import supabase
 
-from app.core.llm import DEFAULT_TOP_K
-
 router = APIRouter(prefix="/chat", tags=["chat"])
+
+
+def _detect_language(question: str, explicit: Optional[str]) -> str:
+    if explicit:
+        return explicit
+    if re.search(r'[가-힣]', question):
+        return "ko"
+    if re.search(r'[぀-ヿ]', question):   # 히라가나/카타카나 → 일본어 우선
+        return "ja"
+    if re.search(r'[一-鿿㐀-䶿]', question):
+        return "zh"
+    if re.search(r'[؀-ۿ]', question):
+        return "ar"
+    try:
+        detected = detect(question)
+        return detected if detected in {"en", "vi", "es", "ko", "zh"} else "auto"
+    except LangDetectException:
+        return "auto"
 
 
 def _insert_chat_log(query: str, answer: str, sources: list, language: str):
@@ -28,31 +46,21 @@ def _insert_chat_log(query: str, answer: str, sources: list, language: str):
 @router.post("/", response_model=ChatResponse)
 async def chat(request: ChatRequest, background_tasks: BackgroundTasks):
     try:
-        if request.language:
-            language = request.language
-        elif re.search(r'[가-힣]', request.question):
-            language = "ko"
-        elif re.search(r'[一-鿿㐀-䶿]', request.question):
-            language = "zh"
-        elif re.search(r'[぀-ヿ]', request.question):
-            language = "ja"
-        elif re.search(r'[؀-ۿ]', request.question):
-            language = "ar"
-        else:
-            try:
-                detected = detect(request.question)
-                language = detected if detected in {"en", "vi", "es", "ko", "zh"} else "auto"
-            except LangDetectException:
-                language = "auto"
+        language = _detect_language(request.question, request.language)
 
-        ko_query = translator.translate_to_ko(request.question)
+        # 번역(OpenAI API)과 벡터 검색을 동시에 실행 → 번역 대기 시간 제거
+        ko_query, vector_docs = await asyncio.gather(
+            asyncio.to_thread(translator.translate_to_ko, request.question),
+            asyncio.to_thread(retriever.vector_search_only, request.question),
+        )
 
         answer, sources, suggestions = rag_chain.generate_answer_with_language(
             question=request.question,
             language=language,
             top_k=request.top_k if request.top_k is not None else DEFAULT_TOP_K,
-            ko_query=ko_query,           # BM25·리랭커: 한국어 번역
+            ko_query=ko_query,
             history=[{"role": m.role, "content": m.content} for m in (request.history or [])],
+            prefetched_vector_docs=vector_docs,
         )
 
         formatted_sources = [

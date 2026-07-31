@@ -29,25 +29,21 @@ def _embed(text: str) -> List[float]:
 
 
 def _build_few_shot_embeddings() -> List[List[float]]:
-    """
-    서버 시작 시 1회 호출되어 QAS 예시들의 임베딩을 캐싱합니다.
-    실패 시 오류 메시지를 출력하고 프로세스를 종료합니다.
-    """
     try:
         embeddings = [_embed(ex["question"]) for ex in FEW_SHOT_QAS_TRIPLETS]
         print(f"[llm.py] Few-shot 예시 임베딩 완료 ({len(embeddings)}개)")
         return embeddings
     except Exception as e:
-        print(
-            f"\n[오류] Few-shot 예시 임베딩 생성에 실패했습니다: {e}\n"
-            "OpenAI API 키와 네트워크 연결을 확인한 뒤 서버를 재실행하세요.\n"
-        )
-        import sys
-        sys.exit(1)
+        raise RuntimeError(f"Few-shot 예시 임베딩 생성 실패: {e}") from e
 
 
-# 서버 시작 시 1회 계산 후 메모리에 캐싱
-_FEW_SHOT_EMBEDDINGS: List[List[float]] = _build_few_shot_embeddings()
+_FEW_SHOT_EMBEDDINGS: List[List[float]] = []
+
+
+def _ensure_embeddings() -> None:
+    global _FEW_SHOT_EMBEDDINGS
+    if not _FEW_SHOT_EMBEDDINGS:
+        _FEW_SHOT_EMBEDDINGS = _build_few_shot_embeddings()
 
 
 def _get_max_relevance_score(sources: List[dict]) -> float:
@@ -88,6 +84,8 @@ def _select_dynamic_few_shot_examples(
     예시 임베딩은 서버 시작 시 _FEW_SHOT_EMBEDDINGS에 캐싱되어 있습니다.
     """
     import numpy as np
+
+    _ensure_embeddings()
 
     # 동일 언어 예시만 필터링 (lang 필드 없는 예시는 "ko"로 간주)
     candidates = [
@@ -287,7 +285,7 @@ class RAGLLM:
     def __init__(self):
         self.llm = ChatOpenAI(
             api_key=settings.openai_api_key,
-            model="gpt-4o-mini",
+            model=settings.openai_model,
             temperature=0.4,
             max_tokens=2048,
         )

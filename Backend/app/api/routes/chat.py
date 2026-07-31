@@ -50,7 +50,7 @@ async def chat(request: ChatRequest, background_tasks: BackgroundTasks):
         answer, sources, suggestions = rag_chain.generate_answer_with_language(
             question=request.question,
             language=language,
-            top_k=request.top_k or DEFAULT_TOP_K,
+            top_k=request.top_k if request.top_k is not None else DEFAULT_TOP_K,
             ko_query=ko_query,           # BM25·리랭커: 한국어 번역
             history=[{"role": m.role, "content": m.content} for m in (request.history or [])],
         )

@@ -8,6 +8,7 @@ from app.models.schemas import ChatRequest, ChatResponse, Source
 from app.core.llm import rag_chain, DEFAULT_TOP_K
 from app.core.translation import translator
 from app.core.retriever import retriever
+from app.core.cache import semantic_cache
 from app.db.database import supabase
 
 router = APIRouter(prefix="/chat", tags=["chat"])
@@ -48,6 +49,18 @@ async def chat(request: ChatRequest, background_tasks: BackgroundTasks):
     try:
         language = _detect_language(request.question, request.language)
 
+        # history 없는 첫 질문만 캐시 조회
+        if not request.history:
+            cached = await asyncio.to_thread(semantic_cache.get, request.question, language)
+            if cached:
+                return ChatResponse(
+                    answer=cached["answer"],
+                    sources=cached["sources"],
+                    suggestions=cached["suggestions"],
+                    language=cached["language"],
+                    question=request.question,
+                )
+
         # 번역(OpenAI API)과 벡터 검색을 동시에 실행 → 번역 대기 시간 제거
         ko_query, vector_docs = await asyncio.gather(
             asyncio.to_thread(translator.translate_to_ko, request.question),
@@ -71,6 +84,19 @@ async def chat(request: ChatRequest, background_tasks: BackgroundTasks):
             )
             for src in sources
         ]
+
+        # history 없는 첫 질문만 캐시 저장 (백그라운드 → 응답 지연 없음)
+        if not request.history:
+            background_tasks.add_task(
+                semantic_cache.set,
+                request.question,
+                language,
+                {
+                    "answer": answer,
+                    "sources": [s.model_dump() for s in formatted_sources],
+                    "suggestions": suggestions or [],
+                },
+            )
 
         background_tasks.add_task(
             _insert_chat_log,

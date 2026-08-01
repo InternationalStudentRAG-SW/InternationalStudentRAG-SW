@@ -31,6 +31,11 @@ class Settings(BaseSettings):
     supabase_service_key: str
     admin_secret: str
 
+    # Redis 시맨틱 캐시
+    upstash_redis_url: str = ""
+    semantic_cache_threshold: float = 0.95
+    semantic_cache_ttl: int = 86400
+
     class Config:
         env_file = ".env"
         case_sensitive = False

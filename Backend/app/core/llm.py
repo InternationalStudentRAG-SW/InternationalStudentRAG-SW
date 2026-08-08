@@ -397,7 +397,8 @@ class RAGLLM:
         language: str = "en",
         top_k: int = DEFAULT_TOP_K,
         ko_query: Optional[str] = None,
-        history: Optional[List[Dict[str, str]]] = None,  # ← 라우터에서 주입
+        history: Optional[List[Dict[str, str]]] = None,
+        prefetched_vector_docs: Optional[List] = None,
     ) -> Tuple[str, List[dict], List[str]]:
         """
         chat.py 라우터와의 호환성을 유지하면서 세션 히스토리를 실제로 수신하는 메서드.
@@ -424,8 +425,11 @@ class RAGLLM:
         """
         search_query = ko_query if ko_query else question
 
-        # ── 답변용 컨텍스트 검색 ──────────────────────────────────────────
-        context_str, sources = retriever.retrieve_with_sources(search_query, k=top_k)
+        # ── 답변용 컨텍스트 검색 (벡터 결과 미리 가져온 경우 재사용) ────────
+        context_str, sources = retriever.retrieve_with_sources(
+            search_query, k=top_k, ko_query=ko_query,
+            prefetched_vector_docs=prefetched_vector_docs,
+        )
 
         # ── [코드 레벨 1차 차단] 관련성 점수 임계값 체크 ─────────────────
         # PDF와 무관한 질문(관련성 < 0.3)은 LLM 호출 없이 즉시 차단

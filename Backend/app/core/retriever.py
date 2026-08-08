@@ -65,7 +65,13 @@ class RAGRetriever:
             self.reranker = CrossEncoder("BAAI/bge-reranker-v2-m3")
             print("하이브리드 + BGE Reranker 초기화 완료")
 
-    def retrieve(self, query: str, k: Optional[int] = None, ko_query: Optional[str] = None) -> List[Document]:
+    def vector_search_only(self, query: str, k: Optional[int] = None) -> List[Document]:
+        """번역 없이 원문으로 벡터 검색만 수행. 번역과 병렬 실행하기 위한 메서드."""
+        fetch_k = k or self.initial_fetch_k
+        return knowledge_base.vector_store.similarity_search(query, k=fetch_k)
+
+    def retrieve(self, query: str, k: Optional[int] = None, ko_query: Optional[str] = None,
+                 prefetched_vector_docs: Optional[List[Document]] = None) -> List[Document]:
         bm25_q_ko = ko_query or query  # BM25: 한국어 번역 (없으면 원문)
         vector_q  = query              # Vector: 원문 (다국어 임베딩)
         rerank_q  = ko_query or query  # 리랭커: 한국어 번역 (없으면 원문)
@@ -82,10 +88,13 @@ class RAGRetriever:
             else:
                 bm25_docs = bm25_docs_ko
 
-            vector_docs = self.vector_retriever.invoke(vector_q)
+            # 병렬로 미리 가져온 벡터 검색 결과가 있으면 재사용, 없으면 직접 검색
+            vector_docs = prefetched_vector_docs if prefetched_vector_docs is not None \
+                else self.vector_retriever.invoke(vector_q)
             docs = self._rrf.weighted_reciprocal_rank([bm25_docs, vector_docs])
         else:
-            docs = self.vector_retriever.invoke(vector_q)
+            docs = prefetched_vector_docs if prefetched_vector_docs is not None \
+                else self.vector_retriever.invoke(vector_q)
 
         if self.mode == "hybrid_rerank":
             pairs = [[rerank_q, doc.page_content] for doc in docs]
@@ -117,8 +126,9 @@ class RAGRetriever:
             )
         return "\n\n".join(context_parts)
 
-    def retrieve_with_sources(self, query: str, k: Optional[int] = None, ko_query: Optional[str] = None) -> Tuple[str, List[Dict[str, Any]]]:
-        docs = self.retrieve(query, k=k, ko_query=ko_query)
+    def retrieve_with_sources(self, query: str, k: Optional[int] = None, ko_query: Optional[str] = None,
+                              prefetched_vector_docs: Optional[List[Document]] = None) -> Tuple[str, List[Dict[str, Any]]]:
+        docs = self.retrieve(query, k=k, ko_query=ko_query, prefetched_vector_docs=prefetched_vector_docs)
         context = self.format_context(docs)
 
         seen_sources = set()

@@ -52,4 +52,31 @@ class QueryTranslator:
             return user_query
 
 
+    _TARGET_LANG_NAMES = {
+        "en": "English",
+        "zh": "Chinese",
+        "vi": "Vietnamese",
+        "es": "Spanish",
+        "ja": "Japanese",
+    }
+
+    def translate_from_ko(self, text: str, target_lang: str) -> str:
+        """한국어 텍스트를 target_lang으로 번역. 캐시 HIT 시 언어 변환에 사용."""
+        if target_lang in ("ko", "auto"):
+            return text
+        lang_name = self._TARGET_LANG_NAMES.get(target_lang, target_lang)
+        try:
+            messages = [
+                SystemMessage(content=(
+                    f"Translate the following Korean text into {lang_name}. "
+                    "Output only the translated text, no explanations."
+                )),
+                HumanMessage(content=text),
+            ]
+            return self.llm.invoke(messages).content.strip()
+        except Exception as e:
+            print(f"⚠️ 번역 오류 (ko→{target_lang}): {e}")
+            return text
+
+
 translator = QueryTranslator()

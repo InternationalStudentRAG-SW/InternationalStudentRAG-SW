@@ -1,33 +1,33 @@
-import type { Source } from '../types'
+import type { Source, Language } from '../types'
 import { getDocumentUrl } from '../services/api'
+import { getLabels } from '../i18n'
 
 interface Props {
   sources: Source[]
+  language: Language
 }
 
-export function SourceList({ sources }: Props) {
+export function SourceList({ sources, language }: Props) {
   if (sources.length === 0) return null
+  const labels = getLabels(language)
 
   return (
     <div className="source-list">
-      <p className="source-list__title">출처 문서</p>
+      <p className="source-list__title">{labels.sourceTitle}</p>
       <ul>
         {sources.map((src, i) => {
-          // 파일명을 실제 열 수 있는 URL로 변환
           const url = getDocumentUrl(src.source)
-          
           return (
             <li key={i} className="source-item">
               <a
                 href={url}
-                download={src.source} // download 기능
+                download={src.source}
                 className="source-item__name"
               >
-              {src.source}
+                {src.source}
               </a>
-
               <span className="source-item__meta">
-                관련성 {(src.similarity_score * 100).toFixed(1)}%
+                {labels.relevance} {(src.similarity_score * 100).toFixed(1)}%
               </span>
             </li>
           )

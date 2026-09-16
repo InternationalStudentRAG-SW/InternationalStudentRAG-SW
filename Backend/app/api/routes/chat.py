@@ -19,7 +19,7 @@ def _detect_language(question: str, explicit: Optional[str]) -> str:
         return explicit
     if re.search(r'[가-힣]', question):
         return "ko"
-    if re.search(r'[぀-ヿ]', question):   # 히라가나/카타카나 → 일본어 우선
+    if re.search(r'[぀-ヿ]', question):
         return "ja"
     if re.search(r'[一-鿿㐀-䶿]', question):
         return "zh"
@@ -49,23 +49,52 @@ async def chat(request: ChatRequest, background_tasks: BackgroundTasks):
     try:
         language = _detect_language(request.question, request.language)
 
-        # history 없는 첫 질문만 캐시 조회
+        # history 없는 첫 질문만 캐시 사용
         if not request.history:
-            cached = await asyncio.to_thread(semantic_cache.get, request.question, language)
+            # 번역을 먼저 수행 (캐시 키로 한국어 임베딩 사용)
+            ko_query, vector_docs = await asyncio.gather(
+                asyncio.to_thread(translator.translate_to_ko, request.question),
+                asyncio.to_thread(retriever.vector_search_only, request.question),
+            )
+
+            # ko_query로 캐시 조회
+            cached = await asyncio.to_thread(semantic_cache.get, ko_query, language)
             if cached:
+                # 요청 언어 답변이 없어서 answer_ko가 반환된 경우 → 번역 후 저장
+                if cached.get("_needs_translation"):
+                    cache_key = cached["_cache_key"]
+                    translated_answer = await asyncio.to_thread(
+                        translator.translate_from_ko, cached["answer"], language
+                    )
+                    translated_suggestions = []
+                    for s in cached["suggestions"]:
+                        ts = await asyncio.to_thread(translator.translate_from_ko, s, language)
+                        translated_suggestions.append(ts)
+                    background_tasks.add_task(
+                        semantic_cache.add_language,
+                        cache_key, language, translated_answer, translated_suggestions,
+                    )
+                    return ChatResponse(
+                        answer=translated_answer,
+                        sources=cached["sources"],
+                        suggestions=translated_suggestions,
+                        language=language,
+                        question=request.question,
+                    )
+
                 return ChatResponse(
                     answer=cached["answer"],
                     sources=cached["sources"],
                     suggestions=cached["suggestions"],
-                    language=cached["language"],
+                    language=language,
                     question=request.question,
                 )
-
-        # 번역(OpenAI API)과 벡터 검색을 동시에 실행 → 번역 대기 시간 제거
-        ko_query, vector_docs = await asyncio.gather(
-            asyncio.to_thread(translator.translate_to_ko, request.question),
-            asyncio.to_thread(retriever.vector_search_only, request.question),
-        )
+        else:
+            # history 있는 경우 번역과 벡터검색 병렬 실행
+            ko_query, vector_docs = await asyncio.gather(
+                asyncio.to_thread(translator.translate_to_ko, request.question),
+                asyncio.to_thread(retriever.vector_search_only, request.question),
+            )
 
         answer, sources, suggestions = rag_chain.generate_answer_with_language(
             question=request.question,
@@ -85,11 +114,11 @@ async def chat(request: ChatRequest, background_tasks: BackgroundTasks):
             for src in sources
         ]
 
-        # history 없는 첫 질문만 캐시 저장 (백그라운드 → 응답 지연 없음)
+        # history 없는 첫 질문만 캐시 저장 (ko_query를 키로 사용)
         if not request.history:
             background_tasks.add_task(
                 semantic_cache.set,
-                request.question,
+                ko_query,
                 language,
                 {
                     "answer": answer,

@@ -9,6 +9,11 @@ export const UI_LABELS = {
     btnClear: '초기화',
     btnSend: '전송',
     chatSubtitle: '문서 기반 안내 · 빠른 응답',
+    loadingText: '답변 작성 중...',
+    sourceTitle: '출처 문서',
+    relevance: '관련성',
+    suggestions: '이런 질문은 어때요?',
+    timeLocale: 'ko-KR',
   },
   en: {
     sidebarTitle: 'International Student\nLife Guide',
@@ -20,6 +25,11 @@ export const UI_LABELS = {
     btnClear: 'Clear',
     btnSend: 'Send',
     chatSubtitle: 'Document-based · Fast Response',
+    loadingText: 'Generating response...',
+    sourceTitle: 'Source Documents',
+    relevance: 'Relevance',
+    suggestions: 'You might also ask:',
+    timeLocale: 'en-US',
   },
   zh: {
     sidebarTitle: '留学生生活·行政\n指南聊天机器人',
@@ -31,6 +41,11 @@ export const UI_LABELS = {
     btnClear: '清除',
     btnSend: '发送',
     chatSubtitle: '基于文档 · 快速响应',
+    loadingText: '正在生成回答...',
+    sourceTitle: '来源文档',
+    relevance: '相关性',
+    suggestions: '你也可以问：',
+    timeLocale: 'zh-CN',
   },
   es: {
     sidebarTitle: 'Guía de Vida para\nEstudiantes Internacionales',
@@ -42,6 +57,11 @@ export const UI_LABELS = {
     btnClear: 'Limpiar',
     btnSend: 'Enviar',
     chatSubtitle: 'Basado en documentos · Respuesta rápida',
+    loadingText: 'Generando respuesta...',
+    sourceTitle: 'Documentos fuente',
+    relevance: 'Relevancia',
+    suggestions: 'También puedes preguntar:',
+    timeLocale: 'es-ES',
   },
 }
 

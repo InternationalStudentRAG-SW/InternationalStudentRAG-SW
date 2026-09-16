@@ -66,7 +66,7 @@ export function ChatInterface({
           </div>
         )}
         {messages.map((msg) => (
-          <MessageBubble key={msg.id} message={msg} onSend={onSend} />
+          <MessageBubble key={msg.id} message={msg} onSend={onSend} language={language} />
         ))}
         {isLoading && (
           <div className="message-row message-row--assistant">
@@ -78,7 +78,7 @@ export function ChatInterface({
                   <span className="loading-dot" />
                   <span className="loading-dot" />
                 </div>
-                <span>답변 작성 중...</span>
+                <span>{labels.loadingText}</span>
               </div>
             </div>
           </div>

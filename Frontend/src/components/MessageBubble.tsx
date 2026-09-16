@@ -1,19 +1,21 @@
 import ReactMarkdown from 'react-markdown'
 import { SourceList } from './SourceList'
-import type { Message } from '../types'
+import type { Message, Language } from '../types'
+import { getLabels } from '../i18n'
 
 interface Props {
   message: Message
-  onSend: (question: string) => void; // 1. onSend 대소문자 수정
+  onSend: (question: string) => void
+  language: Language
 }
 
-function getTime(date: Date): string {
-  return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+function getTime(date: Date, locale: string): string {
+  return date.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' })
 }
 
-// 2. onSend 매개변수 추가
-export function MessageBubble({ message, onSend }: Props) {
+export function MessageBubble({ message, onSend, language }: Props) {
   const isUser = message.role === 'user'
+  const labels = getLabels(language)
 
   return (
     <div className={`message-row ${isUser ? 'message-row--user' : 'message-row--assistant'}`}>
@@ -29,16 +31,16 @@ export function MessageBubble({ message, onSend }: Props) {
             <ReactMarkdown>{message.content}</ReactMarkdown>
           )}
         </div>
-        <div className="message-time">{getTime(message.timestamp)}</div>
-        
+        <div className="message-time">{getTime(message.timestamp, labels.timeLocale)}</div>
+
         {!isUser && message.sources && message.sources.length > 0 && (
-          <SourceList sources={message.sources} />
+          <SourceList sources={message.sources} language={language} />
         )}
 
         {!isUser && message.suggestions && message.suggestions.length > 0 && (
           <div className="follow-up-container" style={{ marginTop : '12px'}}>
             <p style={{ fontSize: '0.85rem', color: '#666', marginBottom: '8px', fontWeight: 600 }}>
-              💡 이런 질문은 어때요?
+              {labels.suggestions}
             </p>
 
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>

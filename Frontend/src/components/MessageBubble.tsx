@@ -1,5 +1,6 @@
 import ReactMarkdown from 'react-markdown'
 import { SourceList } from './SourceList'
+import { ThinkingSteps } from './ThinkingSteps'
 import type { Message, Language } from '../types'
 import { getLabels } from '../i18n'
 
@@ -24,7 +25,25 @@ export function MessageBubble({ message, onSend, language }: Props) {
       )}
 
       <div className={`message-wrap ${isUser ? 'message-wrap--user' : 'message-wrap--assistant'}`}>
-        <div className={`message__bubble ${isUser ? 'message__bubble--user' : 'message__bubble--assistant'}`}>
+        {/* 답변 생성 전: 상태 표시 (content 없으면 즉시 표시) */}
+        {!isUser && !message.content && (
+          <ThinkingSteps statusSteps={message.statusSteps ?? []} language={(message.language ?? language) as Language} />
+        )}
+
+        {/* 마지막 토큰 후 ~ done 이벤트 전 (meta 이벤트 수신 시점부터) */}
+        {!isUser && message.metaStatus && !message.sources && (
+          <div className="thinking-more">
+            <div className="thinking-more__dots">
+              <span className="thinking-more__dot" />
+              <span className="thinking-more__dot" />
+              <span className="thinking-more__dot" />
+            </div>
+            <span>{message.metaStatus}</span>
+          </div>
+        )}
+
+        <div className={`message__bubble ${isUser ? 'message__bubble--user' : 'message__bubble--assistant'}`}
+          style={!isUser && !message.content ? { display: 'none' } : undefined}>
           {isUser ? (
             <p style={{ margin: 0 }}>{message.content}</p>
           ) : (

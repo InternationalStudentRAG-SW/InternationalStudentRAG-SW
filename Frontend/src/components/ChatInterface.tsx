@@ -68,7 +68,7 @@ export function ChatInterface({
         {messages.map((msg) => (
           <MessageBubble key={msg.id} message={msg} onSend={onSend} language={language} />
         ))}
-        {isLoading && (
+        {isLoading && messages[messages.length - 1]?.role !== 'assistant' && (
           <div className="message-row message-row--assistant">
             <img src="/dongA_character.png" className="bot-avatar" alt="bot" />
             <div className="message-wrap message-wrap--assistant">

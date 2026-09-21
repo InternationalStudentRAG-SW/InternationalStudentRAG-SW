@@ -787,3 +787,129 @@ body {
     max-width: 88%;
   }
 }
+
+/* ── ThinkingSteps ─────────────────────────────────────────────────── */
+@keyframes thinking-spin {
+  0%   { transform: rotate(0deg)   scale(1);   }
+  50%  { transform: rotate(180deg) scale(1.2); }
+  100% { transform: rotate(360deg) scale(1);   }
+}
+
+.thinking-steps {
+  padding: 12px 14px;
+  background: rgba(245, 243, 255, 0.75);
+  border: 1px solid rgba(167, 139, 250, 0.3);
+  border-radius: 14px;
+  font-size: 0.82rem;
+  margin-bottom: 4px;
+}
+
+.thinking-header {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #5b21b6;
+  margin-bottom: 10px;
+}
+
+.thinking-step-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.thinking-step {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  position: relative;
+  padding: 3px 0;
+  font-size: 0.8rem;
+  line-height: 1.5;
+}
+
+.thinking-step--done {
+  opacity: 0.45;
+}
+
+.thinking-step--done:not(:last-of-type)::after {
+  content: '';
+  position: absolute;
+  left: 6px;
+  top: 20px;
+  width: 1.5px;
+  height: calc(100% + 2px);
+  background: rgba(124, 58, 237, 0.2);
+}
+
+.thinking-step--current {
+  color: #4c1d95;
+  font-weight: 600;
+}
+
+.thinking-step__icon {
+  flex-shrink: 0;
+  width: 14px;
+  font-size: 0.75rem;
+  margin-top: 1px;
+}
+
+.thinking-step__icon--spin {
+  display: inline-block;
+  color: #7c3aed;
+  animation: thinking-spin 2.5s ease-in-out infinite;
+}
+
+.thinking-step__body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.thinking-step__hint {
+  font-size: 0.73rem;
+  color: #9f7aea;
+  font-style: italic;
+  opacity: 0.85;
+  animation: fadeInUp 0.4s ease;
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 0.85; transform: translateY(0); }
+}
+
+/* ── 답변 후 출처/후속질문 대기 인디케이터 ────────────────────────── */
+.thinking-more {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 5px 2px;
+  font-size: 0.78rem;
+  color: #7c3aed;
+}
+
+.thinking-more__dots {
+  display: flex;
+  gap: 3px;
+}
+
+.thinking-more__dot {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: #7c3aed;
+  opacity: 0.4;
+  animation: pulse 1.4s infinite ease-in-out both;
+}
+
+.thinking-more__dot:nth-child(1) { animation-delay: 0s;   }
+.thinking-more__dot:nth-child(2) { animation-delay: 0.2s; }
+.thinking-more__dot:nth-child(3) { animation-delay: 0.4s; }
+
+@media (prefers-reduced-motion: reduce) {
+  .thinking-step__icon--spin,
+  .thinking-more__dot { animation: none; }
+}

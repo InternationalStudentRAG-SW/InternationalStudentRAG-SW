@@ -1,81 +1,15 @@
-import os
-import re
-import unicodedata
 from pathlib import Path
-from typing import List
-import fitz          # PyMuPDF
-import pymupdf4llm
 from app.config import settings
-
-class DocumentIngester:
-    """PDF에서 문서를 수집합니다."""
-
-    def __init__(self):
-        self.document_path = Path(settings.document_path)
-        self.document_path.mkdir(parents=True, exist_ok=True)
-        
-    def normalize_text(self, text: str) -> str:
-        """PDF 추출 텍스트 정규화 (인코딩 수정 + 노이즈 제거)."""
-        # 한국어 자모 분리 복구 (NFD → NFC) 다른 언어에 대해서도 무해함 
-        text = unicodedata.normalize("NFC", text)
-        # 소프트 하이픈 줄바꿈 제거: "단어-\n계속" → "단어계속"
-        text = re.sub(r"-\n", "", text)
-        # PDF 제어문자 제거 (폼피드 \x0c 등), 일반 whitespace 보존
-        text = re.sub(r"[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]", "", text)
-        # 3개 이상 연속 개행 → 2개로 정리
-        text = re.sub(r"\n{3,}", "\n\n", text)
-        # 줄 끝 공백 제거
-        text = re.sub(r"[ \t]+\n", "\n", text)
-        return text.strip()
-
-    def detect_language(self, text: str) -> str:
-        """페이지 언어 감지. 텍스트가 너무 짧으면 'unknown' 반환."""
-        from langdetect import detect, LangDetectException
-        sample = text[:500].strip()
-        if len(sample) < 20:
-            return "unknown"
-        try:
-            return detect(sample)
-        except LangDetectException:
-            return "unknown"
-
-    def extract_from_pdf(self, pdf_path: str) -> List[dict]:
-        """pymupdf4llm으로 PDF를 마크다운 추출 (표 인라인 포함, 정규화, 언어 감지)."""
-        documents = []
-        try:
-            doc = fitz.open(pdf_path)
-            for page_num in range(len(doc)):
-                md_text = pymupdf4llm.to_markdown(doc, pages=[page_num])
-                if not md_text.strip():
-                    continue
-                if len(md_text.strip()) < 50:
-                    print(f"  ⚠️  p{page_num + 1}: 텍스트 부족 — OCR 미지원 (스킵)")
-                    continue
-                normalized = self.normalize_text(md_text)
-                lang = self.detect_language(normalized)
-                documents.append({
-                    "content": normalized,
-                    "metadata": {
-                        "source": os.path.basename(pdf_path),
-                        "page": page_num + 1,
-                        "lang": lang,
-                    }
-                })
-            doc.close()
-        except Exception as e:
-            print(f"PDF 추출 오류 ({pdf_path}): {e}")
-        return documents
-
-
-
-ingester = DocumentIngester()
 
 
 def sync_documents() -> None:
     """DATA/documents 폴더와 ChromaDB를 증분 동기화."""
-    from app.core.knowledge_base import knowledge_base  # 순환 import 방지
+    from app.core.knowledge_base import knowledge_base
 
-    current_pdfs = {f.name: f for f in ingester.document_path.glob("*.pdf")}
+    document_path = Path(settings.document_path)
+    document_path.mkdir(parents=True, exist_ok=True)
+
+    current_pdfs = {f.name: f for f in document_path.glob("*.pdf")}
     existing_data = knowledge_base.vector_store.get()
     existing_filenames = {m["source"] for m in existing_data["metadatas"] if m}
 
@@ -92,9 +26,9 @@ def sync_documents() -> None:
         print(f"신규 {len(new_files)}개 추가 시작")
 
     for filename in new_files:
-        pages = ingester.extract_from_pdf(str(current_pdfs[filename]))
+        pages = knowledge_base.splitter.extract_from_pdf(str(current_pdfs[filename]))
         if not pages:
-            print(f"  ⚠️  {filename}: 추출 내용 없음")
+            print(f"  {filename}: 추출 내용 없음")
             continue
         for page in pages:
             knowledge_base.add_document(page["content"], page["metadata"])

@@ -1,23 +1,34 @@
 import json
+import uuid
 from typing import List, Dict
 from neo4j import GraphDatabase
 from openai import OpenAI
 from app.config import settings
 
-_EXTRACT_PROMPT = """다음 텍스트에서 유학생 관련 핵심 엔티티와 관계를 추출하세요.
+# [ref:8] GraphRAG (Edge et al., 2024) — 텍스트에서 엔티티/관계를 추출해 지식그래프로 구조화하는 설계 근거
+# [ref:10] KGGen (Agarwal et al., 2025) — 2단계 분리 추출: Stage1 엔티티 확정 → Stage2 확정 엔티티 간 관계 추출
+#   단일 프롬프트 방식 대비 환각(hallucination) 관계 생성을 억제함
+
+# Stage 1: 엔티티만 추출
+_EXTRACT_ENTITIES_PROMPT = """다음 텍스트에서 유학생 관련 핵심 엔티티만 추출하세요.
 
 엔티티 유형: 비자, 서류, 기관, 절차, 자격요건, 기간, 비용, 언어시험
+
+반드시 아래 JSON 형식으로만 응답하세요:
+{"entities": [{"name": "엔티티명", "type": "엔티티유형"}]}
+
+텍스트:
+"""
+
+# Stage 2: 확정된 엔티티 간 관계만 추출 (목록 외 엔티티 생성 금지)
+_EXTRACT_RELATIONS_PROMPT = """아래 엔티티 목록에서만 관계를 추출하세요.
+목록에 없는 엔티티는 절대 생성하지 마세요.
+
+엔티티 목록: {entity_names}
 관계 유형: 필요서류, 제출기관, 소요기간, 비용, 자격요건, 다음절차, 관련항목
 
 반드시 아래 JSON 형식으로만 응답하세요:
-{
-  "entities": [
-    {"name": "엔티티명", "type": "엔티티유형"}
-  ],
-  "relations": [
-    {"from": "출발엔티티명", "relation": "관계유형", "to": "도착엔티티명"}
-  ]
-}
+{{"relations": [{{"from": "엔티티명", "relation": "관계유형", "to": "엔티티명"}}]}}
 
 텍스트:
 """
@@ -29,11 +40,8 @@ class KnowledgeGraph:
     def __init__(self):
         self._driver = None
         self._client = OpenAI(api_key=settings.openai_api_key)
-        # TODO: 지식그래프 고도화 후 아래 주석 해제
-        # 비활성화 원인: search_simple CONTAINS 매칭이 너무 광범위하여
-        # 키워드당 수천 개 엔티티/관계 반환 → LLM 토큰 초과로 답변 생성 실패
-        # self._enabled = bool(settings.neo4j_uri)
-        self._enabled = False
+        self._enabled = bool(settings.neo4j_uri)
+        self._index_ensured = False
 
     def _get_driver(self):
         if self._driver is None:
@@ -48,63 +56,117 @@ class KnowledgeGraph:
             self._driver.close()
             self._driver = None
 
-    # ── 엔티티/관계 추출 ────────────────────────────────────────────────
+    # [ref:9] LightRAG (Guo et al., 2024) — 엔티티 이름을 임베딩 벡터로 표현해 의미 기반 검색에 사용
+    # [ref:7] MTEB (Muennighoff et al., 2022) — 다국어 임베딩 모델은 언어에 무관하게 동일 개념을 유사한
+    #   벡터 공간에 매핑 → 한국어·영어 혼합 KG에서 크로스 언어 엔티티 매칭의 간접 근거
+    def _embed(self, text: str) -> List[float]:
+        resp = self._client.embeddings.create(
+            input=text,
+            model="text-embedding-3-small",
+        )
+        return resp.data[0].embedding
+
+    def _ensure_vector_index(self) -> None:
+        """Entity 임베딩용 벡터 인덱스 생성 (Neo4j 5.x, 최초 1회)."""
+        with self._get_driver().session() as session:
+            session.run("""
+                CREATE VECTOR INDEX entity_embedding IF NOT EXISTS
+                FOR (e:Entity) ON (e.embedding)
+                OPTIONS {indexConfig: {
+                  `vector.dimensions`: 1536,
+                  `vector.similarity_function`: 'cosine'
+                }}
+            """)
+
+    # ── 엔티티/관계 추출 (2단계) ─────────────────────────────────────────
 
     def extract_graph_from_text(
         self, text: str, source: str, page: int, chunk_index: int
     ) -> Dict:
-        """GPT로 텍스트에서 엔티티/관계 추출."""
+        # [ref:10] KGGen 2단계 분리 추출 방식 적용
+        # Stage1에서 확정된 엔티티 목록을 Stage2 프롬프트에 주입해
+        # 목록 외 엔티티가 관계에 포함되는 환각을 방지함
+        truncated = text[:1500]
+        system_msg = {"role": "system", "content": "유학생 행정 문서 분석 전문가입니다. JSON만 응답합니다."}
+
+        # Stage 1 — 엔티티만
         try:
-            response = self._client.chat.completions.create(
+            r1 = self._client.chat.completions.create(
                 model=settings.openai_model,
-                messages=[
-                    {"role": "system", "content": "유학생 행정 문서 분석 전문가입니다. JSON만 응답합니다."},
-                    {"role": "user", "content": _EXTRACT_PROMPT + text[:1500]},
-                ],
+                messages=[system_msg, {"role": "user", "content": _EXTRACT_ENTITIES_PROMPT + truncated}],
                 temperature=0,
                 response_format={"type": "json_object"},
             )
-            result = json.loads(response.choices[0].message.content)
-            return {
-                "entities": result.get("entities", []),
-                "relations": result.get("relations", []),
-                "source": source,
-                "page": page,
-                "chunk_index": chunk_index,
-            }
+            entities = json.loads(r1.choices[0].message.content).get("entities", [])
         except Exception as e:
-            print(f"[KG] 추출 오류 ({source} p{page} c{chunk_index}): {e}")
+            print(f"[KG] Stage1 오류 ({source} p{page} c{chunk_index}): {e}")
             return {"entities": [], "relations": [], "source": source, "page": page, "chunk_index": chunk_index}
+
+        if not entities:
+            return {"entities": [], "relations": [], "source": source, "page": page, "chunk_index": chunk_index}
+
+        # Stage 2 — 확정 엔티티 간 관계만
+        entity_names = [e["name"] for e in entities]
+        valid_names = set(entity_names)
+        relations = []
+        try:
+            prompt2 = _EXTRACT_RELATIONS_PROMPT.format(entity_names=", ".join(entity_names)) + truncated
+            r2 = self._client.chat.completions.create(
+                model=settings.openai_model,
+                messages=[system_msg, {"role": "user", "content": prompt2}],
+                temperature=0,
+                response_format={"type": "json_object"},
+            )
+            raw_relations = json.loads(r2.choices[0].message.content).get("relations", [])
+            # Stage 1 목록에 없는 엔티티가 포함된 관계 필터링
+            relations = [
+                r for r in raw_relations
+                if r.get("from") in valid_names and r.get("to") in valid_names
+            ]
+        except Exception as e:
+            print(f"[KG] Stage2 오류 ({source} p{page} c{chunk_index}): {e}")
+
+        return {
+            "entities": entities,
+            "relations": relations,
+            "source": source,
+            "page": page,
+            "chunk_index": chunk_index,
+        }
 
     # ── Neo4j CRUD ───────────────────────────────────────────────────────
 
     def save_graph(self, graph_data: Dict) -> None:
-        """추출된 엔티티/관계를 Neo4j에 저장."""
+        """추출된 엔티티/관계를 Neo4j에 저장. 엔티티 임베딩 포함."""
         if not self._enabled:
             return
+        if not self._index_ensured:
+            self._ensure_vector_index()
+            self._index_ensured = True
         source = graph_data["source"]
         page = graph_data["page"]
         chunk_index = graph_data["chunk_index"]
 
         with self._get_driver().session() as session:
-            # 엔티티 저장 (MERGE: 중복 방지)
             for entity in graph_data["entities"]:
+                # [ref:9] LightRAG — 엔티티 저장 시 임베딩 벡터를 함께 저장해 추후 의미 기반 검색에 활용
+                embedding = self._embed(entity["name"])
                 session.run(
                     """
                     MERGE (e:Entity {name: $name})
-                    SET e.type = $type
+                    SET e.type = $type, e.embedding = $embedding
                     WITH e
                     MERGE (c:Chunk {source: $source, page: $page, chunk_index: $chunk_index})
                     MERGE (e)-[:MENTIONED_IN]->(c)
                     """,
                     name=entity["name"],
                     type=entity["type"],
+                    embedding=embedding,
                     source=source,
                     page=page,
                     chunk_index=chunk_index,
                 )
 
-            # 관계 저장
             for rel in graph_data["relations"]:
                 session.run(
                     """
@@ -139,28 +201,36 @@ class KnowledgeGraph:
                 source=source,
             )
 
-    # ── 그래프 탐색 (에이전트 tool_graph용) ─────────────────────────────
+    def clear_graph(self) -> None:
+        """모든 엔티티/관계/청크 노드 삭제."""
+        if not self._enabled:
+            return
+        with self._get_driver().session() as session:
+            session.run("MATCH (n) DETACH DELETE n")
+        self._index_ensured = False
 
-    def search_simple(self, query: str) -> Dict:
-        """
-        query와 이름이 유사한 엔티티를 찾고 연결된 관계/청크 반환.
-        반환: {entities, relations, chunks: [{source, page, chunk_index}]}
-        """
+    # ── 그래프 탐색 ──────────────────────────────────────────────────────
+
+    def search_by_embedding(self, query: str) -> Dict:
+        # [ref:9] LightRAG — 로컬 검색(Local Retrieval)은 엔티티 레벨 임베딩 유사도 검색으로 수행
+        #   키워드 CONTAINS 방식 대비 의미적으로 유사한 엔티티를 정확하게 탐색
+        # [ref:7] MTEB — 다국어 임베딩 덕분에 영어 쿼리로 한국어 엔티티 매칭 가능 (크로스 언어)
         if not self._enabled:
             return {"entities": [], "relations": [], "chunks": []}
 
+        q_emb = self._embed(query)
         with self._get_driver().session() as session:
             result = session.run(
                 """
-                MATCH (e:Entity)
-                WHERE toLower(e.name) CONTAINS toLower($term)
-                WITH e LIMIT 5
+                CALL db.index.vector.queryNodes('entity_embedding', 5, $q_emb)
+                YIELD node AS e, score
+                WHERE score > 0.75
                 OPTIONAL MATCH (e)-[r:RELATES]->(related:Entity)
                 OPTIONAL MATCH (e)<-[r2:RELATES]-(incoming:Entity)
                 OPTIONAL MATCH (e)-[:MENTIONED_IN]->(c:Chunk)
-                RETURN e, r, related, r2, incoming, c
+                RETURN e, r, related, r2, incoming, c, score
                 """,
-                term=query,
+                q_emb=q_emb,
             )
             entities, relations, chunks = {}, [], {}
             for record in result:

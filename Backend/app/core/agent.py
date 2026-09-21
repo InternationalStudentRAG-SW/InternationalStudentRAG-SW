@@ -157,7 +157,7 @@ def graph_search_node(state: AgentState) -> AgentState:
 
     merged = {"entities": {}, "relations": [], "chunks": {}}
     for kw in keywords:
-        result = knowledge_graph.search_simple(kw)
+        result = knowledge_graph.search_by_embedding(kw)
         for e in result.get("entities", []):
             merged["entities"][e["name"]] = e
         merged["relations"].extend(result.get("relations", []))

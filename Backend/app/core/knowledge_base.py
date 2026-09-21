@@ -213,12 +213,14 @@ class KnowledgeBase:
         return self.vector_store._collection.count()
 
     def clear_database(self):
+        from app.core.knowledge_graph import knowledge_graph
         self.vector_store.delete_collection()
         self.vector_store = Chroma(
             embedding_function=self.embeddings,
             persist_directory=self.chroma_db_path,
             collection_name="international_student_rag"
         )
+        knowledge_graph.clear_graph()
 
     def delete_document_by_filename(self, filename: str):
         from app.core.knowledge_graph import knowledge_graph

@@ -56,7 +56,6 @@ class KnowledgeGraph:
             self._driver.close()
             self._driver = None
 
-    # [ref:9] LightRAG (Guo et al., 2024) — 엔티티 이름을 임베딩 벡터로 표현해 의미 기반 검색에 사용
     # [ref:7] MTEB (Muennighoff et al., 2022) — 다국어 임베딩 모델은 언어에 무관하게 동일 개념을 유사한
     #   벡터 공간에 매핑 → 한국어·영어 혼합 KG에서 크로스 언어 엔티티 매칭의 간접 근거
     def _embed(self, text: str) -> List[float]:
@@ -149,7 +148,8 @@ class KnowledgeGraph:
 
         with self._get_driver().session() as session:
             for entity in graph_data["entities"]:
-                # [ref:9] LightRAG — 엔티티 저장 시 임베딩 벡터를 함께 저장해 추후 의미 기반 검색에 활용
+                # CONTAINS 키워드 매칭의 광범위 반환 문제를 해결하기 위해
+                # 엔티티 이름을 임베딩 벡터로 저장 → 유사도 기반 검색으로 대체 (자체 설계)
                 embedding = self._embed(entity["name"])
                 session.run(
                     """
@@ -212,61 +212,70 @@ class KnowledgeGraph:
     # ── 그래프 탐색 ──────────────────────────────────────────────────────
 
     def search_by_embedding(self, query: str) -> Dict:
-        # [ref:9] LightRAG — 로컬 검색(Local Retrieval)은 엔티티 레벨 임베딩 유사도 검색으로 수행
-        #   키워드 CONTAINS 방식 대비 의미적으로 유사한 엔티티를 정확하게 탐색
-        # [ref:7] MTEB — 다국어 임베딩 덕분에 영어 쿼리로 한국어 엔티티 매칭 가능 (크로스 언어)
+        # 엔티티 임베딩 유사도 검색: CONTAINS 광범위 매칭 → 코사인 유사도 0.75 이상 엔티티만 반환 (자체 설계)
+        # [ref:7] MTEB — 다국어 임베딩 덕분에 영어 쿼리로 한국어 엔티티 매칭 가능 (크로스 언어 간접 근거)
         if not self._enabled:
             return {"entities": [], "relations": [], "chunks": []}
 
-        q_emb = self._embed(query)
-        with self._get_driver().session() as session:
-            result = session.run(
-                """
-                CALL db.index.vector.queryNodes('entity_embedding', 5, $q_emb)
-                YIELD node AS e, score
-                WHERE score > 0.75
-                OPTIONAL MATCH (e)-[r:RELATES]->(related:Entity)
-                OPTIONAL MATCH (e)<-[r2:RELATES]-(incoming:Entity)
-                OPTIONAL MATCH (e)-[:MENTIONED_IN]->(c:Chunk)
-                RETURN e, r, related, r2, incoming, c, score
-                """,
-                q_emb=q_emb,
-            )
-            entities, relations, chunks = {}, [], {}
-            for record in result:
-                e = record["e"]
-                entities[e["name"]] = {"name": e["name"], "type": e.get("type", "")}
+        try:
+            q_emb = self._embed(query)
+        except Exception as e:
+            print(f"[KG] 임베딩 오류: {e}")
+            return {"entities": [], "relations": [], "chunks": []}
 
-                if record["related"]:
-                    related = record["related"]
-                    entities[related["name"]] = {"name": related["name"], "type": related.get("type", "")}
-                    relations.append({
-                        "from": e["name"],
-                        "relation": record["r"]["type"] if record["r"] else "",
-                        "to": related["name"],
-                    })
-                if record["incoming"]:
-                    incoming = record["incoming"]
-                    entities[incoming["name"]] = {"name": incoming["name"], "type": incoming.get("type", "")}
-                    relations.append({
-                        "from": incoming["name"],
-                        "relation": record["r2"]["type"] if record["r2"] else "",
-                        "to": e["name"],
-                    })
-                if record["c"]:
-                    c = record["c"]
-                    key = (c["source"], c["page"], c["chunk_index"])
-                    chunks[key] = {
-                        "source": c["source"],
-                        "page": c["page"],
-                        "chunk_index": c["chunk_index"],
-                    }
+        try:
+            with self._get_driver().session() as session:
+                result = session.run(
+                    """
+                    CALL db.index.vector.queryNodes('entity_embedding', 5, $q_emb)
+                    YIELD node AS e, score
+                    WHERE score > 0.75
+                    OPTIONAL MATCH (e)-[r:RELATES]->(related:Entity)
+                    OPTIONAL MATCH (e)<-[r2:RELATES]-(incoming:Entity)
+                    OPTIONAL MATCH (e)-[:MENTIONED_IN]->(c:Chunk)
+                    RETURN e, r, related, r2, incoming, c, score
+                    """,
+                    q_emb=q_emb,
+                )
+                entities, relations, chunks = {}, [], {}
+                for record in result:
+                    e = record["e"]
+                    entities[e["name"]] = {"name": e["name"], "type": e.get("type", "")}
 
-            return {
-                "entities": list(entities.values()),
-                "relations": relations,
-                "chunks": list(chunks.values()),
-            }
+                    if record["related"]:
+                        related = record["related"]
+                        entities[related["name"]] = {"name": related["name"], "type": related.get("type", "")}
+                        relations.append({
+                            "from": e["name"],
+                            "relation": record["r"]["type"] if record["r"] else "",
+                            "to": related["name"],
+                        })
+                    if record["incoming"]:
+                        incoming = record["incoming"]
+                        entities[incoming["name"]] = {"name": incoming["name"], "type": incoming.get("type", "")}
+                        relations.append({
+                            "from": incoming["name"],
+                            "relation": record["r2"]["type"] if record["r2"] else "",
+                            "to": e["name"],
+                        })
+                    if record["c"]:
+                        c = record["c"]
+                        key = (c["source"], c["page"], c["chunk_index"])
+                        chunks[key] = {
+                            "source": c["source"],
+                            "page": c["page"],
+                            "chunk_index": c["chunk_index"],
+                        }
+
+                return {
+                    "entities": list(entities.values()),
+                    "relations": relations,
+                    "chunks": list(chunks.values()),
+                }
+        except Exception as e:
+            # 벡터 인덱스 미생성(build_graph 미실행) 또는 Neo4j 연결 오류 시 빈 결과 반환
+            print(f"[KG] search_by_embedding 오류 (인덱스 미생성 또는 연결 오류): {e}")
+            return {"entities": [], "relations": [], "chunks": []}
 
 
 # 전역 인스턴스

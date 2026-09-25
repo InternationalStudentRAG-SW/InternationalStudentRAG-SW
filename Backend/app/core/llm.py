@@ -32,7 +32,8 @@ def _build_few_shot_embeddings() -> List[List[float]]:
         print(f"[llm.py] Few-shot 예시 임베딩 완료 ({len(embeddings)}개)")
         return embeddings
     except Exception as e:
-        raise RuntimeError(f"Few-shot 예시 임베딩 생성 실패: {e}") from e
+        print(f"[llm.py] Few-shot 임베딩 건너뜀: {e}")
+        return []
 
 
 _FEW_SHOT_EMBEDDINGS: List[List[float]] = _build_few_shot_embeddings()

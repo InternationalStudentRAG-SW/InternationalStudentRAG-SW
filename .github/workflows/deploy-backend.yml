@@ -1,0 +1,66 @@
+name: Deploy Backend
+
+# 트리거 조건:
+# - main 브랜치에 push 발생 시 (dev → main PR 머지 포함)
+# - Backend/ 코드 또는 이 워크플로 파일이 변경된 경우에만 실행
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'Backend/**'
+      - '.github/workflows/deploy-backend.yml'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write  # GHCR(GitHub Container Registry) push 권한
+
+    steps:
+      # 1. 코드 체크아웃
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # 2. GHCR 이미지명 소문자 변환
+      #    GHCR은 이미지명에 소문자만 허용
+      #    GitHub 저장소명에 대문자가 있으면 빌드 실패하므로 강제 변환
+      - name: Set lowercase image name
+        run: |
+          echo "IMAGE_NAME=$(echo ghcr.io/${{ github.repository }}/backend | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
+
+      # 3. GHCR 로그인
+      #    GITHUB_TOKEN은 GitHub이 자동 발급 — 별도 Secrets 등록 불필요
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # 4. Docker 이미지 빌드 및 GHCR push
+      #    context: ./Backend → Backend/Dockerfile 기준으로 빌드
+      #    태그 2개:
+      #      - latest: RunPod이 항상 최신 이미지를 참조
+      #      - git SHA: 특정 커밋으로 롤백 시 사용
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./Backend
+          push: true
+          tags: |
+            ${{ env.IMAGE_NAME }}:latest
+            ${{ env.IMAGE_NAME }}:${{ github.sha }}
+
+      # 5. RunPod Serverless 엔드포인트 이미지 업데이트
+      #    새 이미지가 push되면 RunPod API를 호출해 엔드포인트에 반영
+      #    사전 등록 필요한 GitHub Secrets:
+      #      - RUNPOD_API_KEY: RunPod 계정 API 키
+      #      - RUNPOD_ENDPOINT_ID: 업데이트할 RunPod 엔드포인트 ID
+      - name: Update RunPod Serverless endpoint
+        run: |
+          curl -s -X POST "https://api.runpod.io/graphql?api_key=${{ secrets.RUNPOD_API_KEY }}" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "query": "mutation { saveEndpoint(input: { id: \"${{ secrets.RUNPOD_ENDPOINT_ID }}\", imageName: \"${{ env.IMAGE_NAME }}:${{ github.sha }}\" }) { id name } }"
+            }'

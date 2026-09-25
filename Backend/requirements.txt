@@ -53,3 +53,7 @@ SQLAlchemy==2.0.48
 
 # ── 캐시 (Upstash Redis) ──────────────────────────────────
 redis==8.1.0
+
+# ── RunPod Serverless ─────────────────────────────────────
+runpod==1.7.9
+requests==2.32.3

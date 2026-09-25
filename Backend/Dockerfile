@@ -38,6 +38,7 @@ RUN python -c "from sentence_transformers import CrossEncoder; CrossEncoder('BAA
 
 # 앱 코드 복사
 COPY app/ ./app/
+COPY handler.py .
 
 EXPOSE 8000
 

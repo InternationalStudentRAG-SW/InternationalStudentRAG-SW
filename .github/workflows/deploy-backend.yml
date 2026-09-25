@@ -52,15 +52,15 @@ jobs:
             ${{ env.IMAGE_NAME }}:latest
             ${{ env.IMAGE_NAME }}:${{ github.sha }}
 
-      # 5. RunPod Serverless 엔드포인트 이미지 업데이트
-      #    새 이미지가 push되면 RunPod API를 호출해 엔드포인트에 반영
+      # 5. RunPod 템플릿 이미지 업데이트
+      #    saveTemplate 뮤테이션으로 템플릿 이미지를 갱신하면
+      #    연결된 엔드포인트에 자동으로 새 Release가 생성됨
       #    사전 등록 필요한 GitHub Secrets:
       #      - RUNPOD_API_KEY: RunPod 계정 API 키
-      #      - RUNPOD_ENDPOINT_ID: 업데이트할 RunPod 엔드포인트 ID
-      - name: Update RunPod Serverless endpoint
+      #      - RUNPOD_TEMPLATE_ID: 업데이트할 RunPod 템플릿 ID
+      - name: Update RunPod template image
         run: |
-          curl -s -X POST "https://api.runpod.io/graphql?api_key=${{ secrets.RUNPOD_API_KEY }}" \
+          curl -s -X POST "https://api.runpod.io/graphql" \
             -H "Content-Type: application/json" \
-            -d '{
-              "query": "mutation { saveEndpoint(input: { id: \"${{ secrets.RUNPOD_ENDPOINT_ID }}\", imageName: \"${{ env.IMAGE_NAME }}:${{ github.sha }}\" }) { id name } }"
-            }'
+            -H "Authorization: Bearer ${{ secrets.RUNPOD_API_KEY }}" \
+            -d "{\"query\": \"mutation saveTemplate(\$input: SaveTemplateInput) { saveTemplate(input: \$input) { id } }\", \"variables\": {\"input\": {\"id\": \"${{ secrets.RUNPOD_TEMPLATE_ID }}\", \"imageName\": \"${{ env.IMAGE_NAME }}:${{ github.sha }}\"}}}"

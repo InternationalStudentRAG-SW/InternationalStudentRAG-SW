@@ -63,4 +63,4 @@ jobs:
           curl -s -X POST "https://api.runpod.io/graphql" \
             -H "Content-Type: application/json" \
             -H "Authorization: Bearer ${{ secrets.RUNPOD_API_KEY }}" \
-            -d "{\"query\": \"mutation saveTemplate(\$input: SaveTemplateInput) { saveTemplate(input: \$input) { id } }\", \"variables\": {\"input\": {\"id\": \"${{ secrets.RUNPOD_TEMPLATE_ID }}\", \"imageName\": \"${{ env.IMAGE_NAME }}:${{ github.sha }}\"}}}"
+            -d "{\"query\": \"mutation saveTemplate(\$input: SaveTemplateInput) { saveTemplate(input: \$input) { id } }\", \"variables\": {\"input\": {\"id\": \"${{ secrets.RUNPOD_TEMPLATE_ID }}\", \"imageName\": \"${{ env.IMAGE_NAME }}:${{ github.sha }}\", \"name\": \"internationalstudentrag-backend\", \"containerDiskInGb\": 20, \"dockerArgs\": \"\", \"env\": [], \"volumeInGb\": 0}}}"

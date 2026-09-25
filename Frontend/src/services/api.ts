@@ -15,13 +15,114 @@ client.interceptors.request.use((config) => {
   return config
 })
 
+// 토큰 만료(401) 시 자동 로그아웃
+client.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      localStorage.removeItem('token')
+      localStorage.removeItem('role')
+      localStorage.removeItem('userEmail')
+      window.location.href = '/login'
+    }
+    return Promise.reject(error)
+  }
+)
+
+export async function sendMessageStream(
+  question: string,
+  language: string | undefined,
+  history: import('../types').MessageHistory[] | undefined,
+  onToken: (token: string) => void,
+  onDone: (sources: import('../types').Source[], suggestions: string[]) => void,
+  onClarify: (question: string) => void,
+  onError: (error: string) => void,
+  onStatus?: (step: string) => void,
+  onMeta?: (content: string) => void,
+): Promise<void> {
+  const body: ChatRequest = { question }
+  if (language && language !== 'auto') body.language = language
+  if (history && history.length > 0) body.history = history
+
+  const controller = new AbortController()
+  // 60초 안에 응답이 완전히 끝나지 않으면 연결 강제 종료
+  const timeoutId = setTimeout(() => controller.abort(), 60_000)
+
+  try {
+    const response = await fetch(`${BASE_URL}/chat/stream`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(localStorage.getItem('token')
+          ? { Authorization: `Bearer ${localStorage.getItem('token')}` }
+          : {}),
+      },
+      body: JSON.stringify(body),
+      signal: controller.signal,
+    })
+
+    if (!response.ok) {
+      if (response.status === 401) {
+        localStorage.removeItem('token')
+        localStorage.removeItem('role')
+        localStorage.removeItem('userEmail')
+        window.location.href = '/login'
+      }
+      throw new Error(`HTTP ${response.status}`)
+    }
+
+    const reader = response.body!.getReader()
+    const decoder = new TextDecoder()
+    let buffer = ''
+
+    while (true) {
+      const { done, value } = await reader.read()
+      if (done) break
+
+      buffer += decoder.decode(value, { stream: true })
+      const lines = buffer.split('\n\n')
+      buffer = lines.pop() ?? ''
+
+      for (const line of lines) {
+        if (!line.startsWith('data: ')) continue
+        try {
+          const payload = JSON.parse(line.slice(6))
+          if (payload.type === 'token') {
+            onToken(payload.content)
+          } else if (payload.type === 'done') {
+            onDone(payload.sources ?? [], payload.suggestions ?? [])
+          } else if (payload.type === 'clarify') {
+            onClarify(payload.content)
+          } else if (payload.type === 'status') {
+            onStatus?.(payload.content)
+          } else if (payload.type === 'meta') {
+            onMeta?.(payload.content)
+          }
+        } catch {
+          // 파싱 실패한 SSE 라인은 무시
+        }
+      }
+    }
+  } catch (e) {
+    if (e instanceof DOMException && e.name === 'AbortError') {
+      onError('응답 시간이 너무 오래 걸립니다. 잠시 후 다시 시도해주세요.')
+    } else {
+      onError(e instanceof Error ? e.message : '오류가 발생했습니다.')
+    }
+  } finally {
+    clearTimeout(timeoutId)
+  }
+}
+
 export async function sendMessage(
   question: string,
   language?: string,
+  history?: import('../types').MessageHistory[],
   top_k?: number,
 ): Promise<ChatResponse> {
   const body: ChatRequest = { question }
   if (language && language !== 'auto') body.language = language
+  if (history && history.length > 0) body.history = history
   if (top_k !== undefined) body.top_k = top_k
   const { data } = await client.post<ChatResponse>('/chat/', body)
   return data

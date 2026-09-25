@@ -11,6 +11,7 @@ const LANGUAGES: { key: Language; label: string }[] = [
   { key: 'en', label: 'EN' },
   { key: 'zh', label: 'ZH' },
   { key: 'es', label: 'ES' },
+  { key: 'vi', label: 'VI' },
 ]
 
 export function LanguageSelector({ value, onChange }: Props) {

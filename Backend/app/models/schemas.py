@@ -31,6 +31,7 @@ class ChatResponse(BaseModel):
     language: Optional[str] = None
     question: str
     suggestions: List[str] = []
+    clarify_question: Optional[str] = None
 
 
 class ConversationRequest(BaseModel):

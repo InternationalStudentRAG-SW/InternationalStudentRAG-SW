@@ -1,17 +1,15 @@
 # app/core/llm.py
 # 고도화 버전: Dynamic Few-Shot + 세션 히스토리 라우터 연결 + Usefulness 가이드라인
 
+import re
 import json
-from typing import Optional, Tuple, List, Dict, Any
+import asyncio
+from typing import Optional, List, Dict, AsyncGenerator
 
-from langchain_openai import ChatOpenAI
-from langchain_core.prompts import PromptTemplate
-from langchain_core.output_parsers import StrOutputParser
-from langchain_community.callbacks import get_openai_callback
+from openai import AsyncOpenAI
 
 from app.core.retriever import retriever
 from app.config import settings
-
 from app.core.few_shot_qas import FEW_SHOT_QAS_TRIPLETS
 
 DEFAULT_TOP_K = settings.top_k_results
@@ -34,16 +32,15 @@ def _build_few_shot_embeddings() -> List[List[float]]:
         print(f"[llm.py] Few-shot 예시 임베딩 완료 ({len(embeddings)}개)")
         return embeddings
     except Exception as e:
-        raise RuntimeError(f"Few-shot 예시 임베딩 생성 실패: {e}") from e
+        print(f"[llm.py] Few-shot 임베딩 건너뜀: {e}")
+        return []
 
 
-_FEW_SHOT_EMBEDDINGS: List[List[float]] = []
+_FEW_SHOT_EMBEDDINGS: List[List[float]] = _build_few_shot_embeddings()
 
 
 def _ensure_embeddings() -> None:
-    global _FEW_SHOT_EMBEDDINGS
-    if not _FEW_SHOT_EMBEDDINGS:
-        _FEW_SHOT_EMBEDDINGS = _build_few_shot_embeddings()
+    pass  # 서버 시작 시 이미 로딩 완료
 
 
 def _get_max_relevance_score(sources: List[dict]) -> float:
@@ -58,7 +55,7 @@ def _get_max_relevance_score(sources: List[dict]) -> float:
 
 
 # 관련성 임계값 — 이 값 미만이면 PDF 범위 밖 질문으로 판단하여 답변 차단
-_RELEVANCE_THRESHOLD = 0.15  # 다국어 번역 쿼리는 구조적으로 점수가 낮으므로 완화
+_RELEVANCE_THRESHOLD = 0.7
 
 # PDF 범위 밖 질문에 대한 고정 응답 메시지
 _OUT_OF_SCOPE_ANSWER = (
@@ -123,17 +120,16 @@ def _format_few_shot_block(examples: List[Dict[str, str]]) -> str:
     return "\n\n".join(lines)
 
 
+
+
+
 # ===========================================================================
-# [2] 통합 프롬프트 템플릿
-#     - Dynamic Few-Shot 블록 추가 (논문 핵심)
-#     - Usefulness 가이드라인 유지
-#     - 세션 히스토리 유지
+# [4] 스트리밍 전용 비동기 함수 (agent.py run_agent_stream 에서 호출)
 # ===========================================================================
 
-_CONVERSATIONAL_LEADING_TEMPLATE = """귀하는 대한민국 대학교에 재학 중인 외국인 유학생들의 정착과 행정 절차를 돕는 전문가 어시스턴트입니다.
+_async_client = AsyncOpenAI(api_key=settings.openai_api_key)
 
-[1] 제공된 유학생 대화 세션 히스토리와 참고 컨텍스트(RAG)를 바탕으로 사용자의 현재 질문에 성실하게 답변하십시오.
-[2] 답변을 마친 후, 사용자가 다음에 수행해야 하거나 관심을 가질 만한 '유용한 후속 질문(Useful Follow-up Questions)' 6개를 생성하십시오.
+_STREAM_ANSWER_TEMPLATE = """귀하는 대한민국 대학교에 재학 중인 외국인 유학생들의 정착과 행정 절차를 돕는 전문가 어시스턴트입니다.
 
 {lang_instruction}
 
@@ -143,30 +139,38 @@ _CONVERSATIONAL_LEADING_TEMPLATE = """귀하는 대한민국 대학교에 재학
 2. 컨텍스트에 없는 내용은 LLM의 일반 지식으로 절대 보완하지 마십시오.
 3. 앱 추천, 일반 생활 팁, 심리 상담 등 문서 범위 밖의 질문은 아래와 같이 답변하십시오:
    "업로드된 문서에서 해당 질문에 대한 정보를 찾을 수 없습니다."
-4. 후속 질문도 반드시 [후속 질문 생성 전용 컨텍스트] 범위 내에서만 생성하십시오.
-5. 컨텍스트에 근거가 없는 후속 질문은 생성하지 말고, 생성 가능한 개수만큼만 반환하십시오.
-6. 완전 열거: 질문에 해당하는 모든 항목·케이스·예외 규정을 빠짐없이 열거하십시오. 컨텍스트에 '~의 경우', '단, 중국은', '특정 국가는' 등 예외절이 보이면 반드시 포함하십시오.
-7. 대상 선별: 질문의 전형(신입학/편입학)·대상에 해당하지 않는 항목은 답변에서 제외하십시오.
-8. 자기 점검: 답변 작성 후 "컨텍스트에 등장한 항목 중 빠진 것이 없는지" 확인하고, 누락이 있으면 추가하십시오.
+4. 완전 열거: 질문에 해당하는 모든 항목·케이스·예외 규정을 빠짐없이 열거하십시오.
+   컨텍스트에 '~의 경우', '단, 중국은', '특정 국가는' 등 예외절이 보이면 반드시 포함하십시오.
+5. 대상 선별: 질문의 전형(신입학/편입학)·대상에 해당하지 않는 항목은 답변에서 제외하십시오.
+6. 자기 점검: 답변 작성 후 "컨텍스트에 등장한 항목 중 빠진 것이 없는지" 확인하고, 누락이 있으면 추가하십시오.
 
 ---
 [대화 세션 히스토리 (최근 내역 우선)]
 {session_history}
 
-[참고 컨텍스트 (RAG 문서 추출 내용) — 답변 생성용]
+[참고 컨텍스트 (RAG 문서 추출 내용)]
 {context}
 
 [사용자의 현재 질문]
 {question}
+
+답변을 plain text로 작성하십시오. JSON 형식 없이 답변 내용만 출력하십시오.
+"""
+
+_STREAM_SUGGESTIONS_TEMPLATE = """귀하는 대한민국 대학교 유학생 Q&A 어시스턴트입니다.
+아래 컨텍스트를 바탕으로 유학생이 다음에 관심 가질 후속 질문 3개를 생성하십시오.
+
+{lang_instruction}
+
 ---
-[Dynamic Few-Shot 예시 — 유사 질문에 대한 후속 질문 생성 레퍼런스]
+[Dynamic Few-Shot 예시 — 후속 질문 스타일 참고]
 아래 예시들을 참고하여 후속 질문의 스타일, 구체성, 행동 지향성을 학습하십시오.
 단, 예시의 내용을 그대로 복사하지 말고, 현재 질문과 컨텍스트에 맞게 새롭게 생성하십시오.
 
 {few_shot_examples}
 
 ---
-[후속 질문 생성 전용 컨텍스트 (RAG 문서 추출 내용) — 후속 질문 소재 탐색용]
+[후속 질문 생성 전용 컨텍스트 (RAG 문서 추출 내용)]
 아래는 현재 질문과 관련하여 RAG로 추가 검색한 문서 내용입니다.
 후속 질문은 반드시 이 컨텍스트 안에서 답변 가능한 내용을 소재로 생성하십시오.
 이 컨텍스트에 근거가 없는 후속 질문은 절대 생성하지 마십시오.
@@ -174,319 +178,123 @@ _CONVERSATIONAL_LEADING_TEMPLATE = """귀하는 대한민국 대학교에 재학
 {suggestion_context}
 
 ---
-[후속 질문 생성 시 필수 준수 가이드라인 (Usefulness Guidelines)]
-1. 중복 제거 (No Redundancy): 사용자의 현재 질문이나 세션 히스토리에 이미 등장했던 내용과 의미상 중복되거나 단순히 유사한 질문은 절대 배제하십시오.
-2. 전제조건 스킵 (Skip Prerequisites): 사용자가 이미 수행했거나 알고 있을 것으로 간주되는 기초적인 지식 단계는 건너뛰고, 실질적인 다음 액션 단계의 질문을 생성하십시오.
-3. 다음 유저 여정 유도 (Lead Next Journey): 유학생 행정 주기(예: 모집요강 확인 → 원서접수 → 서류제출 및 공증 → 합격확인 → 비자신청 → 정착 및 학사운영)에 따라, 다음 단계에 마주하게 될 실무적이고 구체적인 행동을 유도하는 질문을 제안하십시오.
-4. 답변 가능성 보장 (Answerability): 생성된 후속 질문은 반드시 위의 [후속 질문 생성 전용 컨텍스트]에서 답변 가능한 범위 내의 질문이어야 합니다. 컨텍스트 범위를 벗어나는 질문은 배제하십시오.
-5. 직접 근거 (Direct Groundedness): 후속 질문은 반드시 위의 [후속 질문 생성 전용 컨텍스트]에 등장하는 구체적인 단어, 수치, 절차, 조건 중 하나를 직접 소재로 해야 합니다. 컨텍스트에서 직접 파생되지 않은 질문은 절대 생성하지 마십시오.
-6. 구체적 키워드 포함 (Specific Keywords): 후속 질문에는 반드시 [후속 질문 생성 전용 컨텍스트]에 등장하는 고유명사, 수치, 기한, 서류명 중 하나 이상을 질문 문장 안에 명시적으로 포함하십시오.
-   나쁜 예: "장학금 신청 방법은?" → 좋은 예: "GKS 장학금 신청 시 제출 기한과 필수 서류 목록은?"
-7. 독립 완결성 (Self-contained): 후속 질문은 앞선 대화 맥락 없이 단독으로 검색되어도 완전히 의미가 통하는 독립적인 완전한 문장으로 작성하십시오. "그", "이", "해당", "위의" 등 지시대명사나 문맥 의존적 표현 대신 구체적인 명사를 사용하십시오.
-
-[출력 양식 가이드]
-반드시 아래의 엄격한 JSON 형식으로만 결과를 반환해야 하며, 마크다운 코드 블록(```json ```)을 제외한 다른 텍스트는 포함하지 마십시오.
-
-{{
-    "answer": "사용자 질문에 대한 최종 답변 내용",
-    "suggestions": ["답변 가능한 후속 질문을 6개 생성하십시오"]
-}}"""
-
-
-_EVAL_ONLY_TEMPLATE = """{lang_instruction}
-
-아래 [참고 컨텍스트]만을 근거로 질문에 답변하세요.
-컨텍스트에 없는 내용은 절대 추가하지 마세요.
-
-[참고 컨텍스트]
-{context}
-
-[질문]
+[방금 한 질문]
 {question}
 
-답변:"""
+---
+[후속 질문 생성 시 필수 준수 가이드라인 (Usefulness Guidelines)]
+1. 중복 제거 (No Redundancy): 방금 한 질문과 의미상 중복되거나 단순히 유사한 질문은 절대 배제하십시오.
+2. 전제조건 스킵 (Skip Prerequisites): 이미 수행했거나 알고 있을 기초 단계는 건너뛰고, 실질적인 다음 액션 단계의 질문을 생성하십시오.
+3. 다음 유저 여정 유도 (Lead Next Journey): 유학생 행정 주기(모집요강 확인 → 원서접수 → 서류제출 및 공증 → 합격확인 → 비자신청 → 정착 및 학사운영)에 따라 다음 단계를 유도하십시오.
+4. 답변 가능성 보장 (Answerability): 반드시 위 [컨텍스트]에서 답변 가능한 범위 내의 질문만 생성하십시오. 컨텍스트 범위를 벗어나는 질문은 배제하십시오.
+5. 직접 근거 (Direct Groundedness): 반드시 위 [컨텍스트]에 등장하는 구체적인 단어, 수치, 절차, 조건 중 하나를 직접 소재로 하십시오. 컨텍스트에서 직접 파생되지 않은 질문은 절대 생성하지 마십시오.
+6. 구체적 키워드 포함 (Specific Keywords): 컨텍스트에 등장하는 고유명사, 수치, 기한, 서류명 중 하나 이상을 질문 문장 안에 명시적으로 포함하십시오.
+   나쁜 예: "장학금 신청 방법은?" → 좋은 예: "GKS 장학금 신청 시 제출 기한과 필수 서류 목록은?"
+7. 독립 완결성 (Self-contained): 앞선 대화 맥락 없이 단독으로 검색되어도 완전히 의미가 통하는 독립적인 완전한 문장으로 작성하십시오. "그", "이", "해당", "위의" 등 지시대명사 대신 구체적인 명사를 사용하십시오.
 
-_LANGUAGE_INSTRUCTIONS = {
-    "ko": "한국어로 답변하고, 후속 질문도 한국어로 생성하십시오.",
-    "en": "Please answer in English, and generate follow-up questions in English as well.",
-    "zh": "请用中文回答，并同样用中文生成后续推荐问题。",
-    "es": "Por favor, responda en español y genere también las preguntas de seguimiento en español.",
-    "vi": "Hãy trả lời bằng tiếng Việt và tạo các câu hỏi gợi ý cũng bằng tiếng Việt.",
-    "auto": "사용자가 질문한 언어를 파악하여 반드시 답변과 후속 질문 모두 그 언어로 작성하십시오.",
-}
+반드시 JSON 배열만 반환: ["질문1", "질문2", "질문3"]
+"""
 
 
-def _verify_suggestions_by_search_and_llm(
+def _parse_suggestions(raw: str) -> List[str]:
+    """GPT 응답에서 JSON 배열 추출."""
+    raw = raw.strip()
+    raw = re.sub(r"```(?:json)?\s*", "", raw).replace("```", "").strip()
+    match = re.search(r'\[.*\]', raw, re.DOTALL)
+    if match:
+        result = json.loads(match.group())
+        if isinstance(result, list):
+            return result
+    return []
+
+
+async def stream_answer(
+    question: str,
+    context: str,
+    lang_instruction: str,
+    session_history: str,
+) -> AsyncGenerator[str, None]:
+    """답변만 스트리밍으로 생성. 토큰 단위로 yield."""
+    prompt = _STREAM_ANSWER_TEMPLATE.format(
+        lang_instruction=lang_instruction,
+        session_history=session_history,
+        context=context,
+        question=question,
+    )
+    try:
+        stream = await _async_client.chat.completions.create(
+            model=settings.openai_model,
+            messages=[{"role": "user", "content": prompt}],
+            temperature=0.3,
+            stream=True,
+        )
+        async for chunk in stream:
+            token = chunk.choices[0].delta.content or ""
+            if token:
+                yield token
+    except Exception:
+        yield "답변 생성 중 오류가 발생했습니다."
+
+
+async def _verify_suggestions_async(
     suggestions: List[str],
-    llm: ChatOpenAI,
-    min_score: float = 0.3,
-    search_k: int = 1,
+    min_score: float = 0.5,
 ) -> List[str]:
-    """
-    1차: 후속질문별 hybrid_rerank 재검색 — score < 0.3이면 즉시 탈락
-    2차: LLM 근거 인용 강제 검증 (현재 주석 처리)
-    """
+    """후속질문별 재검색으로 문서 근거 확인 — 점수 미달 시 탈락. 병렬 실행."""
     if not suggestions:
         return []
 
-    # ── 1차: hybrid_rerank 재검색 필터 (score < min_score 즉시 탈락) ────────
-    verified = []
-    for suggestion in suggestions:
+    async def _check(suggestion: str) -> tuple[str, float]:
         try:
-            _, verify_sources = retriever.retrieve_with_sources(suggestion, k=search_k)
-            score = verify_sources[0].get("similarity_score", 0.0) if verify_sources else 0.0
-            if score >= min_score:
-                verified.append(suggestion)
-        except Exception:
-            pass  # 검색 실패 시 보수적으로 제외
-
-    # ── 2차: LLM 검증 (재검색 컨텍스트 기반, 근거 인용 강제) ─────────────
-    # import re as _re
-    # candidates = [(q, ctx) for ...]  # hybrid_rerank 결과 컨텍스트 수집 필요
-    # questions_block = "\n".join(f"{i+1}. {q}" for i, (q, _) in enumerate(candidates))
-    # contexts_block = "\n\n".join(
-    #     f"[질문 {i+1} 검색 컨텍스트]\n{ctx}"
-    #     for i, (_, ctx) in enumerate(candidates)
-    # )
-    # prompt = (
-    #     "각 질문에 대해, 해당 번호의 [검색 컨텍스트]에서 구체적으로 답할 수 있는지 판단하세요.\n"
-    #     "판단 기준:\n"
-    #     "  - 컨텍스트에 구체적인 수치, 목록, 절차, 조건이 명시되어 있어야 true\n"
-    #     "  - 주제만 관련 있고 구체적인 답이 없으면 false\n"
-    #     "  - 근거 문장을 컨텍스트에서 직접 인용할 수 없으면 반드시 false\n\n"
-    #     f"{contexts_block}\n\n"
-    #     f"[질문 목록]\n{questions_block}\n\n"
-    #     "반드시 아래 JSON 형식으로만 반환하세요:\n"
-    #     '{"results": [{"answerable": true, "evidence": "컨텍스트에서 인용한 근거 문장"}, ...]}'
-    # )
-    # try:
-    #     response = llm.invoke(prompt)
-    #     raw = response.content.strip()
-    #     match = _re.search(r'\{.*\}', raw, _re.DOTALL)
-    #     if not match:
-    #         return verified[:3]
-    #     parsed = json.loads(match.group())
-    #     results_list = parsed.get("results", [])
-    #     verified = [
-    #         q for q, r in zip(verified, results_list)
-    #         if isinstance(r, dict) and r.get("answerable") is True and r.get("evidence", "").strip()
-    #     ]
-    # except Exception:
-    #     pass
-
-    return verified[:3]
-
-
-# ===========================================================================
-# [3] RAGLLM 클래스
-# ===========================================================================
-
-class RAGLLM:
-    def __init__(self):
-        self.llm = ChatOpenAI(
-            api_key=settings.openai_api_key,
-            model=settings.openai_model,
-            temperature=0.4,
-            max_tokens=2048,
-        )
-        self._total_tokens = 0
-        self._total_requests = 0
-        self._total_cost = 0.0
-
-    def get_usage(self) -> dict:
-        return {
-            "total_tokens": self._total_tokens,
-            "total_requests": self._total_requests,
-            "total_cost_usd": round(self._total_cost, 4),
-        }
-
-    def generate_answer_with_suggestions(
-        self,
-        question: str,
-        context: str,
-        lang_instruction: str,
-        history: Optional[List[Dict[str, str]]] = None,
-        use_few_shot: bool = True,          # ← 논문 Dynamic Few-Shot 제어 플래그
-        few_shot_top_k: int = 3,            # ← 선택할 예시 개수
-        suggestion_context: str = "",       # ← 후속 질문 전용 RAG 컨텍스트 (논문 §4)
-        lang: str = "ko",                   # ← few-shot 언어 필터링용
-    ) -> Tuple[str, List[str]]:
-        """
-        Dynamic Few-Shot + 세션 히스토리 + Usefulness 가이드라인을 통합한 코어 파이프라인.
-        
-        Args:
-            question:            현재 유저 질문
-            context:             RAG로 검색된 문서 컨텍스트 (답변용)
-            lang_instruction:    언어별 응답 지시문
-            history:             FastAPI 세션에서 전달받은 대화 히스토리 [{role, content}, ...]
-            use_few_shot:        Dynamic Few-Shot 예시 사용 여부 (기본 True)
-            few_shot_top_k:      동적으로 선택할 예시 개수 (기본 2)
-            suggestion_context:  후속 질문 생성 전용 RAG 컨텍스트 (논문 §4 Dynamic Retrieved Contexts)
-                                 비어있으면 답변용 context를 그대로 재사용
-        """
-
-        # ── 세션 히스토리 포맷팅 ──────────────────────────────────────────
-        history_str = ""
-        if history:
-            for turn in history[-5:]:   # 최근 5턴만 사용 (토큰 절약)
-                role = "유저" if turn.get("role") == "user" else "봇"
-                history_str += f"- {role}: {turn.get('content')}\n"
-        else:
-            history_str = "(이전 대화 내역 없음 - 첫 질문)"
-
-        # ── Dynamic Few-Shot 예시 선택 (논문 핵심) ───────────────────────
-        if use_few_shot:
-            selected_examples = _select_dynamic_few_shot_examples(
-                question=question,
-                top_k=few_shot_top_k,
-                lang=lang,
+            _, sources = await asyncio.to_thread(
+                retriever.retrieve_with_sources, suggestion, 1
             )
-            few_shot_block = _format_few_shot_block(selected_examples)
-        else:
-            few_shot_block = "(Dynamic Few-Shot 비활성화)"
+            score = sources[0].get("similarity_score", 0.0) if sources else 0.0
+            return suggestion, score
+        except Exception:
+            return suggestion, 0.0
 
-        # ── 후속 질문 전용 컨텍스트 결정 (논문 §4: Dynamic Retrieved Contexts) ──
-        # suggestion_context가 전달된 경우 → 후속 질문 전용 컨텍스트 사용
-        # 전달되지 않은 경우 → 답변용 context 재사용 (하위 호환)
-        suggestion_ctx = suggestion_context if suggestion_context.strip() else context
+    results = await asyncio.gather(*[_check(s) for s in suggestions])
+    for s, score in results:
+        print(f"[verify] {score:.3f} | {s}")
+    verified = [s for s, score in results if score >= min_score]
+    print(f"[verify] {len(verified)}/{len(results)} 통과 (min_score={min_score})")
+    return verified
 
-        # ── 프롬프트 구성 ─────────────────────────────────────────────────
-        prompt_text = _CONVERSATIONAL_LEADING_TEMPLATE.format(
-            lang_instruction=lang_instruction,
-            session_history=history_str,
-            context=context,
-            suggestion_context=suggestion_ctx,
-            question=question,
-            few_shot_examples=few_shot_block,
+
+async def generate_suggestions_async(
+    question: str,
+    suggestion_context: str,
+    lang_instruction: str,
+    lang: str = "ko",
+) -> List[str]:
+    """후속질문 비동기 생성. Dynamic Few-Shot + 문서 근거 검증 포함."""
+    print(f"[suggestions] 시작 | lang={lang} | question={question[:30]}")
+    try:
+        few_shot_examples = await asyncio.to_thread(
+            _select_dynamic_few_shot_examples, question, 3, lang
         )
+        few_shot_block = _format_few_shot_block(few_shot_examples)
+    except Exception:
+        few_shot_block = "(예시 없음)"
 
-        try:
-            with get_openai_callback() as cb:
-                response = self.llm.invoke(prompt_text)
-            self._total_tokens += cb.total_tokens
-            self._total_requests += cb.successful_requests
-            self._total_cost += cb.total_cost
-            print(f"[API] 이번: {cb.total_tokens}토큰 | 누적: {self._total_tokens:,}토큰 / {self._total_requests}회 / ${self._total_cost:.4f}")
-
-            raw_output = response.content
-            clean_output = raw_output.replace("```json", "").replace("```", "").strip()
-            # JSON 블록만 추출 (LLM이 앞뒤로 설명 텍스트를 붙인 경우 대비)
-            import re as _re
-            json_match = _re.search(r'\{.*\}', clean_output, _re.DOTALL)
-            if json_match:
-                clean_output = json_match.group()
-            parsed_data = json.loads(clean_output)
-
-            answer = parsed_data.get("answer", "답변을 생성하지 못했습니다.")
-            suggestions = parsed_data.get("suggestions", [])
-
-        except Exception as e:
-            answer = "죄송합니다. 답변을 생성하는 도중 에러가 발생했습니다."
-            suggestions = []
-
-        return answer, suggestions
-
-    # ── 라우터 연동 메서드 ─────────────────────────────────────────────────
-    # [고도화 포인트] history 파라미터를 실제로 받아서 코어 파이프라인에 전달
-    # FastAPI 라우터에서: rag_chain.generate_answer_with_language(..., history=session_history)
-    # ─────────────────────────────────────────────────────────────────────────
-
-    def generate_answer_with_language(
-        self,
-        question: str,
-        language: str = "en",
-        top_k: int = DEFAULT_TOP_K,
-        ko_query: Optional[str] = None,
-        history: Optional[List[Dict[str, str]]] = None,
-        prefetched_vector_docs: Optional[List] = None,
-    ) -> Tuple[str, List[dict], List[str]]:
-        """
-        chat.py 라우터와의 호환성을 유지하면서 세션 히스토리를 실제로 수신하는 메서드.
-        
-        FastAPI 라우터 연동 예시 (app/api/chat.py):
-        
-            from app.core.session import get_session_history  # 세션 관리 유틸
-            
-            @router.post("/chat")
-            async def chat(req: ChatRequest, session_id: str = Header(...)):
-                history = await get_session_history(session_id)   # ← 세션에서 히스토리 조회
-                
-                answer, sources, suggestions = rag_chain.generate_answer_with_language(
-                    question=req.question,
-                    language=req.language,
-                    ko_query=req.ko_query,
-                    history=history,          # ← 실제 히스토리 전달 (기존: [])
-                )
-                
-                await append_to_session(session_id, "user", req.question)
-                await append_to_session(session_id, "assistant", answer)
-                
-                return {"answer": answer, "sources": sources, "suggestions": suggestions}
-        """
-        search_query = ko_query if ko_query else question
-
-        # ── 답변용 컨텍스트 검색 (벡터 결과 미리 가져온 경우 재사용) ────────
-        context_str, sources = retriever.retrieve_with_sources(
-            search_query, k=top_k, ko_query=ko_query,
-            prefetched_vector_docs=prefetched_vector_docs,
+    prompt = _STREAM_SUGGESTIONS_TEMPLATE.format(
+        lang_instruction=lang_instruction,
+        suggestion_context=suggestion_context,
+        question=question,
+        few_shot_examples=few_shot_block,
+    )
+    try:
+        resp = await _async_client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[{"role": "user", "content": prompt}],
+            temperature=0.3,
+            max_tokens=500,
         )
+        suggestions = _parse_suggestions(resp.choices[0].message.content)
+        print(f"[suggestions] GPT 생성 {len(suggestions)}개: {suggestions}")
+    except Exception as e:
+        print(f"[suggestions] GPT 호출 실패: {e}")
+        return []
 
-        # ── [코드 레벨 1차 차단] 관련성 점수 임계값 체크 ─────────────────
-        # PDF와 무관한 질문(관련성 < 0.3)은 LLM 호출 없이 즉시 차단
-        max_score = _get_max_relevance_score(sources)
-        if max_score < _RELEVANCE_THRESHOLD:
-            return _OUT_OF_SCOPE_ANSWER, sources, []
-
-        # # ── 후속 질문 전용 컨텍스트 별도 검색 (논문 §4: Dynamic Retrieved Contexts) ──
-        # # 논문 권장: top 4개 문서를 별도 검색하여 후속 질문 소재로 활용
-        # # 답변용(top_k=3)보다 넓게 검색해 다양한 후속 질문 소재 확보
-        # suggestion_context_str, _ = retriever.retrieve_with_sources(search_query, k=4)
-
-        lang_instruction = _LANGUAGE_INSTRUCTIONS.get(
-            language, "질문과 같은 언어로 명확하고 유용한 답변을 제공하십시오."
-        )
-
-        answer, suggestions = self.generate_answer_with_suggestions(
-            question=question,
-            context=context_str,
-            lang_instruction=lang_instruction,
-            history=history or [],
-            use_few_shot=True,
-            few_shot_top_k=2,
-            suggestion_context=context_str,
-            lang=language,                   # ← 언어별 few-shot 필터링
-        )
-
-        # ── 생성 후 검증 (Post-generation Verification) ──────────────────────
-        # 1차: 벡터 재검색 score < 0.3 즉시 탈락 / 2차: LLM 근거 인용 강제 검증
-        suggestions = _verify_suggestions_by_search_and_llm(suggestions, self.llm)
-
-        return answer, sources, suggestions
-
-    def generate_answer(
-        self,
-        question: str,
-        context: Optional[str] = None,
-        top_k: int = 3,
-        lang: str = "ko",
-    ) -> Tuple[str, List[dict]]:
-        """기본형 메서드 구조 호환 유지 (히스토리·후속질문 불필요한 단순 질의 및 평가용)"""
-        if context is None:
-            context_str, sources = retriever.retrieve_with_sources(question, k=top_k)
-        else:
-            context_str = context
-            sources = []
-
-        lang_instruction = _LANGUAGE_INSTRUCTIONS.get(lang, _LANGUAGE_INSTRUCTIONS["ko"])
-        prompt = _EVAL_ONLY_TEMPLATE.format(
-            lang_instruction=lang_instruction,
-            context=context_str,
-            question=question,
-        )
-        response = self.llm.invoke(prompt)
-        answer = response.content.strip()
-        return answer, sources
-
-
-# chat.py 라우터 인스턴스 이름 바인딩
-rag_chain = RAGLLM()
+    return await _verify_suggestions_async(suggestions)

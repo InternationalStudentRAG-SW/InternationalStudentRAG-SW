@@ -1,7 +1,13 @@
+export interface MessageHistory {
+  role: 'user' | 'assistant'
+  content: string
+}
+
 export interface ChatRequest {
   question: string
   language?: string
   top_k?: number
+  history?: MessageHistory[]
 }
 
 export interface Source {
@@ -31,7 +37,9 @@ export interface Message {
   sources?: Source[]
   language?: string
   timestamp: Date
-  suggestions?: string[];
+  suggestions?: string[]
+  statusSteps?: string[]
+  metaStatus?: string
 }
 
 export interface UserProfile {
@@ -40,7 +48,7 @@ export interface UserProfile {
   nationality: string | null
 }
 
-export type Language = 'auto' | 'ko' | 'en' | 'zh' | 'es'
+export type Language = 'auto' | 'ko' | 'en' | 'zh' | 'es' | 'vi'
 
 export interface FaqItem {
   id: string
@@ -63,4 +71,5 @@ export const LANGUAGE_LABELS: Record<Language, string> = {
   en: 'English',
   zh: '中文',
   es: 'Español',
+  vi: 'Tiếng Việt',
 }

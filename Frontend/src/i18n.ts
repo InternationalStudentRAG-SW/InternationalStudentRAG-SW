@@ -63,6 +63,22 @@ export const UI_LABELS = {
     suggestions: 'También puedes preguntar:',
     timeLocale: 'es-ES',
   },
+  vi: {
+    sidebarTitle: 'Hướng dẫn Cuộc sống\nDu học sinh',
+    sidebarDesc: 'Chatbot thông minh giúp bạn nhanh chóng tìm kiếm thông tin dựa trên tài liệu trường.',
+    sidebarStatus: 'Sẵn sàng tư vấn',
+    faqTitle: 'Câu hỏi thường gặp',
+    chatEmpty: 'Nhập câu hỏi để bắt đầu trò chuyện.',
+    chatPlaceholder: 'Ví dụ: Thời gian đăng ký ký túc xá là khi nào?',
+    btnClear: 'Xóa',
+    btnSend: 'Gửi',
+    chatSubtitle: 'Dựa trên tài liệu · Phản hồi nhanh',
+    loadingText: 'Đang tạo câu trả lời...',
+    sourceTitle: 'Tài liệu nguồn',
+    relevance: 'Độ liên quan',
+    suggestions: 'Bạn cũng có thể hỏi:',
+    timeLocale: 'vi-VN',
+  },
 }
 
 export type UILabels = typeof UI_LABELS.ko

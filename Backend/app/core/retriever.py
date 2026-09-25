@@ -127,13 +127,15 @@ class RAGRetriever:
         return "\n\n".join(context_parts)
 
     def retrieve_with_sources(self, query: str, k: Optional[int] = None, ko_query: Optional[str] = None,
-                              prefetched_vector_docs: Optional[List[Document]] = None) -> Tuple[str, List[Dict[str, Any]]]:
+                              prefetched_vector_docs: Optional[List[Document]] = None,
+                              context_min_score: float = 0.55) -> Tuple[str, List[Dict[str, Any]]]:
         docs = self.retrieve(query, k=k, ko_query=ko_query, prefetched_vector_docs=prefetched_vector_docs)
-        context = self.format_context(docs)
+        context_docs = [d for d in docs if d.metadata.get("similarity_score", 1.0) >= context_min_score]
+        context = self.format_context(context_docs if context_docs else docs)
 
         seen_sources = set()
         sources = []
-        for i, doc in enumerate(docs):
+        for i, doc in enumerate(context_docs if context_docs else docs):
             source = doc.metadata.get("source", "알 수 없음")
             if source not in seen_sources:
                 seen_sources.add(source)
@@ -146,7 +148,7 @@ class RAGRetriever:
                 })
 
         return context, sources
-
+# 여기쪽에서 시뮬러리 컨트롤 하면 컨텍스트 관련성 괜찮은거만 들어 가겠네 ㅇㅈ? 일단 확인 ㄱㄷ 
 
 # 실서비스용 모델
 retriever = RAGRetriever(mode="hybrid_rerank")

@@ -125,14 +125,20 @@ class SemanticCache:
                     "_cache_key": None,  # 추가 저장 불필요
                 }
 
-            # 없으면 answer_ko를 번역해서 반환 (번역은 호출자가 수행)
-            base_answer = best_entry.get("answer_ko", "")
-            base_suggestions = json.loads(best_entry.get("suggestions_ko", "[]"))
+            # 없으면 저장된 언어 중 하나를 base로 번역 (ko 우선, 없으면 다른 언어)
+            base_lang = next(
+                (l for l in ("ko", "en", "zh", "es", "vi") if best_entry.get(f"answer_{l}")),
+                None
+            )
+            if not base_lang:
+                return None
+            base_answer = best_entry[f"answer_{base_lang}"]
+            base_suggestions = json.loads(best_entry.get(f"suggestions_{base_lang}", "[]"))
             return {
                 "answer": base_answer,
                 "sources": json.loads(best_entry["sources"]),
                 "suggestions": base_suggestions,
-                "language": "ko",           # 번역 전 언어임을 표시
+                "language": base_lang,      # 번역 전 언어임을 표시
                 "question": ko_query,
                 "_cache_key": best_key,     # 번역 후 이 키에 필드 추가
                 "_needs_translation": True,

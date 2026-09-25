@@ -1,0 +1,52 @@
+name: Test Backend
+
+# 트리거 조건:
+# - dev 브랜치에 push 시 (feature → dev PR 머지 포함)
+# - dev 또는 main 브랜치로 PR 생성/업데이트 시
+# - Backend/ 코드 또는 이 워크플로 파일이 변경된 경우에만 실행
+on:
+  push:
+    branches: [dev]
+    paths:
+      - 'Backend/**'
+      - '.github/workflows/test-backend.yml'
+  pull_request:
+    branches: [dev, main]
+    paths:
+      - 'Backend/**'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. 코드 체크아웃
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # 2. Python 3.11 환경 세팅
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      # 3. pip 캐싱
+      #    requirements.txt가 변경되지 않으면 이전 캐시 재사용 → 설치 시간 단축
+      - name: Cache pip dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('Backend/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      # 4. 의존성 설치
+      - name: Install dependencies
+        working-directory: Backend
+        run: pip install --no-cache-dir -r requirements.txt
+
+      # 5. 테스트 실행
+      #    tests/ 디렉토리의 pytest 테스트 수행
+      - name: Run tests
+        working-directory: Backend
+        run: pytest tests/ -v

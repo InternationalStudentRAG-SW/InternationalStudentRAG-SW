@@ -12,7 +12,7 @@ import './admin.css'
 const LIMIT = 20
 
 const LANG_LABELS: Record<string, string> = {
-  ko: 'KO', en: 'EN', zh: 'ZH', es: 'ES', auto: 'AUTO',
+  ko: 'KO', en: 'EN', zh: 'ZH', es: 'ES', vi: 'VI', auto: 'AUTO',
 }
 
 const LANG_COLORS: Record<string, string> = {
@@ -206,6 +206,7 @@ export default function AdminChatLogPage() {
             <option value="en">EN</option>
             <option value="zh">ZH</option>
             <option value="es">ES</option>
+            <option value="vi">VI</option>
             <option value="auto">AUTO</option>
           </select>
           <input

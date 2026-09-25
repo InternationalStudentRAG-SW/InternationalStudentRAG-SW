@@ -3,19 +3,11 @@ from datetime import date
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
 from app.models.schemas import DocumentUploadResponse, DocumentUploadRequest, HealthResponse, UpdateRoleRequest, UpdateStatusRequest
 from app.core.knowledge_base import knowledge_base
-from app.core.ingestion import ingester
 from app.core.auth_middleware import get_admin_user
-from app.core.llm import rag_chain
 from app.db.database import supabase
 
 
 router = APIRouter(prefix="/admin", tags=["admin"])
-
-
-@router.get("/usage")
-async def get_api_usage(user: dict = Depends(get_admin_user)):
-    """서버 시작 이후 누적 OpenAI API 사용량을 반환합니다."""
-    return rag_chain.get_usage()
 
 
 @router.post("/upload", response_model=DocumentUploadResponse)
@@ -24,14 +16,19 @@ async def upload_document(file: UploadFile = File(...), user: dict = Depends(get
     if file.filename and not file.filename.lower().endswith('.pdf'):
         raise HTTPException(status_code=400, detail="PDF 파일만 지원합니다")
     try:
-        tmp_path = f"/tmp/{file.filename}"
-        with open(tmp_path, "wb") as f:
+        from app.config import settings
+        from pathlib import Path
+        save_dir = Path(settings.document_path)
+        save_dir.mkdir(parents=True, exist_ok=True)
+        save_path = save_dir / file.filename
+
+        with open(save_path, "wb") as f:
             f.write(await file.read())
 
-        pages_data = ingester.extract_from_pdf(tmp_path)
-        os.unlink(tmp_path)
+        pages_data = knowledge_base.splitter.extract_from_pdf(str(save_path))
 
         if not pages_data:
+            save_path.unlink(missing_ok=True)
             raise HTTPException(status_code=400, detail="PDF에서 텍스트를 찾을 수 없습니다")
 
         total_chunks = sum(

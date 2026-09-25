@@ -1,0 +1,25 @@
+# 로컬 개발 전용 — RunPod 프로덕션에서는 사용하지 않음
+# 사용법:
+#   실행: docker-compose up --build
+#   종료: docker-compose down
+#   로그: docker-compose logs -f backend
+
+services:
+  backend:
+    build:
+      context: ./Backend      # Backend/Dockerfile 기준으로 빌드
+    ports:
+      - "8000:8000"           # 로컬 8000 → 컨테이너 8000
+    env_file:
+      - ./Backend/.env        # .env 파일의 환경변수 전체 주입
+    volumes:
+      # 맥북 DATA 폴더를 컨테이너 /data 에 연결
+      # 컨테이너를 재시작해도 ChromaDB 데이터 유지됨
+      - ./DATA/chroma_db:/data/chroma_db
+      - ./DATA/documents:/data/documents
+    environment:
+      # .env의 경로값을 컨테이너 내부 경로로 덮어씀
+      # 컨테이너 안에는 ../DATA/ 경로가 없기 때문
+      - CHROMA_DB_PATH=/data/chroma_db
+      - DOCUMENT_PATH=/data/documents
+    restart: unless-stopped   # 비정상 종료 시 자동 재시작

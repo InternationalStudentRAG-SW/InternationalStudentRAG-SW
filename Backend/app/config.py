@@ -33,8 +33,16 @@ class Settings(BaseSettings):
 
     # Redis 시맨틱 캐시
     upstash_redis_url: str = ""
-    semantic_cache_threshold: float = 0.75
+    semantic_cache_threshold: float = 0.70
     semantic_cache_ttl: int = 86400
+
+    # CORS
+    cors_origins: str = "http://localhost:3000"
+
+    # Neo4j 그래프DB (비어있으면 자동 비활성화)
+    neo4j_uri: str = ""
+    neo4j_user: str = ""
+    neo4j_password: str = ""
 
     class Config:
         env_file = ".env"

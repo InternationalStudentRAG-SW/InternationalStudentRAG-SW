@@ -46,7 +46,7 @@ jobs:
         run: pip install --no-cache-dir -r requirements.txt
 
       # 5. 테스트 실행
-      #    evaluate/ 디렉토리의 pytest 테스트 수행
+      #    tests/ 디렉토리의 pytest 테스트 수행
       - name: Run tests
         working-directory: Backend
-        run: pytest evaluate/ -v
+        run: pytest tests/ -v

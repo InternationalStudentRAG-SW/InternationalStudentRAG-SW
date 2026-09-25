@@ -56,4 +56,4 @@ redis==8.1.0
 
 # ── RunPod Serverless ─────────────────────────────────────
 runpod==1.7.9
-requests==2.32.3
+requests==2.32.5

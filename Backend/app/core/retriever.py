@@ -150,10 +150,9 @@ class RAGRetriever:
         return context, sources
 # 여기쪽에서 시뮬러리 컨트롤 하면 컨텍스트 관련성 괜찮은거만 들어 가겠네 ㅇㅈ? 일단 확인 ㄱㄷ 
 
-# 실서비스용 모델
 retriever = RAGRetriever(mode="hybrid_rerank")
 
-# 평가용 모델
-vector_retriever = RAGRetriever(mode="vector")
-hybrid_retriever = RAGRetriever(mode="hybrid")
-hybrid_rerank_retriever = RAGRetriever(mode="hybrid_rerank")
+# 평가용 모델 (evaluate/ 스크립트에서만 직접 인스턴스화해서 사용)
+# vector_retriever = RAGRetriever(mode="vector")
+# hybrid_retriever = RAGRetriever(mode="hybrid")
+# hybrid_rerank_retriever = RAGRetriever(mode="hybrid_rerank")

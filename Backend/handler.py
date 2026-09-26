@@ -55,7 +55,7 @@ def handler(job):
             f"http://localhost:8000{path}",
             json=body,
             headers=headers,
-            timeout=120,
+            timeout=300,
         )
         return {
             "status_code": response.status_code,

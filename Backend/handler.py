@@ -57,9 +57,14 @@ def handler(job):
             headers=headers,
             timeout=300,
         )
+        content_type = response.headers.get("content-type", "")
+        if "application/json" in content_type:
+            body = response.json()
+        else:
+            body = response.text
         return {
             "status_code": response.status_code,
-            "body": response.json(),
+            "body": body,
         }
     except Exception as e:
         return {"error": str(e)}

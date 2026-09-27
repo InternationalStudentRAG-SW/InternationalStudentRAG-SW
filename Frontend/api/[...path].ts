@@ -1,5 +1,8 @@
 export const config = { runtime: 'edge' }
 
+// Vercel Edge Runtime exposes process.env at runtime
+declare const process: { env: Record<string, string | undefined> }
+
 const CORS_HEADERS = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Methods': 'GET, POST, PUT, PATCH, DELETE, OPTIONS',

@@ -1,4 +1,5 @@
-export const config = { runtime: 'edge' }
+// Node.js Serverless Function (maxDuration 60s covers RunPod cold start ~40s)
+export const config = { maxDuration: 60 }
 
 const CORS_HEADERS = {
   'Access-Control-Allow-Origin': '*',

@@ -19,7 +19,7 @@ export default async function handler(request: Request): Promise<Response> {
     return new Response(null, { status: 204, headers: CORS_HEADERS })
   }
 
-  const url = new URL(request.url)
+  const url = new URL(request.url, `https://${request.headers.get('host') ?? 'localhost'}`)
   // Strip /api prefix added by VITE_API_BASE_URL=/api
   const backendPath = url.pathname.replace(/^\/api/, '') || '/'
   const method = request.method

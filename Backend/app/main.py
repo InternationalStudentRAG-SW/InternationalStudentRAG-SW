@@ -1,5 +1,10 @@
+import logging
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+
+logging.getLogger("neo4j").propagate = False
+logging.getLogger("neo4j").setLevel(logging.ERROR)
+logging.getLogger("huggingface_hub").propagate = False
 
 from app.api.routes import chat, admin, auth, document
 from app.api.routes.faq import router as faq_router

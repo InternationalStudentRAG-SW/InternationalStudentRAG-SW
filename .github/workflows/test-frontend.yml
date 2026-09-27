@@ -33,3 +33,7 @@ jobs:
       - name: Build
         working-directory: Frontend
         run: npm run build
+
+      - name: Type check API functions
+        working-directory: Frontend/api
+        run: npx tsc --noEmit

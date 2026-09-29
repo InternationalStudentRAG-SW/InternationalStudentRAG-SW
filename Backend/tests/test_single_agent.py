@@ -415,3 +415,197 @@ def test_verify_prompt_chunk_header_has_no_brackets():
     cid = next(iter(pool.chunks))
     prompt = build_user_prompt(analysis, judge_targets(analysis), [cid], pool, "질문")
     assert f"### 청크 ID: {cid}\n" in prompt and f"[{cid}]" not in prompt
+
+
+# ── 청크 메모: 대상 한정(1-1)·갈래 감지(1-3)·갈래 저장(1-5) ─────────────────
+
+def _run_verify(llm_output, conditions=None, analysis=None):
+    from evaluate.check_verification import FakeClient, build_inputs
+    from evaluate.verify_scenarios import B1, BASE_POOL, FIRST
+    from app.core.single_agent.verifier import verify_evidence
+    a0, pool, history, budget = build_inputs(
+        {"pool": BASE_POOL, "history": FIRST, "budget": B1, "conditions": conditions or []})
+    return verify_evidence(analysis or a0, pool, budget, history, model="fake", client=FakeClient(llm_output))
+
+
+def _note(page, idx, applies=(), rel=("rule",)):
+    from evaluate.verify_scenarios import gid
+    return {"evidence_id": gid(page, idx), "applies_to": [{"field_id": f, "value": v} for f, v in applies],
+            "relevant_slots": list(rel)}
+
+
+def _verdicts(scope_pages):
+    from evaluate.verify_scenarios import ALL_GOOD, ref, v
+    quotes = {(11, 0): "A GKS recipient in a degree program", (10, 3): "A GKS recipient in the Korean language program"}
+    scope = v("applicable_scope", "supported", [ref(p, i, quotes[(p, i)]) for p, i in scope_pages])
+    return [ALL_GOOD[0], scope] + ALL_GOOD[2:]
+
+
+STAGE_NOTES = [_note(11, 0, [("gks_stage", "학위과정")], ("rule", "applicable_scope")),
+               _note(10, 3, [("gks_stage", "어학연수")], ("rule", "applicable_scope"))]
+
+
+def test_notes_detect_branches_and_lower_scope_citing_one_branch():
+    """1-3: 청크 메모의 적용 대상 값이 둘이면 갈래. 적용 범위가 한 갈래만 인용하면 partial."""
+    run = _run_verify({"chunk_notes": STAGE_NOTES, "slot_verdicts": _verdicts([(11, 0)])})
+    a = run.analysis
+    scope = next(s for s in a.document_slots if s.slot_id == "applicable_scope")
+    u = next(u for u in a.user_slots if u.field_id == "gks_stage")
+    assert scope.status == "partial" and "어학연수" in scope.missing_detail
+    assert u.active and [b.value for b in u.branches] == ["학위과정", "어학연수"]
+    assert all(b.source == "notes" for b in u.branches)
+    assert run.decision.next_action == "continue_search"
+    assert any(w.startswith("[갈래] gks_stage") for w in run.warnings)
+
+
+def test_notes_branches_with_full_scope_give_answer_by_condition():
+    run = _run_verify({"chunk_notes": STAGE_NOTES, "slot_verdicts": _verdicts([(11, 0), (10, 3)])})
+    d = run.decision
+    assert d.next_action == "answer_by_condition" and d.condition_field_ids == ["gks_stage"]
+    assert d.condition_branches["gks_stage"] == ["학위과정", "어학연수"]
+
+
+def test_notes_single_target_marks_scope_partial():
+    """1-1: 인용된 근거가 전부 한 대상(GKS 장학생) 규정이면 적용 범위 partial + 그 조건을 연다."""
+    gks = [("gks_status", "GKS 장학생")]
+    notes = [_note(11, 0, gks), _note(10, 3, gks), _note(10, 4, gks), _note(11, 2, gks)]
+    run = _run_verify({"chunk_notes": notes, "slot_verdicts": _verdicts([(11, 0), (10, 3)])})
+    a = run.analysis
+    scope = next(s for s in a.document_slots if s.slot_id == "applicable_scope")
+    u = next(u for u in a.user_slots if u.field_id == "gks_status")
+    assert scope.status == "partial" and "gks_status=GKS 장학생" in scope.missing_detail
+    assert u.active and u.branches[0].value == "GKS 장학생"
+    assert any("[대상 한정]" in w for w in run.warnings)
+
+
+def test_notes_ignore_confirmed_condition_and_unrelated_chunks():
+    """질문이 이미 대상을 밝혔으면(조건 확인됨) 대상 한정이 아니다. 관련 없는 청크의 값은 갈래로 치지 않는다."""
+    gks = [("gks_status", "GKS 장학생")]
+    cond = [{"field_id": "gks_status", "value": "GKS 장학생", "subject": "question_target", "status": "confirmed",
+             "source_message_id": "m1", "quote": "GKS 장학생"}]
+    notes = [_note(11, 0, gks), _note(10, 3, gks), _note(10, 4, gks), _note(11, 2, gks),
+             _note(10, 9, [("gks_stage", "졸업생")], rel=()),              # 인용·관련 없음
+             _note(11, 0, [("없는칸", "x")])]                              # 중복·정의 안 된 칸
+    run = _run_verify({"chunk_notes": notes, "slot_verdicts": _verdicts([(11, 0), (10, 3)])}, conditions=cond)
+    a = run.analysis
+    assert next(s for s in a.document_slots if s.slot_id == "applicable_scope").status == "supported"
+    assert not any(u.active for u in a.user_slots)
+    assert run.decision.next_action == "answer"
+
+
+def test_branches_persist_to_next_round():
+    """1-5: 다음 라운드 LLM이 갈래를 다시 적지 않아도 저장된 갈래로 조건별 안내를 한다."""
+    from evaluate.verify_scenarios import ALL_GOOD, v
+    r1 = _verdicts([(11, 0), (10, 3)])
+    r1[2] = v("conditions_limits", "partial", [r1[2]["evidence_refs"][0]], activation_state="triggered")
+    run1 = _run_verify({"chunk_notes": STAGE_NOTES, "slot_verdicts": r1})
+    assert run1.decision.next_action == "continue_search"
+    run2 = _run_verify({"slot_verdicts": [ALL_GOOD[2]]}, analysis=run1.analysis)   # 메모·갈래 없이 한 칸만 판정
+    d = run2.decision
+    assert d.next_action == "answer_by_condition"
+    assert d.condition_branches["gks_stage"] == ["학위과정", "어학연수"]
+
+
+def test_llm_user_field_needs_are_stored_as_branches():
+    from evaluate.verify_scenarios import ALL_GOOD, STAGE_NEED
+    run = _run_verify({"slot_verdicts": ALL_GOOD, "user_field_needs": [STAGE_NEED]})
+    u = next(u for u in run.analysis.user_slots if u.field_id == "gks_stage")
+    assert [(b.value, b.summary, b.source) for b in u.branches] == [
+        ("학위과정", "총장 승인 시 가능", "llm"), ("한국어연수", "6개월 이후 방학 중", "llm")]
+    assert "갈래:" not in u.reason     # 예전처럼 reason에 누적하지 않음
+
+
+# ── 문서별 기본 대상(DOC_SCOPES)·질문이 가리킨 대상 ─────────────────────────
+
+KOT_SRC = "[동아대]2026학년도+후기+학부+외국인+신(편)입학+특별전형+모집요강_한국어트랙.pdf"
+ENT_SRC = "[Dong-A+univ]2026+FALL+Admission+Guidelines_English+track+for+the+Undergraduates_English+Track.pdf"
+KLC_SRC = "English_2026-2027+Korean+Language+Course.pdf"
+
+
+def _run_docs(pool_items, verdicts, notes=None, question=""):
+    from evaluate.check_verification import FakeClient, build_inputs
+    from evaluate.verify_scenarios import B1, FIRST
+    from app.core.single_agent.verifier import verify_evidence
+    a, pool, history, budget = build_inputs({"pool": pool_items, "history": FIRST, "budget": B1})
+    out = {"slot_verdicts": verdicts, "chunk_notes": notes or []}
+    return verify_evidence(a, pool, budget, history, question=question, model="fake", client=FakeClient(out))
+
+
+def _scope_verdicts(ids_quotes):
+    from evaluate.verify_scenarios import v
+    refs = [{"evidence_id": i, "quote": q} for i, q in ids_quotes]
+    return [v("rule", "supported", refs[:1]), v("applicable_scope", "supported", refs)]
+
+
+def test_doc_scopes_find_track_branch_even_without_llm_notes():
+    """D2 재현: LLM이 청크 메모에 트랙을 안 적어도 문서 이름으로 track 갈래를 찾는다."""
+    k, e = f"{KOT_SRC}#p5#c0", f"{ENT_SRC}#p5#c0"
+    pool = [{"id": k, "text": "모집기간 2026.4.1.(수) ~ 4.14.(화)"}, {"id": e, "text": "Application period April 1 ~ April 14"}]
+    run = _run_docs(pool, _scope_verdicts([(k, "2026.4.1.(수) ~ 4.14.(화)"), (e, "Application period April 1")]),
+                    question="동아대학교 2026년 가을학기 지원 기간이 언제예요?")
+    u = next(u for u in run.analysis.user_slots if u.field_id == "track")
+    assert u.active and sorted(b.value for b in u.branches) == ["영어트랙", "한국어트랙"]
+
+
+def test_doc_scopes_unify_llm_value_and_question_alias_skips_target_rule():
+    """LLM 표기('Korean Language Course')는 문서 값으로 통일, 질문이 '어학당'을 가리키면 대상 한정을 적용하지 않는다."""
+    c = f"{KLC_SRC}#p2#c1"
+    pool = [{"id": c, "text": "Tuition Fee 1,300,000 KRW per semester"}]
+    notes = [{"evidence_id": c, "applies_to": [{"field_id": "program", "value": "Korean Language Course"}],
+              "relevant_slots": ["rule"]}]
+    verdicts = _scope_verdicts([(c, "Tuition Fee 1,300,000 KRW per semester")])
+    run = _run_docs(pool, verdicts, notes, question="한국어학당 수업료가 얼마예요?")
+    assert [a.value for a in run.chunk_notes[0].applies_to] == ["어학연수"]
+    assert next(s for s in run.analysis.document_slots if s.slot_id == "applicable_scope").status == "supported"
+    assert not any(u.active for u in run.analysis.user_slots)
+    # 질문이 대상을 가리키지 않으면(비자 서류) 어학당 자료만으로 답한 것 → 대상 한정
+    run2 = _run_docs(pool, verdicts, notes, question="What documents do I need to apply for a student visa?")
+    assert next(s for s in run2.analysis.document_slots if s.slot_id == "applicable_scope").status == "partial"
+    assert next(u for u in run2.analysis.user_slots if u.field_id == "program").active
+
+
+# ── 1-2 근거 빠뜨림: 관련 있다고 적고 인용 안 한 청크 → 1회 재판정 ─────────────
+
+def _recheck_inputs():
+    from evaluate.verify_scenarios import ALL_GOOD, ref, v
+    first = {"chunk_notes": [_note(11, 0, rel=("rule",)), _note(10, 4, rel=("rule", "conditions_limits"))],
+             "slot_verdicts": ALL_GOOD}    # rule은 11,0만 인용 → 10,4 빠뜨림
+    fixed = v("rule", "supported", [ref(10, 4, "part-time employment shall not exceed twenty (20) hours per week")])
+    return first, fixed
+
+
+def test_recheck_adds_missed_evidence_and_keeps_old_refs():
+    from evaluate.check_verification import FakeClient, build_inputs
+    from evaluate.verify_scenarios import B1, BASE_POOL, FIRST, gid
+    from app.core.single_agent.verifier import verify_evidence
+    first, fixed = _recheck_inputs()
+    a, pool, history, budget = build_inputs({"pool": BASE_POOL, "history": FIRST, "budget": B1})
+    fake = FakeClient([first, {"slot_verdicts": [fixed]}])
+    run = verify_evidence(a, pool, budget, history, model="fake", client=fake)
+    rule = next(s for s in run.analysis.document_slots if s.slot_id == "rule")
+    assert fake.calls == 2 and run.recheck_slot_ids == ["rule"]
+    assert [r.evidence_id for r in rule.evidence_refs] == [gid(11, 0), gid(10, 4)]   # 기존 근거 유지 + 추가
+    assert rule.status == "supported" and any(w.startswith("[재확인] rule") for w in run.warnings)
+    assert run.error is None and run.decision.next_action == "answer"
+
+
+def test_recheck_failure_marks_supported_slot_partial():
+    from evaluate.check_verification import FakeClient, build_inputs
+    from evaluate.verify_scenarios import B1, BASE_POOL, FIRST
+    from app.core.single_agent.verifier import verify_evidence
+    first, _ = _recheck_inputs()
+    a, pool, history, budget = build_inputs({"pool": BASE_POOL, "history": FIRST, "budget": B1})
+    run = verify_evidence(a, pool, budget, history, model="fake", client=FakeClient([first, "JSON 아님", "또 아님"]))
+    rule = next(s for s in run.analysis.document_slots if s.slot_id == "rule")
+    assert rule.status == "partial" and "재확인 실패" in rule.missing_detail
+    assert run.error is None and run.decision.next_action == "continue_search"
+
+
+def test_no_recheck_when_all_relevant_chunks_cited():
+    from evaluate.check_verification import FakeClient, build_inputs
+    from evaluate.verify_scenarios import ALL_GOOD, B1, BASE_POOL, FIRST
+    from app.core.single_agent.verifier import verify_evidence
+    a, pool, history, budget = build_inputs({"pool": BASE_POOL, "history": FIRST, "budget": B1})
+    fake = FakeClient([{"chunk_notes": [_note(11, 0, rel=("rule",))], "slot_verdicts": ALL_GOOD}])
+    run = verify_evidence(a, pool, budget, history, model="fake", client=fake)
+    assert fake.calls == 1 and run.recheck_slot_ids == []

@@ -457,3 +457,21 @@ def _validate_config() -> None:
 
 
 _validate_config()
+
+
+# ── 문서별 기본 적용 대상 (④ 청크 메모에 서버가 합침, branching.py) ─────────────
+# LLM이 청크 메모에 적용 대상을 빠뜨리거나 표기를 바꿔도(예: "Korean Language Course" / "어학연수")
+# 문서 단위로 확실한 대상은 서버가 채운다. match는 파일 이름(source)의 부분 문자열(정규화 후 비교).
+# aliases: 사용자 질문에 이 표현이 있으면 이미 그 대상을 가리킨 것으로 보고 그 사용자 칸은 갈래·대상 한정에서 뺀다.
+# 문서가 추가·교체되면 이 표를 함께 고친다.
+DOC_SCOPES = [
+    {"match": "모집요강_한국어트랙", "field_id": "track", "value": "한국어트랙",
+     "aliases": ["한국어트랙", "한국어 트랙", "Korean track", "Korean-taught"]},
+    {"match": "English+Track", "field_id": "track", "value": "영어트랙",
+     "aliases": ["영어트랙", "영어 트랙", "English track", "English-taught"]},
+    {"match": "정부초청+외국인+장학생", "field_id": "gks_status", "value": "GKS 장학생",
+     "aliases": ["GKS", "정부초청", "Global Korea Scholarship", "government scholarship"]},
+    {"match": "Korean+Language+Course", "field_id": "program", "value": "어학연수",
+     "aliases": ["어학당", "어학연수", "한국어 연수", "한국어연수", "언어교육원", "Korean Language Course",
+                 "language course", "language program", "language institute"]},
+]

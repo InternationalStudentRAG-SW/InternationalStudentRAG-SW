@@ -42,6 +42,14 @@ class DocSlot(BaseModel):
     missing_detail: str = ""  # 남은 확인 사항 (partial·missing·conflicting일 때)
 
 
+class Branch(BaseModel):
+    """문서상 이 사용자 조건의 값 하나에 대한 갈래. 라운드가 바뀌어도 UserSlot에 남는다."""
+    value: str                     # 조건 값 (예: "학위과정")
+    summary: str = ""              # 그 값일 때의 규정 요약 (없으면 빈 값)
+    evidence_ids: List[str] = []   # 이 갈래를 보여주는 청크
+    source: str = "llm"            # notes(서버가 청크 메모로 찾음) / llm(④의 user_field_needs)
+
+
 class UserSlot(BaseModel):
     """사용자 칸 후보. 문서 근거 없이 되묻기 대상으로 활성화하지 않는다."""
     field_id: str
@@ -49,6 +57,7 @@ class UserSlot(BaseModel):
     active: bool = False
     reason: str = ""
     required_by_evidence: List[str] = []
+    branches: List[Branch] = []    # ④가 채움 (1-5: 다음 라운드·되묻기·조건별 안내가 여기서 읽음)
 
 
 class FirstSearch(BaseModel):

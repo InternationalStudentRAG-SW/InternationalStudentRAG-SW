@@ -25,6 +25,19 @@ class SlotVerdict(BaseModel):
     reason: str = ""
 
 
+class AppliesTo(BaseModel):
+    """청크 규정의 적용 대상 하나 (사용자 칸 ID + 값)."""
+    field_id: str
+    value: str
+
+
+class ChunkNote(BaseModel):
+    """LLM이 보여준 청크마다 적는 메모. 갈래 감지·적용 범위 검사는 서버가 이 메모로 한다."""
+    evidence_id: str
+    applies_to: List[AppliesTo] = []    # 비어 있으면 대상 제한 없음 (모든 유학생)
+    relevant_slots: List[str] = []      # 이 청크가 근거가 될 수 있는 문서 칸
+
+
 class UserFieldNeed(BaseModel):
     """문서가 이 사용자 조건에 따라 답을 달리한다는 판정 (되묻기·조건별 안내의 근거)."""
     field_id: str
@@ -35,6 +48,7 @@ class UserFieldNeed(BaseModel):
 
 class VerifyOutput(BaseModel):
     """LLM 출력 전체."""
+    chunk_notes: List[ChunkNote] = []
     slot_verdicts: List[SlotVerdict] = []
     user_field_needs: List[UserFieldNeed] = []
 
@@ -57,6 +71,8 @@ class VerificationRun(BaseModel):
     judged_slot_ids: List[str] = []    # 이번에 판정 대상이었던 칸
     shown_chunk_ids: List[str] = []    # 프롬프트에 넣은 청크
     llm_called: bool = False
+    chunk_notes: List[ChunkNote] = []  # 서버 검증을 통과한 청크 메모
+    recheck_slot_ids: List[str] = []   # 1-2 재판정 대상이었던 칸 (비었으면 재판정 안 함)
     warnings: List[str] = []
     error: Optional[str] = None
     model: str = ""

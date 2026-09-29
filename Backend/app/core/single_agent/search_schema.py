@@ -36,8 +36,9 @@ class SearchPlan(BaseModel):
     reason: str = ""
     is_duplicate: bool = False  # 중복이면 실행하지 않으므로 action=search일 때는 항상 False
     from_first_search: bool = False  # 첫 바퀴에 ①의 first_search를 그대로 썼는지
-    # 이번 계획에서 칸별 시도 상한에 걸려 은퇴시킨 칸 (missing → unavailable_in_corpus로 바꿈)
-    retired_slot_ids: List[str] = []
+    # 이번 계획에서 칸별 시도 상한에 걸려 더 검색하지 않기로 한 칸. status는 바꾸지 않는다
+    # (missing·partial 유지 → ④·⑤가 부분 답변으로 처리). 체크리스트 2.1절.
+    exhausted_slot_ids: List[str] = []
     # 후보였지만 이번 바퀴에 건너뛴 칸과 이유 (예산·상한·중복)
     skipped: List[str] = []
 

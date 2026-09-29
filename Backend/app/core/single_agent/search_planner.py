@@ -13,8 +13,10 @@
   - 예산(하위 질문 3개 / 검색 호출 총 6회 / 원문 확장 3회)은 서버가 강제한다.
     LLM이 뭐라고 하든 한도를 넘으면 budget_exhausted로 덮어쓴다.
   - 예산은 후보 칸마다 검사한다. 1순위 칸이 막혀도 예산이 되는 다음 후보로 넘어간다.
-  - 칸 하나의 시도 횟수에도 상한이 있다(신규 2회·확장 2회). 신규 검색 상한에 걸린
-    missing 칸은 unavailable_in_corpus로 은퇴시켜 다른 필수 칸이 예산을 쓸 수 있게 한다.
+  - 칸 하나의 시도 횟수에도 상한이 있다(신규 2회·확장 2회). 상한에 걸린 칸은 이번 계획에서
+    건너뛰어 다른 필수 칸이 예산을 쓸 수 있게 하되, status는 바꾸지 않는다(missing·partial·
+    conflicting 유지). 검색 한도 소진은 unavailable_in_corpus의 근거가 아니다(체크리스트 2.1절).
+    남은 미해결 칸은 ④·⑤가 부분 답변으로 처리한다.
   - 첫 바퀴(검색 기록 없음)에는 ①이 만든 first_search를 그대로 쓴다(LLM 호출 없음).
   - 이미 시도한 검색어(칸 무관)와 같은 문구는 실행하지 않는다. 한 번 다시 만들게 하고,
     그래도 같으면 그 칸은 이번 바퀴에서 건너뛴다.
@@ -261,8 +263,8 @@ def plan_search(
     이번 바퀴에 실행할 검색 액션 1개를 정한다.
     실패해도 예외 대신 SearchPlanRun.error에 이유를 담아 돌려준다.
 
-    주의: 신규 검색 상한에 걸린 missing 칸은 analysis.document_slots의 status를
-    unavailable_in_corpus로 직접 바꾼다 (plan.retired_slot_ids에 기록).
+    주의: 이 함수는 analysis.document_slots의 status를 바꾸지 않는다. 칸별 상한에 걸린 칸은
+    plan.exhausted_slot_ids에 기록하고 status(missing 등)를 그대로 둔다.
     """
     budget = budget or SearchBudget()
     history = history or []
@@ -291,7 +293,7 @@ def plan_search(
             )
             return run
 
-    retired: List[str] = []
+    exhausted: List[str] = []
     skipped: List[str] = []
     budget_block: Optional[Tuple[DocSlot, str, str]] = None
 
@@ -300,14 +302,12 @@ def plan_search(
         n = count_attempts(history, slot.slot_id, search_type)
         limit = slot_attempt_limit(search_type)
         if n >= limit:
-            if search_type == "new" and slot.status == "missing":
-                slot.status = "unavailable_in_corpus"
-                retired.append(slot.slot_id)
-                run.warnings.append(
-                    f"[수정] {slot.slot_id}: 신규 검색 {n}회에도 missing → unavailable_in_corpus (은퇴)"
-                )
-            else:
-                skipped.append(f"{slot.slot_id}({search_type}): 칸별 시도 상한 {limit}회 도달, status={slot.status} 유지")
+            # 상한에 걸린 칸은 더 검색하지 않는다. status는 그대로 둔다(부분 답변 대상).
+            exhausted.append(slot.slot_id)
+            skipped.append(f"{slot.slot_id}({search_type}): 칸별 시도 상한 {limit}회 도달, status={slot.status} 유지")
+            run.warnings.append(
+                f"[상한] {slot.slot_id}: {search_type} {n}회 도달 → 더 검색하지 않음 (status={slot.status} 유지, 부분 답변 대상)"
+            )
             continue
 
         budget_msg = check_budget(budget, search_type)
@@ -344,7 +344,7 @@ def plan_search(
             search_type=search_type,
             query_ko=query_ko,
             reason=reason,
-            retired_slot_ids=retired,
+            exhausted_slot_ids=exhausted,
             skipped=skipped,
         )
         return run
@@ -358,14 +358,14 @@ def plan_search(
             target_slot_id=slot.slot_id,
             search_type=search_type,
             reason=msg,
-            retired_slot_ids=retired,
+            exhausted_slot_ids=exhausted,
             skipped=skipped,
         )
     else:
         run.plan = SearchPlan(
             action="no_target_left",
-            reason="남은 후보가 모두 칸별 시도 상한에 걸렸거나 중복 검색어뿐임",
-            retired_slot_ids=retired,
+            reason="남은 후보가 모두 칸별 시도 상한에 걸렸거나 중복 검색어뿐임 (미해결 칸은 status 유지 → 부분 답변)",
+            exhausted_slot_ids=exhausted,
             skipped=skipped,
         )
     return run

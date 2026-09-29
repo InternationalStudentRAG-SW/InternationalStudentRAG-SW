@@ -74,12 +74,17 @@ def run_scenario(scenario: Dict) -> Dict:
         "search_type": p.search_type if p else None,
         "query_ko": p.query_ko if p else None,
         "from_first_search": p.from_first_search if p else None,
-        "retired_slot_ids": p.retired_slot_ids if p else None,
+        "exhausted_slot_ids": p.exhausted_slot_ids if p else None,
         "llm_calls": fake.calls,
     }
 
     checks = []
     for key, want in scenario["expect"].items():
+        if key == "slot_statuses":  # 적은 칸만 검사. 상한에 걸려도 status가 그대로인지 확인
+            actual = {s.slot_id: s.status for s in analysis.document_slots}
+            ok = all(actual.get(k) == v for k, v in want.items())
+            checks.append({"ok": ok, "message": f"slot_statuses {want!r} (실제 {actual!r})"})
+            continue
         checks.append({"ok": got.get(key) == want, "message": f"{key} {want!r} (실제 {got.get(key)!r})"})
     if run.error:
         checks.append({"ok": False, "message": f"오류 없음 (실제 {run.error})"})

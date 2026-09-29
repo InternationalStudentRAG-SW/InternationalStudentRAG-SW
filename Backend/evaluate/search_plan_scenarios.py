@@ -18,7 +18,8 @@ expect 키 (적은 것만 검사)
   search_type       : "new" / "expand_context"
   query_ko          : 최종 검색어
   from_first_search : ①의 first_search를 그대로 썼는지
-  retired_slot_ids  : 은퇴시킨 칸 목록
+  exhausted_slot_ids: 칸별 시도 상한에 걸려 더 검색하지 않는 칸 목록
+  slot_statuses     : 계획 후 칸 status (적은 칸만 검사. 상한에 걸려도 status가 바뀌지 않는지 확인)
   llm_calls         : 가짜 LLM 호출 횟수
 """
 
@@ -159,7 +160,7 @@ SCENARIOS = [
     # ── 칸별 시도 상한 ─────────────────────────────────────────────────
     {
         "id": "R01",
-        "title": "[수정 3] 신규 검색 2번에도 missing → unavailable_in_corpus로 은퇴, 다음 필수 칸 검색",
+        "title": "[수정 3] 신규 검색 2번에도 missing → 상한 도달로 건너뜀(status는 missing 유지), 다음 필수 칸 검색",
         "document_slots": [
             {"slot_id": "rule", "active": True, "requirement": "required", "status": "missing"},
             {"slot_id": "applicable_scope", "active": True, "requirement": "required", "status": "supported"},
@@ -171,7 +172,7 @@ SCENARIOS = [
         ],
         "budget": {"total_calls": 2, "expand_calls": 0, "subqueries": 2},
         "expect": {"action": "search", "target_slot_id": "exceptions_related", "search_type": "new",
-                   "retired_slot_ids": ["rule"]},
+                   "exhausted_slot_ids": ["rule"], "slot_statuses": {"rule": "missing"}},
     },
     {
         "id": "R02",
@@ -188,11 +189,11 @@ SCENARIOS = [
         ],
         "budget": {"total_calls": 3, "expand_calls": 2, "subqueries": 1},
         "expect": {"action": "search", "target_slot_id": "conditions_limits", "search_type": "new",
-                   "retired_slot_ids": []},
+                   "exhausted_slot_ids": ["applicable_scope"], "slot_statuses": {"applicable_scope": "partial"}},
     },
     {
         "id": "R03",
-        "title": "[수정 3] 모든 후보가 상한에 걸림 → no_target_left (예산은 남아 있음)",
+        "title": "[수정 3] 모든 후보가 상한에 걸림 → no_target_left (예산은 남아 있음, status는 missing 유지 → 부분 답변)",
         "document_slots": [
             {"slot_id": "rule", "active": True, "requirement": "required", "status": "missing"},
         ],
@@ -201,7 +202,8 @@ SCENARIOS = [
             {"target_slot_id": "rule", "search_type": "new", "query_ko": "검색어 2"},
         ],
         "budget": {"total_calls": 2, "expand_calls": 0, "subqueries": 2},
-        "expect": {"action": "no_target_left", "retired_slot_ids": ["rule"], "llm_calls": 0},
+        "expect": {"action": "no_target_left", "exhausted_slot_ids": ["rule"], "slot_statuses": {"rule": "missing"},
+                   "llm_calls": 0},
     },
     # ── ①의 first_search 재사용 ────────────────────────────────────────
     {

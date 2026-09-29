@@ -78,6 +78,10 @@ MAX_SUBQUERIES = 3        # 질문 1개당 하위 질문(신규 검색) 최대 �
 MAX_SEARCH_CALLS = 6      # 신규 검색 + 원문 확장을 합친 전체 검색 호출 한도
 MAX_CONTEXT_EXPANSIONS = 3  # 원문 확장 최대 횟수
 
+# 칸 하나에 쓸 수 있는 검색 횟수 (한 칸이 전체 예산을 독식하지 않게)
+MAX_NEW_SEARCHES_PER_SLOT = 2  # 신규 검색 2번에도 missing이면 unavailable_in_corpus로 은퇴
+MAX_EXPANSIONS_PER_SLOT = 2    # 원문 확장 2번에도 partial이면 더 확장하지 않음 (partial로 답변)
+
 # ② 검색 계획이 문서 칸 status를 보고 다음 행동을 정할 때 쓰는 분류.
 # (체크리스트 v1 2.1절 문서 칸 상태 기준)
 NEEDS_EXPAND_STATUSES = {"partial"}

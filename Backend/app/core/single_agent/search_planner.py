@@ -12,7 +12,12 @@
   - LLM은 선택된 슬롯 하나에 대한 자연어 검색어 문구만 만든다.
   - 예산(하위 질문 3개 / 검색 호출 총 6회 / 원문 확장 3회)은 서버가 강제한다.
     LLM이 뭐라고 하든 한도를 넘으면 budget_exhausted로 덮어쓴다.
-  - 같은 슬롯에 같은 검색어를 반복하지 않는다.
+  - 예산은 후보 칸마다 검사한다. 1순위 칸이 막혀도 예산이 되는 다음 후보로 넘어간다.
+  - 칸 하나의 시도 횟수에도 상한이 있다(신규 2회·확장 2회). 신규 검색 상한에 걸린
+    missing 칸은 unavailable_in_corpus로 은퇴시켜 다른 필수 칸이 예산을 쓸 수 있게 한다.
+  - 첫 바퀴(검색 기록 없음)에는 ①이 만든 first_search를 그대로 쓴다(LLM 호출 없음).
+  - 이미 시도한 검색어(칸 무관)와 같은 문구는 실행하지 않는다. 한 번 다시 만들게 하고,
+    그래도 같으면 그 칸은 이번 바퀴에서 건너뛴다.
 """
 from __future__ import annotations
 
@@ -46,9 +51,9 @@ def _norm(text: str) -> str:
 
 # ── 대상 슬롯 선택 (규칙 기반, LLM 호출 없음) ───────────────────────────────
 
-def select_target_slot(document_slots: List[DocSlot]) -> Tuple[Optional[DocSlot], Optional[str]]:
+def rank_candidates(document_slots: List[DocSlot]) -> List[Tuple[DocSlot, str]]:
     """
-    다음에 확인할 문서 칸을 규칙으로 고른다.
+    검색이 필요한 칸을 우선순위대로 정렬해 모두 돌려준다.
 
     후보: active=true이고 status가 검색이 필요한 상태(unchecked/missing/conflicting/partial)인 칸.
     supported / not_applicable / unavailable_in_corpus는 이미 처리됐거나 검색이 필요 없으므로 제외한다.
@@ -58,8 +63,6 @@ def select_target_slot(document_slots: List[DocSlot]) -> Tuple[Optional[DocSlot]
       2) 같은 필수도 안에서는 원문 확장(partial)이 신규 검색보다 먼저
          (이미 찾은 근거를 완성하는 쪽이 새 슬롯을 여는 것보다 저렴하고 실패 위험이 낮음)
       3) document_slots에 나열된 순서(유형 프로파일 순서)
-
-    반환: (선택된 슬롯 또는 None, "new"/"expand_context" 또는 None)
     """
     order = {s.slot_id: i for i, s in enumerate(document_slots)}
     candidates: List[Tuple[DocSlot, str]] = []
@@ -72,16 +75,26 @@ def select_target_slot(document_slots: List[DocSlot]) -> Tuple[Optional[DocSlot]
             candidates.append((s, "new"))
         # NO_SEARCH_NEEDED_STATUSES(supported/not_applicable/unavailable_in_corpus)는 건너뜀
 
-    if not candidates:
-        return None, None
-
     candidates.sort(key=lambda pair: (
         -_REQ_RANK.get(pair[0].requirement, 0),
         0 if pair[1] == "expand_context" else 1,
         order.get(pair[0].slot_id, 999),
     ))
-    slot, search_type = candidates[0]
-    return slot, search_type
+    return candidates
+
+
+def select_target_slot(document_slots: List[DocSlot]) -> Tuple[Optional[DocSlot], Optional[str]]:
+    """1순위 후보 하나만 돌려준다 (예산·상한 무시). 반환: (슬롯 또는 None, "new"/"expand_context" 또는 None)"""
+    ranked = rank_candidates(document_slots)
+    return ranked[0] if ranked else (None, None)
+
+
+def count_attempts(history: List[SearchAttempt], slot_id: str, search_type: str) -> int:
+    return sum(1 for h in history if h.target_slot_id == slot_id and h.search_type == search_type)
+
+
+def slot_attempt_limit(search_type: str) -> int:
+    return cfg.MAX_NEW_SEARCHES_PER_SLOT if search_type == "new" else cfg.MAX_EXPANSIONS_PER_SLOT
 
 
 # ── 예산 검사 (서버가 강제) ─────────────────────────────────────────────────
@@ -119,12 +132,14 @@ def _build_query_user_prompt(
     conditions: List[Condition],
     slot: DocSlot,
     search_type: str,
-    tried: List[str],
+    tried_for_slot: List[str],
+    tried_other: List[str],
 ) -> str:
     cond_lines = "\n".join(
         f"- {c.field_id}={c.value} ({c.subject})" for c in conditions
     ) or "(확인된 조건 없음)"
-    tried_lines = "\n".join(f"- {q}" for q in tried) or "(없음)"
+    tried_slot_lines = "\n".join(f"- {q}" for q in tried_for_slot) or "(없음)"
+    tried_other_lines = "\n".join(f"- {q}" for q in tried_other) or "(없음)"
     slot_def = cfg.DOC_SLOTS.get(slot.slot_id, {})
     return (
         f"## 질문 의도\n{analysis_intent}\n\n"
@@ -134,7 +149,8 @@ def _build_query_user_prompt(
         f"- 충족 기준: {slot_def.get('criterion', '')}\n"
         f"- 이 칸을 확인하려는 이유: {slot.activation_reason}\n\n"
         f"## 검색 종류\n{search_type} ({'원문 확장' if search_type == 'expand_context' else '신규 검색'})\n\n"
-        f"## 이미 시도한 검색어 (이 칸 기준)\n{tried_lines}\n\n"
+        f"## 이미 시도한 검색어 (이 칸)\n{tried_slot_lines}\n\n"
+        f"## 이미 시도한 검색어 (다른 칸, 같은 문구 금지)\n{tried_other_lines}\n\n"
         "위 규칙에 따라 검색어 JSON을 출력하세요."
     )
 
@@ -151,60 +167,34 @@ def _get_client():
     return _client
 
 
-def plan_search(
+def _generate_query(
+    run: SearchPlanRun,
+    client,
+    model: str,
     analysis: QuestionAnalysis,
-    budget: Optional[SearchBudget] = None,
-    history: Optional[List[SearchAttempt]] = None,
-    model: Optional[str] = None,
-    client=None,
-) -> SearchPlanRun:
+    slot: DocSlot,
+    search_type: str,
+    history: List[SearchAttempt],
+) -> Tuple[Optional[str], str, bool]:
     """
-    이번 바퀴에 실행할 검색 액션 1개를 정한다.
-    실패해도 예외 대신 SearchPlanRun.error에 이유를 담아 돌려준다.
+    칸 하나에 대한 검색어를 LLM으로 만든다. 형식 오류나 중복이면 1회 다시 만든다.
+    반환: (검색어 또는 None, reason, 중복 여부)
+      - 검색어가 None이면 LLM이 끝내 형식을 못 맞춘 것 (호출자가 대체 검색어를 만든다)
+      - 중복 여부 True면 두 번 다 이미 시도한 문구였다는 뜻 (호출자가 이 칸을 건너뛴다)
     """
-    budget = budget or SearchBudget()
-    history = history or []
-    run = SearchPlanRun(model=model or "", checklist_version=cfg.CHECKLIST_VERSION)
-
-    # 1) 대상 슬롯 선택 — 규칙 기반, LLM 호출 없음
-    slot, search_type = select_target_slot(analysis.document_slots)
-    if slot is None:
-        run.plan = SearchPlan(
-            action="no_target_left",
-            reason="검색이 필요한 활성 문서 칸이 남아있지 않음 (모두 supported/not_applicable/unavailable_in_corpus)",
-        )
-        return run
-
-    # 2) 예산 검사 — 서버가 강제, LLM 호출 전에 차단
-    budget_msg = check_budget(budget, search_type)
-    if budget_msg:
-        run.plan = SearchPlan(
-            action="budget_exhausted",
-            target_slot_id=slot.slot_id,
-            search_type=search_type,
-            reason=budget_msg,
-        )
-        return run
-
-    # 3) 검색어 문구 생성 — LLM 1회 (슬롯·종류는 이미 정해져 있음)
-    if model is None:
-        from app.config import settings
-        model = settings.openai_model
-        run.model = model
-    client = client or _get_client()
-
+    tried_all = {_norm(h.query_ko) for h in history}
     tried_for_slot = [h.query_ko for h in history if h.target_slot_id == slot.slot_id]
+    tried_other = [h.query_ko for h in history if h.target_slot_id != slot.slot_id]
     messages = [
         {"role": "system", "content": SEARCH_QUERY_SYSTEM_PROMPT},
         {"role": "user", "content": _build_query_user_prompt(
-            analysis.intent_summary, analysis.conditions, slot, search_type, tried_for_slot,
+            analysis.intent_summary, analysis.conditions, slot, search_type, tried_for_slot, tried_other,
         )},
     ]
 
-    started = time.perf_counter()
-    query_ko, reason = None, ""
-    for attempt in range(1, MAX_ATTEMPTS + 1):
-        run.attempts = attempt
+    query_ko, reason, is_dup = None, "", False
+    for _ in range(MAX_ATTEMPTS):
+        run.attempts += 1
         try:
             resp = client.chat.completions.create(
                 model=model,
@@ -223,42 +213,159 @@ def plan_search(
             q = str(data.get("query_ko", "")).strip()
             if not q:
                 raise SearchPlanFormatError("query_ko가 비어 있음")
-            query_ko = q
-            reason = str(data.get("reason", "")).strip()
-            run.error = None
-            break
         except (json.JSONDecodeError, SearchPlanFormatError) as e:
             run.error = f"형식 오류: {type(e).__name__}: {str(e)[:300]}"
             messages += [
                 {"role": "assistant", "content": raw},
                 {"role": "user", "content": f"출력 형식 오류입니다: {run.error}\nJSON만 다시 출력하세요."},
             ]
+            continue
 
+        run.error = None
+        query_ko, reason = q, str(data.get("reason", "")).strip()
+        is_dup = _norm(q) in tried_all
+        if not is_dup:
+            break
+        run.warnings.append(f"[재시도] 검색어 '{q}'는 이미 시도한 문구 → 다른 표현으로 다시 생성")
+        messages += [
+            {"role": "assistant", "content": raw},
+            {"role": "user", "content": "이미 시도한 검색어와 같습니다. 표현·범위·조항 명칭을 바꿔 다른 검색어를 JSON으로 다시 출력하세요."},
+        ]
+
+    return query_ko, reason, is_dup
+
+
+def _pick_first_search(
+    analysis: QuestionAnalysis,
+    candidates: List[Tuple[DocSlot, str]],
+) -> Optional[DocSlot]:
+    """①의 first_search가 가리키는 칸 중 우선순위가 가장 높은 신규 검색 후보."""
+    fs = analysis.first_search
+    if not fs or not fs.query_ko.strip():
+        return None
+    targets = set(fs.target_slot_ids)
+    for slot, search_type in candidates:
+        if search_type == "new" and slot.slot_id in targets:
+            return slot
+    return None
+
+
+def plan_search(
+    analysis: QuestionAnalysis,
+    budget: Optional[SearchBudget] = None,
+    history: Optional[List[SearchAttempt]] = None,
+    model: Optional[str] = None,
+    client=None,
+) -> SearchPlanRun:
+    """
+    이번 바퀴에 실행할 검색 액션 1개를 정한다.
+    실패해도 예외 대신 SearchPlanRun.error에 이유를 담아 돌려준다.
+
+    주의: 신규 검색 상한에 걸린 missing 칸은 analysis.document_slots의 status를
+    unavailable_in_corpus로 직접 바꾼다 (plan.retired_slot_ids에 기록).
+    """
+    budget = budget or SearchBudget()
+    history = history or []
+    run = SearchPlanRun(model=model or "", checklist_version=cfg.CHECKLIST_VERSION)
+    started = time.perf_counter()
+
+    candidates = rank_candidates(analysis.document_slots)
+    if not candidates:
+        run.plan = SearchPlan(
+            action="no_target_left",
+            reason="검색이 필요한 활성 문서 칸이 남아있지 않음 (모두 supported/not_applicable/unavailable_in_corpus)",
+        )
+        return run
+
+    # 1) 첫 바퀴: ①의 first_search를 그대로 사용 (LLM 호출 없음)
+    if not history and budget.total_calls == 0:
+        first_slot = _pick_first_search(analysis, candidates)
+        if first_slot is not None and check_budget(budget, "new") is None:
+            run.plan = SearchPlan(
+                action="search",
+                target_slot_id=first_slot.slot_id,
+                search_type="new",
+                query_ko=analysis.first_search.query_ko.strip(),
+                reason=analysis.first_search.reason or "(①의 첫 검색 사용)",
+                from_first_search=True,
+            )
+            return run
+
+    retired: List[str] = []
+    skipped: List[str] = []
+    budget_block: Optional[Tuple[DocSlot, str, str]] = None
+
+    # 2) 후보를 우선순위대로 보면서, 상한·예산을 통과하고 중복이 아닌 첫 칸을 고른다
+    for slot, search_type in candidates:
+        n = count_attempts(history, slot.slot_id, search_type)
+        limit = slot_attempt_limit(search_type)
+        if n >= limit:
+            if search_type == "new" and slot.status == "missing":
+                slot.status = "unavailable_in_corpus"
+                retired.append(slot.slot_id)
+                run.warnings.append(
+                    f"[수정] {slot.slot_id}: 신규 검색 {n}회에도 missing → unavailable_in_corpus (은퇴)"
+                )
+            else:
+                skipped.append(f"{slot.slot_id}({search_type}): 칸별 시도 상한 {limit}회 도달, status={slot.status} 유지")
+            continue
+
+        budget_msg = check_budget(budget, search_type)
+        if budget_msg:
+            skipped.append(f"{slot.slot_id}({search_type}): {budget_msg}")
+            if budget_block is None:
+                budget_block = (slot, search_type, budget_msg)
+            continue
+
+        # 3) 검색어 문구 생성 — LLM (슬롯·종류는 이미 정해져 있음)
+        if not model:
+            from app.config import settings
+            model = settings.openai_model
+            run.model = model
+        client = client or _get_client()
+
+        query_ko, reason, is_dup = _generate_query(run, client, model, analysis, slot, search_type, history)
+        if query_ko is None:
+            # LLM이 끝내 검색어를 못 만들면, 슬롯 라벨로 최소한의 검색어를 만들어 진행한다.
+            slot_def = cfg.DOC_SLOTS.get(slot.slot_id, {})
+            query_ko = f"{analysis.intent_summary} {slot_def.get('label', slot.slot_id)}".strip()
+            reason = "(서버 보완) LLM 검색어 생성 실패 → 슬롯 라벨로 대체"
+            run.warnings.append(reason)
+            is_dup = _norm(query_ko) in {_norm(h.query_ko) for h in history}
+        if is_dup:
+            skipped.append(f"{slot.slot_id}({search_type}): 다시 만들어도 이미 시도한 검색어 '{query_ko}'")
+            run.warnings.append(f"[건너뜀] {slot.slot_id}: 중복 검색어 '{query_ko}'")
+            continue
+
+        run.latency_ms = int((time.perf_counter() - started) * 1000)
+        run.plan = SearchPlan(
+            action="search",
+            target_slot_id=slot.slot_id,
+            search_type=search_type,
+            query_ko=query_ko,
+            reason=reason,
+            retired_slot_ids=retired,
+            skipped=skipped,
+        )
+        return run
+
+    # 4) 실행할 검색이 없음
     run.latency_ms = int((time.perf_counter() - started) * 1000)
-
-    if query_ko is None:
-        # LLM이 끝내 검색어를 못 만들면, 슬롯 라벨로 최소한의 검색어를 만들어 진행한다.
-        slot_def = cfg.DOC_SLOTS.get(slot.slot_id, {})
-        query_ko = f"{analysis.intent_summary} {slot_def.get('label', slot.slot_id)}".strip()
-        reason = "(서버 보완) LLM 검색어 생성 실패 → 슬롯 라벨로 대체"
-        run.warnings.append(reason)
-
-    # 4) 중복 검사
-    is_dup = any(
-        h.target_slot_id == slot.slot_id
-        and h.search_type == search_type
-        and _norm(h.query_ko) == _norm(query_ko)
-        for h in history
-    )
-    if is_dup:
-        run.warnings.append(f"[확인 필요] 검색어 '{query_ko}'가 {slot.slot_id}에 이미 시도됨 (중복)")
-
-    run.plan = SearchPlan(
-        action="search",
-        target_slot_id=slot.slot_id,
-        search_type=search_type,
-        query_ko=query_ko,
-        reason=reason,
-        is_duplicate=is_dup,
-    )
+    if budget_block is not None:
+        slot, search_type, msg = budget_block
+        run.plan = SearchPlan(
+            action="budget_exhausted",
+            target_slot_id=slot.slot_id,
+            search_type=search_type,
+            reason=msg,
+            retired_slot_ids=retired,
+            skipped=skipped,
+        )
+    else:
+        run.plan = SearchPlan(
+            action="no_target_left",
+            reason="남은 후보가 모두 칸별 시도 상한에 걸렸거나 중복 검색어뿐임",
+            retired_slot_ids=retired,
+            skipped=skipped,
+        )
     return run

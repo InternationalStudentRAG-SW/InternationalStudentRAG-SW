@@ -84,7 +84,7 @@ SYSTEM_PROMPT_TEMPLATE = """당신은 동아대학교 유학생 생활·행정 �
 3. 단순 질문을 억지로 쪼개지 않습니다.
 
 [문서 칸]
-4. 대표·추가 유형에 속한 칸만 사용합니다. 칸마다 active, requirement, activation_reason을 적습니다.
+4. 대표·추가 유형에 속한 칸만 사용하되, 그 유형들의 칸을 하나도 빠짐없이 모두 document_slots에 적습니다(비활성으로 둘 칸도 active=false로 적음). 칸마다 active, requirement, activation_reason을 적습니다.
 5. 필수도: {requirements}
    - 사용자가 명시적으로 요구한 정보는 required로 올립니다. (예: "언제 어디에 내?" → 기한·제출처 required)
    - 제출처·제출방법을 명시적으로 물으면("어디에 내?", "어떻게 제출해?") submission_method가 존재하는 유형에서는 그 칸을 active=true, required로 올립니다. 기본값이 optional/비활성이어도 이 경우에는 올립니다.
@@ -102,6 +102,7 @@ SYSTEM_PROMPT_TEMPLATE = """당신은 동아대학교 유학생 생활·행정 �
    - "친구가 GKS 장학생인데 ~" → other_person
 9. 질문 언어·이름·말투로 국적, 체류자격, GKS 여부 등을 추정하지 않습니다. 명확한 정정 발언이 있으면 최신 값을 씁니다.
 10. answer_scope: {answer_scopes}
+   - conditions에 user_self 조건이 있으면 personal, other_person 조건만 있으면 third_party입니다.
 
 [사용자 칸]
 11. 대표·추가 유형의 사용자 칸 후보 중 이 질문과 관련 있는 것만 적습니다. conditions에 있으면 confirmed, 없으면 unknown.
@@ -158,7 +159,7 @@ SYSTEM_PROMPT_TEMPLATE = """당신은 동아대학교 유학생 생활·행정 �
   "next_action_reason": "어떤 서류인지(입학 지원, 아르바이트, 비자 등) 알아야 검색어를 정할 수 있음",
   "clarification_question": "어떤 것에 필요한 서류를 말씀하시는 건가요? (예: 입학 지원, 아르바이트, 비자 신청 등)"
 }}
-out_of_scope 또는 no_retrieval이면 primary_type은 null, document_slots·user_slots는 빈 목록, first_search는 null입니다."""
+clarify_scope, out_of_scope, no_retrieval이면 primary_type은 null, document_slots·user_slots는 빈 목록, first_search는 null입니다."""
 
 
 def build_system_prompt() -> str:
@@ -216,12 +217,14 @@ def validate_analysis(a: QuestionAnalysis, numbered: List[Dict]) -> Tuple[Questi
         w.append(f"[수정] answer_scope '{a.answer_scope}' → general")
         a.answer_scope = "general"
 
-    no_search = a.next_action in ("out_of_scope", "no_retrieval")
+    # search가 아닌 행동(clarify_scope 포함)은 유형·칸·첫 검색을 갖지 않는다.
+    # clarify_scope는 프롬프트가 primary_type=null을 요구하므로 유형 검사를 하면 안 된다.
+    no_search = a.next_action != "search"
 
     # 유형
     if no_search:
-        if a.primary_type or a.document_slots or a.first_search:
-            w.append(f"[수정] {a.next_action}이므로 유형·문서 칸·첫 검색을 비움")
+        if a.primary_type or a.additional_types or a.document_slots or a.user_slots or a.first_search:
+            w.append(f"[수정] {a.next_action}이므로 유형·문서 칸·사용자 칸·첫 검색을 비움")
         a.primary_type, a.additional_types = None, []
         a.document_slots, a.user_slots, a.first_search = [], [], None
     else:
@@ -319,6 +322,16 @@ def validate_analysis(a: QuestionAnalysis, numbered: List[Dict]) -> Tuple[Questi
             kept.append(c)
     a.conditions = kept
     confirmed_fields = {c.field_id for c in kept if c.status == "confirmed"}
+
+    # 답변 범위: 조건의 subject와 어긋나면 조건 쪽을 따른다 (general일 때만 올림)
+    subjects = {c.subject for c in kept}
+    if a.answer_scope == "general":
+        if "user_self" in subjects:
+            w.append("[수정] answer_scope general → personal (사용자 본인 조건 user_self가 있음)")
+            a.answer_scope = "personal"
+        elif "other_person" in subjects:
+            w.append("[수정] answer_scope general → third_party (다른 사람 조건 other_person만 있음)")
+            a.answer_scope = "third_party"
 
     # 사용자 칸
     users, seen_fields = [], set()

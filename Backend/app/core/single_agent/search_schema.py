@@ -34,7 +34,12 @@ class SearchPlan(BaseModel):
     search_type: Optional[str] = None  # "new" / "expand_context"
     query_ko: Optional[str] = None
     reason: str = ""
-    is_duplicate: bool = False
+    is_duplicate: bool = False  # 중복이면 실행하지 않으므로 action=search일 때는 항상 False
+    from_first_search: bool = False  # 첫 바퀴에 ①의 first_search를 그대로 썼는지
+    # 이번 계획에서 칸별 시도 상한에 걸려 은퇴시킨 칸 (missing → unavailable_in_corpus로 바꿈)
+    retired_slot_ids: List[str] = []
+    # 후보였지만 이번 바퀴에 건너뛴 칸과 이유 (예산·상한·중복)
+    skipped: List[str] = []
 
 
 class SearchPlanRun(BaseModel):

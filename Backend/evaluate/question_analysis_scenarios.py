@@ -91,6 +91,7 @@ SCENARIOS = [
         "question": "저는 학위과정이고 학기 중에 쉬고 싶어요.",
         "expect": {
             "primary_type": "T5",
+            "answer_scope": "personal",
             "next_action": "search",
             "condition": {"field_id": "gks_stage", "subject": "user_self", "value_contains": "학위"},
         },

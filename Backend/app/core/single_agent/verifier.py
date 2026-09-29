@@ -458,6 +458,16 @@ def decide(
         if u.active and u.status in ("unknown", "ambiguous") and u.required_by_evidence
     ]
 
+    early = ""
+    es = cfg.EARLY_STOP_SLOTS.get(analysis.primary_type or "") if cfg.EARLY_STOP_ON_CORE else None
+    if unresolved and es:
+        core = [s for s in needed if s.slot_id in es["core"]]
+        rest = [s for s in needed if s.slot_id in unresolved]
+        if (len(core) == len(es["core"]) and all(s.status == "supported" and s.evidence_refs for s in core)
+                and all(s.slot_id in es["aux"] and s.status in ("unchecked", "partial", "missing") for s in rest)):
+            early = f"핵심 칸 {[s.slot_id for s in core]} 확인됨 → 부수 칸 {unresolved}은 더 찾지 않음"
+            unresolved = []
+
     if not unresolved:
         if pending:
             picked = {f: branches.get(f, []) for f in pending}
@@ -473,7 +483,7 @@ def decide(
                 reason=f"일반 질문이며 문서상 {pending}에 따라 답이 갈림 → 조건별 안내",
                 condition_field_ids=pending, condition_branches=picked,
             )
-        return VerifyDecision(next_action="answer", reason="필요한 문서 칸이 모두 근거로 확인됨")
+        return VerifyDecision(next_action="answer", reason=early or "필요한 문서 칸이 모두 근거로 확인됨")
 
     can, why = _can_search_more(analysis, budget, history)
     if can:
@@ -640,9 +650,10 @@ def verify_evidence(
 
         apply_user_needs(a, output.user_field_needs, shown_set, run.warnings)
         check_scope_covers_branches(a, output.user_field_needs, shown_set, run.warnings)
-        apply_doc_scopes(notes, shown, lambda i: pool.get(i).source if pool.get(i) else "")
+        _src = lambda i: pool.get(i).source if pool.get(i) else ""
+        apply_doc_scopes(notes, shown, _src)
         run.chunk_notes = list(notes.values())
-        apply_branch_rules(a, notes, run.warnings, question or "")
+        apply_branch_rules(a, notes, run.warnings, question or "", _src)
     elif targets:
         run.warnings.append("[건너뜀] 판정할 청크가 없어 LLM을 부르지 않음")
         for s in targets:

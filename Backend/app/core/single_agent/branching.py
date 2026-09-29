@@ -97,7 +97,7 @@ def _cited(analysis: QuestionAnalysis, slot_ids: Set[str]) -> Set[str]:
 
 
 def detect_branches(
-    analysis: QuestionAnalysis, notes: Dict[str, ChunkNote], skip_fields: Set[str] = frozenset(),
+    analysis: QuestionAnalysis, notes: Dict[str, ChunkNote], skip_fields: Set[str] = frozenset(), source_of=None,
 ) -> Dict[str, Dict[str, Branch]]:
     """
     관련 청크(필요한 칸에 인용됐거나, 메모에서 필요한 칸과 관련 있다고 한 청크)의 적용 대상을 조건별로 모은다.
@@ -107,11 +107,15 @@ def detect_branches(
     needed = _needed_ids(analysis)
     cited = _cited(analysis, needed)
     by_field: Dict[str, Dict[str, Branch]] = {}
+    doc_fields = {eid: {d["field_id"] for d in doc_scopes_for(source_of(eid) or "")} for eid in notes} if source_of else {}
     for eid, n in notes.items():
         if eid not in cited and not (set(n.relevant_slots) & needed):
             continue
         for a in n.applies_to:
             if a.field_id in confirmed:
+                continue
+            # 문서 이름으로 채운 기본 대상은 실제로 인용된 청크만 갈래로 센다 (풀에 섞인 다른 문서 때문에 가짜 갈래가 생김)
+            if eid not in cited and a.field_id in doc_fields.get(eid, set()):
                 continue
             b = by_field.setdefault(a.field_id, {}).setdefault(
                 normalize(a.value), Branch(value=a.value, source="notes"))
@@ -162,7 +166,7 @@ def _lower_scope(scope: DocSlot, detail: str, w: List[str]) -> None:
 
 
 def apply_branch_rules(
-    analysis: QuestionAnalysis, notes: Dict[str, ChunkNote], w: List[str], question: str = "",
+    analysis: QuestionAnalysis, notes: Dict[str, ChunkNote], w: List[str], question: str = "", source_of=None,
 ) -> None:
     """청크 메모로 갈래(1-3)와 대상 한정(1-1)을 판정해 사용자 칸·적용 범위 칸에 반영한다."""
     if not notes:
@@ -170,7 +174,7 @@ def apply_branch_rules(
     named = fields_named_in_question(question)
     if named:
         w.append(f"[확인] 질문이 이미 대상을 가리킴 → 갈래·대상 한정에서 제외: {sorted(named)}")
-    by_field = detect_branches(analysis, notes, named)
+    by_field = detect_branches(analysis, notes, named, source_of)
     scope = next((s for s in analysis.document_slots if s.slot_id == SCOPE_SLOT and s.active), None)
     scope_cited = {r.evidence_id for r in scope.evidence_refs} if scope else set()
     cited = sorted(_cited(analysis, _needed_ids(analysis)))

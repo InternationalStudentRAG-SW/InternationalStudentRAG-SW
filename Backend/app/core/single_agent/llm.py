@@ -52,7 +52,7 @@ def get_client():
 
 
 def model_for(stage: str) -> str:
-    """stage: "analyze" / "plan" / "verify"."""
+    """stage: "analyze" / "plan" / "verify" / "answer"."""
     from app.config import settings
     if stage == "verify" and (getattr(settings, "verify_model", "") or "").strip():
         return settings.verify_model.strip()

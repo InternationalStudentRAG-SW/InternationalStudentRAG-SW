@@ -564,6 +564,50 @@ def test_doc_scopes_unify_llm_value_and_question_alias_skips_target_rule():
     assert next(u for u in run2.analysis.user_slots if u.field_id == "program").active
 
 
+def test_doc_scope_default_from_uncited_chunk_makes_no_fake_branch():
+    """실제 사례(수업료): 인용 안 한 다른 트랙 문서의 기본 대상 때문에 가짜 track 갈래가 생기면 안 된다."""
+    k, e = f"{KOT_SRC}#p5#c0", f"{ENT_SRC}#p5#c0"
+    pool = [{"id": k, "text": "모집기간 2026.4.1.(수) ~ 4.14.(화)"}, {"id": e, "text": "Application period April 1 ~ April 14"}]
+    notes = [{"evidence_id": k, "applies_to": [], "relevant_slots": ["rule"]},
+             {"evidence_id": e, "applies_to": [], "relevant_slots": ["rule"]}]
+    run = _run_docs(pool, _scope_verdicts([(k, "2026.4.1.(수) ~ 4.14.(화)")]), notes,
+                    question="지원 기간이 언제예요?")
+    assert not any(w.startswith("[갈래] track") for w in run.warnings)   # 인용 안 한 문서는 갈래로 세지 않음
+    # 둘 다 인용하면 진짜 갈래
+    run2 = _run_docs(pool, _scope_verdicts([(k, "2026.4.1.(수) ~ 4.14.(화)"), (e, "Application period April 1")]), notes,
+                     question="지원 기간이 언제예요?")
+    assert next(u for u in run2.analysis.user_slots if u.field_id == "track").active
+
+
+def test_early_stop_when_core_slots_supported():
+    """B: T1에서 핵심 칸(값·적용 범위)이 supported면 부수 칸(시점·변동)이 미해결이어도 더 찾지 않고 answer."""
+    from app.core.single_agent.analysis_schema import DocSlot, EvidenceRef
+    from app.core.single_agent.verifier import decide
+    from evaluate.check_verification import build_inputs
+    from evaluate.verify_scenarios import B1, FIRST, BASE_POOL
+    base, _, history, budget = build_inputs({"pool": BASE_POOL, "history": FIRST, "budget": B1})
+    ref = [EvidenceRef(evidence_id="x#p1#c0", quote="q")]
+
+    def make(scope_status, aux_status):
+        slots = [DocSlot(slot_id="requested_value", active=True, requirement="required", status="supported", evidence_refs=ref),
+                 DocSlot(slot_id="applicable_scope", active=True, requirement="required", status=scope_status,
+                         evidence_refs=ref if scope_status == "supported" else []),
+                 DocSlot(slot_id="reference_time", active=True, requirement="conditional",
+                         activation_state="triggered", status=aux_status),
+                 DocSlot(slot_id="variation_notes", active=True, requirement="conditional",
+                         activation_state="triggered", status="unchecked")]
+        a = base.model_copy(deep=True)
+        a.primary_type, a.document_slots, a.user_slots = "T1", slots, []
+        return a
+
+    d = decide(make("supported", "partial"), budget, history)
+    assert d.next_action == "answer" and "부수 칸" in d.reason
+    assert decide(make("partial", "unchecked"), budget, history).next_action == "continue_search"
+    a = make("supported", "partial")
+    a.primary_type = "T5"   # 다른 유형은 조기 종료 없음
+    assert decide(a, budget, history).next_action == "continue_search"
+
+
 # ── 1-2 근거 빠뜨림: 관련 있다고 적고 인용 안 한 청크 → 1회 재판정 ─────────────
 
 def _recheck_inputs():
@@ -609,3 +653,102 @@ def test_no_recheck_when_all_relevant_chunks_cited():
     fake = FakeClient([{"chunk_notes": [_note(11, 0, rel=("rule",))], "slot_verdicts": ALL_GOOD}])
     run = verify_evidence(a, pool, budget, history, model="fake", client=fake)
     assert fake.calls == 1 and run.recheck_slot_ids == []
+
+
+# ── 전체 흐름: ① → ②③④ 반복 → ⑤ (가짜 LLM·검색) ────────────────────────────
+
+_PIPE_ANALYSIS = {
+    "intent_summary": "GKS 아르바이트 가능 여부", "answer_scope": "general", "primary_type": "T5",
+    "additional_types": [], "conditions": [], "user_slots": [],
+    "document_slots": [{"slot_id": "rule", "active": True, "requirement": "required", "status": "unchecked"}],
+    "first_search": {"query_ko": "GKS 아르바이트", "target_slot_ids": ["rule"]}, "next_action": "search",
+}
+
+
+def _pipe_fakes():
+    from evaluate.check_search_execution import FakeSearch, FakeStore
+    text = "Part-time work requires approval of the president."
+    search = FakeSearch([{"source": "d.pdf", "page": 1, "chunk_index": 0, "text": text, "score": 0.9}])
+    store = FakeStore({"d.pdf": {1: [text, "Limited to 20 hours per week."]}})
+    return search, store
+
+
+def test_pipeline_runs_question_to_partial_answer_with_sources():
+    """rule만 확인되고 라운드 상한(1)에 걸림 → partial_answer, 답변의 [1]이 청크 출처로 연결된다."""
+    from evaluate.check_verification import FakeClient
+    from app.core.single_agent.pipeline import run_pipeline
+    search, store = _pipe_fakes()
+    verdict = {"slot_verdicts": [{"slot_id": "rule", "status": "supported",
+                                  "evidence_refs": [{"evidence_id": "d.pdf#p1#c0", "quote": "requires approval of the president"}]}]}
+    answer = {"answer": "총장 승인이 필요합니다 [1]. 예외 조항은 확인하지 못했습니다 [7]."}
+    fake = FakeClient([_PIPE_ANALYSIS, verdict, answer])
+    events = []
+    run = run_pipeline("GKS 장학생은 아르바이트할 수 있어?", max_rounds=1, client=fake, search_fn=search, store=store,
+                       on_event=lambda s, i: events.append(s))
+    assert fake.calls == 3                                    # ① + ④ + ⑤ (②는 first_search, 확장은 LLM 없음)
+    assert [r.search_type for r in run.plan_runs[0:1] for r in [r.plan]] == ["new"]
+    assert len(run.search_runs) == 2 and set(run.pool.chunks) == {"d.pdf#p1#c0", "d.pdf#p1#c1"}
+    assert run.stopped == "max_rounds: 1" and run.decision.next_action == "partial_answer"
+    a = run.answer_run
+    assert a.mode == "partial_answer" and "[7]" not in a.answer and "[1]" in a.answer
+    assert [(s.number, s.source, s.page) for s in a.sources] == [(1, "d.pdf", 1)]
+    assert any("[7]" in w for w in a.warnings)
+    assert events[0] == "analysis" and events[-1] == "answer"
+
+
+def test_pipeline_no_search_question_goes_straight_to_answer():
+    from evaluate.check_verification import FakeClient
+    from app.core.single_agent.pipeline import run_pipeline
+    oos = {"intent_summary": "날씨", "answer_scope": "general", "primary_type": None, "next_action": "out_of_scope"}
+    fake = FakeClient([oos, {"answer": "학교생활·행정 질문을 도와드릴 수 있어요."}])
+    run = run_pipeline("오늘 날씨 어때?", client=fake)
+    assert fake.calls == 2 and run.answer_run.mode == "out_of_scope" and run.plan_runs == []
+    assert run.stopped == "no_search: out_of_scope"
+
+
+def test_pipeline_without_evidence_answers_no_evidence():
+    """④가 근거를 하나도 인정하지 않고 라운드가 끝나면 no_evidence로 답한다 (추측 답변 금지)."""
+    from evaluate.check_verification import FakeClient
+    from app.core.single_agent.pipeline import run_pipeline
+    search, store = _pipe_fakes()
+    verdict = {"slot_verdicts": [{"slot_id": "rule", "status": "missing", "evidence_refs": []}]}
+    fake = FakeClient([_PIPE_ANALYSIS, verdict, {"answer": "문서에서 찾지 못했습니다."}])
+    run = run_pipeline("질문", max_rounds=1, client=fake, search_fn=search, store=store)
+    assert run.decision.next_action == "no_evidence" and run.answer_run.mode == "no_evidence"
+    assert run.answer_run.shown_evidence_ids == []
+
+
+def test_pipeline_survives_llm_failure_everywhere(monkeypatch):
+    """LLM이 계속 실패해도 예외 없이 안내 문구를 돌려준다."""
+    from app.core.single_agent import llm
+    from app.core.single_agent.pipeline import run_pipeline
+    monkeypatch.setattr(llm, "API_RETRY_WAIT_S", 0)
+    fake = _FlakyClient([("{}", "stop")], fail_times=99)
+    run = run_pipeline("질문", client=fake)
+    assert run.stopped.startswith("analysis_error") and run.answer_run.mode == "error"
+    assert run.answer_run.answer and run.answer_run.error
+
+
+def test_pipeline_second_round_expands_with_verify_anchors():
+    """④가 partial + 앵커를 주면 다음 라운드 ②가 원문 확장을 고르고 ③이 그 앵커로 확장한다."""
+    from evaluate.check_search_execution import FakeSearch, FakeStore
+    from evaluate.check_verification import FakeClient
+    from app.core.single_agent.pipeline import run_pipeline
+    t = ["Part-time work requires approval.", "Limited to 20 hours per week.", "Only during vacation.", "Fines apply."]
+    search = FakeSearch([{"source": "d.pdf", "page": 1, "chunk_index": 2, "text": t[2], "score": 0.9}])
+    store = FakeStore({"d.pdf": {1: t}})
+    analysis = dict(_PIPE_ANALYSIS)
+    v1 = {"slot_verdicts": [{"slot_id": "rule", "status": "partial", "missing_detail": "앞 조항 필요",
+                             "evidence_refs": [{"evidence_id": "d.pdf#p1#c2", "quote": "Only during vacation"}]}]}
+    q2 = {"query_ko": "GKS 아르바이트 앞 조항", "reason": "확장"}
+    v2 = {"slot_verdicts": [{"slot_id": "rule", "status": "supported",
+                             "evidence_refs": [{"evidence_id": "d.pdf#p1#c1", "quote": "Limited to 20 hours per week"}]}]}
+    fake = FakeClient([analysis, v1, q2, v2, {"answer": "주 20시간까지입니다 [1]."}])
+    run = run_pipeline("질문", max_rounds=2, client=fake, search_fn=search, store=store)
+    assert fake.calls == 5 and run.rounds == 2
+    r2 = run.plan_runs[1].plan
+    assert r2.target_slot_id == "rule" and r2.search_type == "expand_context"
+    assert run.search_runs[-1].anchor_ids == ["d.pdf#p1#c2"]
+    assert set(run.pool.chunks) == {"d.pdf#p1#c1", "d.pdf#p1#c2", "d.pdf#p1#c3"}
+    # 현재 한계(2-2): 같은 앵커로 다시 확장하면 첫 바퀴와 같은 이웃만 가져와 새 청크가 없다
+    assert run.search_runs[-1].new_chunk_ids == []

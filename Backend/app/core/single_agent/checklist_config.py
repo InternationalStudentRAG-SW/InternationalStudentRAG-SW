@@ -91,10 +91,20 @@ TOOL_MAX_RETRIES = 1      # 검색 도구 오류 시 재시도 횟수. 끝내 �
 VERIFY_MAX_CHUNKS = 20      # 판정 프롬프트에 넣을 청크 상한 (이미 칸에 연결된 청크 → 이번 라운드 새 청크 순)
 MAX_CLARIFY_FIELDS = 2      # 한 번에 되물을 사용자 칸 최대 수 (체크리스트 4.2절)
 MAX_NO_PROGRESS_ROUNDS = 2  # 연속으로 새 근거가 없던 검색이 이만큼이면 더 검색하지 않음 (체크리스트 7절)
+# 전체 흐름 (pipeline.py, 초기값이며 평가로 조정한다)
+MAX_VERIFY_ROUNDS = 3        # ②③④ 라운드 최대 횟수 (④ LLM 호출 비용이 커서 검색 예산보다 먼저 제한)
+AUTO_EXPAND_FIRST_ROUND = True  # 첫 바퀴 신규 검색 뒤 1순위 청크 앞뒤를 바로 확장 (LLM 없음, dev 풀 수집과 같은 방식)
+ANSWER_MAX_EVIDENCE = 12     # ⑤ 프롬프트에 넣을 근거 청크 상한
+ANSWER_CHUNK_CHARS = 900     # ⑤ 프롬프트에 넣을 청크 본문 길이 상한
 MIN_QUOTE_CHARS = 4         # 근거 인용의 최소 길이 (text_match 정규화 후 글자 수). 너무 짧은 인용은 아무 청크에나 맞으므로 거부
 
 # ④가 LLM에게 허용하는 칸 상태. unavailable_in_corpus는 자료 범위표로만 정하므로 ④가 쓰지 않는다(2.1절).
 VERIFIABLE_STATUSES = {"supported", "partial", "missing", "conflicting", "not_applicable"}
+EARLY_STOP_ON_CORE = True   # 핵심 칸이 모두 supported이고 남은 미해결 칸이 전부 부수 칸이면 검색을 멈추고 답한다
+# 질문 유형별 핵심·부수 칸. 표에 없는 유형(조건·예외가 답을 바꾸는 T2~T6)은 조기 종료하지 않는다
+EARLY_STOP_SLOTS = {
+    "T1": {"core": ("requested_value", "applicable_scope"), "aux": ("reference_time", "variation_notes", "extra_info")},
+}
 RESOLVED_STATUSES = {"supported", "not_applicable"}   # 답변에 필요한 확인이 끝난 상태
 
 # ④가 고르는 다음 행동 (서버 규칙으로 결정, 체크리스트 2.4절)

@@ -64,5 +64,6 @@ class VerificationRun(BaseModel):
     prompt_tokens: int = 0
     completion_tokens: int = 0
     attempts: int = 0
-    raw_output: str = ""
+    raw_output: str = ""              # 마지막 시도의 LLM 원문
+    raw_outputs: List[str] = []        # 시도별 LLM 원문 (형식 오류로 재시도한 경우 확인용)
     checklist_version: str = ""

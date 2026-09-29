@@ -6,6 +6,7 @@ class Settings(BaseSettings):
     # OpenAI Configuration
     openai_api_key: str
     openai_model: str = "gpt-4o-mini"
+    verify_model: str = ""  # 단일 에이전트 ④ 충분성 검증 전용 모델 (환경변수 VERIFY_MODEL, 비우면 openai_model)
 
     # ChromaDB Configuration
     chroma_db_path: str = "../DATA/chroma_db"

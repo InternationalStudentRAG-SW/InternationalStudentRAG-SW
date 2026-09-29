@@ -203,10 +203,12 @@ def _print_run(run) -> None:
 
 def run_live(path: Optional[str], show_prompt: bool = False, models: Optional[List[str]] = None,
              repeat: int = 1, client=None, save: bool = True, verbose: bool = True,
-             label: Optional[str] = None) -> List[Dict]:
+             label: Optional[str] = None, keep_run: bool = False) -> List[Dict]:
     """
     저장된 live JSON으로 ④를 실제 LLM으로 돌린다. models × repeat번 실행하고 마지막에 비교표를 출력한다.
     client는 테스트용(가짜 LLM)이다. 반환: 실행별 요약 목록.
+    요약에는 항상 서버 경고(warnings)와 시도별 LLM 원문(raw_outputs)을 담는다.
+    keep_run=True면 ④ 실행 기록 전체(run: 칸별 인용·value·missing_detail 포함)도 담는다 (--dev 저장용).
     """
     p = Path(path) if path else _latest_live_file()
     if p is None or not p.exists():
@@ -243,7 +245,11 @@ def run_live(path: Optional[str], show_prompt: bool = False, models: Optional[Li
                 "removed_refs": sum(1 for w in run.warnings if w.startswith("[제거]") and "근거" in w),
                 "tokens": run.prompt_tokens + run.completion_tokens, "latency_ms": run.latency_ms,
                 "error": run.error,
+                "warnings": list(run.warnings),
+                "raw_outputs": list(run.raw_outputs),
             })
+            if keep_run:
+                summaries[-1]["run"] = run.model_dump()
 
     if len(summaries) > 1:
         slot_ids = list(summaries[0]["statuses"].keys())
@@ -280,7 +286,8 @@ def run_dev(models: Optional[List[str]], repeat: int, only: Optional[set] = None
     rows: List[Dict] = []
     for f in files:
         print(f"\n########## {f.stem} ##########")
-        rows += run_live(str(f), models=models, repeat=repeat, client=client, save=False, verbose=False, label=f.stem)
+        rows += run_live(str(f), models=models, repeat=repeat, client=client, save=False, verbose=False,
+                         label=f.stem, keep_run=True)
 
     from evaluate.dev_questions import DEV_QUESTIONS
     from evaluate.dev_scoring import score_row, total_score
@@ -298,6 +305,11 @@ def run_dev(models: Optional[List[str]], repeat: int, only: Optional[set] = None
         cells = " ".join(f"{k}={short.get(v, v)}({r['ref_counts'][k]})" for k, v in r["statuses"].items())
         print(f"{r['label']:<4} {str(r['model'])[:11]:<11} #{r['try']} | 청크 {r['distinct_chunks']:>2} | 제거 {r['removed_refs']} "
               f"| {str(r['next_action']):<19} | {r['tokens']:>5}tok {r['latency_ms']:>6}ms | {cells}")
+        if r.get("error"):
+            print(f"      ④ 실패: {r['error']}")
+        for w in r.get("warnings", []):
+            if w.startswith("[제거]") and "근거" in w:
+                print(f"      {w}")
         sc = r.get("score")
         if sc:
             print("      채점 " + " ".join(f"{k} {sc[k]['pass']}/{sc[k]['total']}" for k in ("slots", "cite", "not_cite", "users", "action")))

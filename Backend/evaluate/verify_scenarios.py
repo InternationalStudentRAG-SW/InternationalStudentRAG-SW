@@ -67,6 +67,16 @@ def ref(page, idx, quote):
     return {"evidence_id": gid(page, idx), "quote": quote}
 
 
+KOT_DEMO = "[동아대]모집요강_한국어트랙.pdf"
+T_TABLE_DOCS = ("## **가. 필수제출서류**  \n|**순번**|**제출서류**|**제출서류**|**구분**|\n|---|---|---|---|\n"
+                "|**1**|입학지원서||●|●|-<br>온라인접수후출력|\n|**2**|자기소개서||●|●|(양식1)|\n"
+                "|**3**|학력조회동의서||●|●|(양식2)|\n|**4**|고등학교졸업(예정)증명서||●|●|-|")
+
+
+def ref_s(page, idx, quote, source=KOT_DEMO):
+    return {"evidence_id": gid(page, idx, source=source), "quote": quote}
+
+
 def v(slot_id, status, refs=(), **kw):
     return {"slot_id": slot_id, "status": status, "evidence_refs": list(refs), "value": kw.pop("value", "요약"), **kw}
 
@@ -199,6 +209,50 @@ SCENARIOS = [
         "history": FIRST, "budget": B1,
         "llm": {"slot_verdicts": [v("rule", "supported", [ref(11, 0, "Article 3 A GKS recipient in a degree program")])]},
         "expect": {"slot_statuses": {"rule": "supported"}, "slot_ref_ids": {"rule": [gid(11, 0)]}},
+    },
+    {
+        "id": "C11",
+        "title": "표 기호(|)·<br>·** 차이는 인용 일치로 인정 (dev D1 수업료 표 재현)",
+        "pool": [{"id": gid(11, 0), "text": " |**Class size**<br>Approximately 15 students|\n |**Tuition Fee**<br>1,300,000 KRW per semester<br>(excluding application fee)|"}],
+        "history": FIRST, "budget": B1,
+        "llm": {"slot_verdicts": [v("rule", "supported", [ref(11, 0, "Tuition Fee 1,300,000 KRW per semester")])]},
+        "expect": {"slot_statuses": {"rule": "supported"}, "slot_ref_ids": {"rule": [gid(11, 0)]}},
+    },
+    {
+        "id": "C12",
+        "title": "너무 짧은 인용(정규화 후 4자 미만)은 어느 청크에나 맞으므로 제거",
+        "pool": BASE_POOL, "history": FIRST, "budget": B1,
+        "llm": {"slot_verdicts": [v("rule", "supported", [ref(11, 0, "GKS")])] + ALL_GOOD[1:]},
+        "expect": {"slot_statuses": {"rule": "missing"}, "slot_ref_ids": {"rule": []},
+                   "warnings_contain": "너무 짧음"},
+    },
+    {
+        "id": "C13",
+        "title": "파일 이름이 '['로 시작할 때 LLM이 괄호를 더 붙인 ID → 보정해서 인정 (dev D2 재현)",
+        "pool": [{"id": gid(13, 1, source=KOT_DEMO), "text": T_TABLE_DOCS}],
+        "history": FIRST, "budget": B1,
+        "llm": {"slot_verdicts": [v("rule", "supported", [
+            {"evidence_id": "[" + gid(13, 1, source=KOT_DEMO), "quote": "학력조회동의서"}])]},
+        "expect": {"slot_statuses": {"rule": "supported"}, "slot_ref_ids": {"rule": [gid(13, 1, source=KOT_DEMO)]},
+                   "warnings_contain": "괄호·공백 보정"},
+    },
+    {
+        "id": "C14",
+        "title": "표의 여러 행을 쉼표로 이어 붙인 목록 인용 → 항목이 모두 순서대로 있으면 인정 (dev D4 재현)",
+        "pool": [{"id": gid(13, 1, source=KOT_DEMO), "text": T_TABLE_DOCS}],
+        "history": FIRST, "budget": B1,
+        "llm": {"slot_verdicts": [v("rule", "supported", [
+            ref_s(13, 1, "입학지원서, 자기소개서, 학력조회동의서, 고등학교졸업(예정)증명서")])]},
+        "expect": {"slot_statuses": {"rule": "supported"}, "warnings_contain": "목록 인용"},
+    },
+    {
+        "id": "C15",
+        "title": "목록 인용에 본문에 없는 항목이 하나라도 섞이면 제거",
+        "pool": [{"id": gid(13, 1, source=KOT_DEMO), "text": T_TABLE_DOCS}],
+        "history": FIRST, "budget": B1,
+        "llm": {"slot_verdicts": [v("rule", "supported", [
+            ref_s(13, 1, "입학지원서, 자기소개서, 추천서")])]},
+        "expect": {"slot_statuses": {"rule": "missing"}, "warnings_contain": "청크 본문에 없음"},
     },
     {
         "id": "C04",

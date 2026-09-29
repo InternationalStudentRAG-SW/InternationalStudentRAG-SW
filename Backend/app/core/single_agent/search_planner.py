@@ -24,13 +24,12 @@
 from __future__ import annotations
 
 import json
-import re
 import time
 from typing import List, Optional, Tuple
 
-from pydantic import ValidationError
-
 from app.core.single_agent import checklist_config as cfg
+from app.core.single_agent.llm import RetryWith, get_client, model_for, run_json_loop
+from app.core.single_agent.text_match import normalize as _norm
 from app.core.single_agent.analysis_schema import Condition, DocSlot, QuestionAnalysis
 from app.core.single_agent.search_schema import (
     SearchAttempt,
@@ -39,16 +38,11 @@ from app.core.single_agent.search_schema import (
     SearchPlanRun,
 )
 
-MAX_ATTEMPTS = 2
 _REQ_RANK = {"required": 2, "conditional": 1, "optional": 0}
 
 
 class SearchPlanFormatError(ValueError):
     """LLM 출력이 다음 단계로 넘길 수 없을 만큼 틀렸을 때 (재시도 대상)."""
-
-
-def _norm(text: str) -> str:
-    return re.sub(r"\s+", "", text or "").lower()
 
 
 # ── 대상 슬롯 선택 (규칙 기반, LLM 호출 없음) ───────────────────────────────
@@ -157,18 +151,6 @@ def _build_query_user_prompt(
     )
 
 
-_client = None
-
-
-def _get_client():
-    global _client
-    if _client is None:
-        from openai import OpenAI
-        from app.config import settings
-        _client = OpenAI(api_key=settings.openai_api_key)
-    return _client
-
-
 def _generate_query(
     run: SearchPlanRun,
     client,
@@ -194,47 +176,29 @@ def _generate_query(
         )},
     ]
 
-    query_ko, reason, is_dup = None, "", False
-    for _ in range(MAX_ATTEMPTS):
-        run.attempts += 1
-        try:
-            resp = client.chat.completions.create(
-                model=model,
-                messages=messages,
-                temperature=0.3,
-                max_tokens=300,
-                response_format={"type": "json_object"},
+    def parse(raw: str) -> Tuple[str, str]:
+        data = json.loads(raw)
+        if not isinstance(data, dict):
+            raise SearchPlanFormatError("JSON 객체가 아님")
+        q = str(data.get("query_ko", "")).strip()
+        if not q:
+            raise SearchPlanFormatError("query_ko가 비어 있음")
+        r = str(data.get("reason", "")).strip()
+        if _norm(q) in tried_all:
+            raise RetryWith(
+                "이미 시도한 검색어와 같습니다. 표현·범위·조항 명칭을 바꿔 다른 검색어를 JSON으로 다시 출력하세요.",
+                value=(q, r),
+                warning=f"[재시도] 검색어 '{q}'는 이미 시도한 문구 → 다른 표현으로 다시 생성",
             )
-        except Exception as e:
-            run.error = f"LLM 호출 실패: {type(e).__name__}: {e}"
-            break
+        return q, r
 
-        raw = resp.choices[0].message.content or ""
-        try:
-            data = json.loads(raw)
-            q = str(data.get("query_ko", "")).strip()
-            if not q:
-                raise SearchPlanFormatError("query_ko가 비어 있음")
-        except (json.JSONDecodeError, SearchPlanFormatError) as e:
-            run.error = f"형식 오류: {type(e).__name__}: {str(e)[:300]}"
-            messages += [
-                {"role": "assistant", "content": raw},
-                {"role": "user", "content": f"출력 형식 오류입니다: {run.error}\nJSON만 다시 출력하세요."},
-            ]
-            continue
-
-        run.error = None
-        query_ko, reason = q, str(data.get("reason", "")).strip()
-        is_dup = _norm(q) in tried_all
-        if not is_dup:
-            break
-        run.warnings.append(f"[재시도] 검색어 '{q}'는 이미 시도한 문구 → 다른 표현으로 다시 생성")
-        messages += [
-            {"role": "assistant", "content": raw},
-            {"role": "user", "content": "이미 시도한 검색어와 같습니다. 표현·범위·조항 명칭을 바꿔 다른 검색어를 JSON으로 다시 출력하세요."},
-        ]
-
-    return query_ko, reason, is_dup
+    value, ok = run_json_loop(run, client, model, messages, parse=parse,
+                              temperature=0.3, max_tokens=300, format_hint="JSON만 다시 출력하세요.")
+    if ok:
+        return value[0], value[1], False
+    if value is not None:          # 두 번 다 이미 시도한 문구
+        return value[0], value[1], True
+    return None, "", False
 
 
 def _pick_first_search(
@@ -319,10 +283,9 @@ def plan_search(
 
         # 3) 검색어 문구 생성 — LLM (슬롯·종류는 이미 정해져 있음)
         if not model:
-            from app.config import settings
-            model = settings.openai_model
+            model = model_for("plan")
             run.model = model
-        client = client or _get_client()
+        client = client or get_client()
 
         query_ko, reason, is_dup = _generate_query(run, client, model, analysis, slot, search_type, history)
         if query_ko is None:

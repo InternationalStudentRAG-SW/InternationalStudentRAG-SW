@@ -6,7 +6,7 @@
 
 흐름
   1. 체크리스트 설정으로 프롬프트를 만든다 (유형 요약 + 칸 ID 목록).
-  2. LLM을 JSON 모드로 1회 호출한다. 형식이 틀리면 오류를 알려주고 1회 재시도한다.
+  2. LLM을 JSON 모드로 1회 호출한다. 형식이 틀리면 오류를 알려주고 1회 재시도한다 (llm.py).
   3. 서버 검증: 칸 ID·선택지 확인, 필수도 하향 복구, 인용 문구 대조, ① 단계 상태 강제.
      고친 내용은 warnings에 남긴다.
 
@@ -15,20 +15,18 @@
 from __future__ import annotations
 
 import json
-import re
 import time
 from typing import Dict, List, Optional, Tuple
 
-from pydantic import ValidationError
-
 from app.core.single_agent import checklist_config as cfg
+from app.core.single_agent.llm import get_client, model_for, run_json_loop
+from app.core.single_agent.text_match import quote_in_text
 from app.core.single_agent.analysis_schema import (
     AnalysisRun,
     DocSlot,
     QuestionAnalysis,
 )
 
-MAX_ATTEMPTS = 2          # 최초 1회 + 형식 오류 시 재시도 1회
 MAX_HISTORY_MESSAGES = 10  # 프롬프트에 넣을 최근 대화 수
 
 _REQ_RANK = {"required": 2, "conditional": 1, "optional": 0}
@@ -90,7 +88,8 @@ SYSTEM_PROMPT_TEMPLATE = """당신은 동아대학교 유학생 생활·행정 �
    - 제출처·제출방법을 명시적으로 물으면("어디에 내?", "어떻게 제출해?") submission_method가 존재하는 유형에서는 그 칸을 active=true, required로 올립니다. 기본값이 optional/비활성이어도 이 경우에는 올립니다.
    - 유형의 기본 필수도보다 낮추지 않습니다.
    - conditional 칸에는 activation_state를 적습니다: {activation_states}
-     질문이 명시적으로 요구하면 triggered, 문서를 봐야 알 수 있으면 unresolved(active=true 유지), 질문과 명백히 무관하면 not_triggered(active=false).
+     질문이 명시적으로 요구하면 triggered, 그 밖에는 모두 unresolved(active=true 유지)입니다.
+     not_triggered는 문서 근거가 있어야 정할 수 있으므로 이 단계에서는 쓰지 않습니다(④가 문서를 보고 정함).
    - optional 칸은 질문 해결에 도움이 될 때만 active=true.
 6. status는 모두 "unchecked"입니다. 규정 내용·수치·가능 여부를 추측해 적지 않습니다.
 
@@ -197,10 +196,6 @@ def build_user_prompt(numbered: List[Dict]) -> str:
 
 # ── 서버 검증 ─────────────────────────────────────────────────────────────
 
-def _norm(text: str) -> str:
-    return re.sub(r"\s+", "", text or "").lower()
-
-
 def validate_analysis(a: QuestionAnalysis, numbered: List[Dict]) -> Tuple[QuestionAnalysis, List[str]]:
     """
     LLM 출력을 체크리스트 규칙에 맞게 검사·보정한다.
@@ -265,9 +260,11 @@ def validate_analysis(a: QuestionAnalysis, numbered: List[Dict]) -> Tuple[Questi
             if s.activation_state in ("triggered", "unresolved") and not s.active:
                 w.append(f"[수정] {s.slot_id}: 발동 {s.activation_state}인데 비활성 → 활성 (임의 비활성화 금지)")
                 s.active = True
-            if s.activation_state == "not_triggered" and s.active:
-                w.append(f"[수정] {s.slot_id}: not_triggered인데 활성 → 비활성")
-                s.active = False
+            if s.activation_state == "not_triggered":
+                # ①은 문서를 보기 전이라 '문서상 발동 안 함'을 정할 근거가 없다. 꺼 버리면 ④가 다시 볼 수 없다.
+                w.append(f"[수정] {s.slot_id}: ①은 문서 근거가 없어 not_triggered 불가 → unresolved(활성) (④가 문서로 판단)")
+                s.activation_state = "unresolved"
+                s.active = True
         else:
             s.activation_state = None
 
@@ -311,7 +308,7 @@ def validate_analysis(a: QuestionAnalysis, numbered: List[Dict]) -> Tuple[Questi
             w.append(f"[제거] 조건 {label}: subject '{c.subject}' 잘못됨")
         elif msg is None or msg["role"] != "user":
             w.append(f"[제거] 조건 {label}: {c.source_message_id}가 없거나 사용자 메시지가 아님")
-        elif not c.quote.strip() or _norm(c.quote) not in _norm(msg["content"]):
+        elif not quote_in_text(c.quote, msg["content"]):
             w.append(f"[제거] 조건 {label}: 인용 '{c.quote}'이 {c.source_message_id}에 없음 (추정 의심)")
         elif not c.value.strip():
             w.append(f"[제거] 조건 {c.field_id}: 값 없음")
@@ -386,18 +383,6 @@ def validate_analysis(a: QuestionAnalysis, numbered: List[Dict]) -> Tuple[Questi
 
 # ── LLM 호출 ─────────────────────────────────────────────────────────────
 
-_client = None
-
-
-def _get_client():
-    global _client
-    if _client is None:
-        from openai import OpenAI
-        from app.config import settings
-        _client = OpenAI(api_key=settings.openai_api_key)
-    return _client
-
-
 def analyze_question(
     question: str,
     history: Optional[List[Dict]] = None,
@@ -408,10 +393,8 @@ def analyze_question(
     질문 하나를 분석한다. 실패해도 예외 대신 AnalysisRun.error에 이유를 담아 돌려준다.
     client: 테스트용으로 OpenAI 클라이언트를 바꿔 끼울 때 사용.
     """
-    if model is None:
-        from app.config import settings
-        model = settings.openai_model
-    client = client or _get_client()
+    model = model or model_for("analyze")
+    client = client or get_client()
 
     numbered = number_messages(question, history)
     messages = [
@@ -426,38 +409,15 @@ def analyze_question(
     )
 
     started = time.perf_counter()
-    for attempt in range(1, MAX_ATTEMPTS + 1):
-        run.attempts = attempt
-        try:
-            resp = client.chat.completions.create(
-                model=model,
-                messages=messages,
-                temperature=0,
-                max_tokens=2000,
-                response_format={"type": "json_object"},
-            )
-        except Exception as e:  # 네트워크·API 오류는 재시도하지 않고 기록
-            run.error = f"LLM 호출 실패: {type(e).__name__}: {e}"
-            break
-
-        usage = getattr(resp, "usage", None)
-        if usage:
-            run.prompt_tokens += getattr(usage, "prompt_tokens", 0) or 0
-            run.completion_tokens += getattr(usage, "completion_tokens", 0) or 0
-        raw = resp.choices[0].message.content or ""
-        run.raw_output = raw
-
-        try:
-            parsed = QuestionAnalysis.model_validate(json.loads(raw))
-            run.analysis, run.warnings = validate_analysis(parsed, numbered)
-            run.error = None
-            break
-        except (json.JSONDecodeError, ValidationError, AnalysisFormatError) as e:
-            run.error = f"형식 오류: {type(e).__name__}: {str(e)[:500]}"
-            messages += [
-                {"role": "assistant", "content": raw},
-                {"role": "user", "content": f"출력 형식 오류입니다: {run.error}\n규칙과 JSON 형식을 지켜 JSON만 다시 출력하세요."},
-            ]
+    value, ok = run_json_loop(
+        run, client, model, messages,
+        parse=lambda raw: validate_analysis(QuestionAnalysis.model_validate(json.loads(raw)), numbered),
+        temperature=0, max_tokens=2000,
+        format_hint="규칙과 JSON 형식을 지켜 JSON만 다시 출력하세요.",
+    )
+    if ok:
+        run.analysis, w = value
+        run.warnings += w
 
     run.latency_ms = int((time.perf_counter() - started) * 1000)
     return run

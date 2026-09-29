@@ -13,7 +13,7 @@
         "active": true,
         "requirement": "required",
         "activation_state": null,
-        "activation_reason": "비자 신청에 필요한 서류 목록이 필수적이기 때문",
+        "activation_reason": "비자 신청에 필요한 서류 목록이 필수이기 때문",
         "status": "unchecked",
         "evidence_refs": [],
         "value": "",
@@ -21,10 +21,10 @@
       },
       {
         "slot_id": "conditional_documents",
-        "active": false,
+        "active": true,
         "requirement": "conditional",
-        "activation_state": "not_triggered",
-        "activation_reason": "추가 서류가 필요한 경우는 질문과 무관함",
+        "activation_state": "unresolved",
+        "activation_reason": "조건별 추가 서류가 필요할 수 있으나 확인 후 판단",
         "status": "unchecked",
         "evidence_refs": [],
         "value": "",
@@ -32,10 +32,10 @@
       },
       {
         "slot_id": "format_validity",
-        "active": false,
+        "active": true,
         "requirement": "conditional",
-        "activation_state": "not_triggered",
-        "activation_reason": "서류 형식 및 유효기간은 질문과 무관함",
+        "activation_state": "unresolved",
+        "activation_reason": "서류 형식 및 유효기간이 조건에 따라 달라질 수 있으나 확인 후 판단",
         "status": "unchecked",
         "evidence_refs": [],
         "value": "",
@@ -43,10 +43,10 @@
       },
       {
         "slot_id": "country_exceptions",
-        "active": false,
+        "active": true,
         "requirement": "conditional",
-        "activation_state": "not_triggered",
-        "activation_reason": "국가별 예외는 질문과 무관함",
+        "activation_state": "unresolved",
+        "activation_reason": "국가별 예외 사항이 있을 수 있으나 확인 후 판단",
         "status": "unchecked",
         "evidence_refs": [],
         "value": "",
@@ -57,7 +57,7 @@
         "active": false,
         "requirement": "optional",
         "activation_state": null,
-        "activation_reason": "제출 방법은 질문과 무관함",
+        "activation_reason": "제출 방법은 선택 사항이지만 도움이 될 수 있음",
         "status": "unchecked",
         "evidence_refs": [],
         "value": "",
@@ -135,7 +135,7 @@
       "anchor_ids": [],
       "warnings": [],
       "tool_attempts": 1,
-      "latency_ms": 19582,
+      "latency_ms": 19627,
       "checklist_version": "v1-2026-09-28"
     },
     {
@@ -177,7 +177,7 @@
       ],
       "warnings": [],
       "tool_attempts": 1,
-      "latency_ms": 3,
+      "latency_ms": 5,
       "checklist_version": "v1-2026-09-28"
     }
   ],
@@ -342,5 +342,5 @@
   "dev_id": "D9",
   "dev_type": "T3",
   "dev_check": "영어 질문, 관할이 제한된 비자 자료(체크리스트 5.3절)",
-  "collected_at": "2026-09-29T19:16:13"
+  "collected_at": "2026-09-29T20:47:52"
 }

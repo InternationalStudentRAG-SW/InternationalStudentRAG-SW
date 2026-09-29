@@ -82,6 +82,30 @@ MAX_CONTEXT_EXPANSIONS = 3  # 원문 확장 최대 횟수
 MAX_NEW_SEARCHES_PER_SLOT = 2  # 신규 검색 2번에도 missing이면 더 검색하지 않음 (status는 missing 유지 → 부분 답변)
 MAX_EXPANSIONS_PER_SLOT = 2    # 원문 확장 2번에도 partial이면 더 확장하지 않음 (partial로 답변)
 
+# ③ 근거 검색 (초기값이며 평가로 조정한다)
+SEARCH_TOP_K = 7          # 신규 검색 1회당 돌려받을 청크 수 (기본 top_k 10보다 줄여 ④ 입력을 제한)
+EXPAND_WINDOW = 1         # 원문 확장 때 앵커 앞·뒤로 가져올 청크 수
+TOOL_MAX_RETRIES = 1      # 검색 도구 오류 시 재시도 횟수. 끝내 실패하면 예산·칸별 상한에서 차감하지 않는다
+
+# ④ 충분성 검증 (초기값이며 평가로 조정한다)
+VERIFY_MAX_CHUNKS = 20      # 판정 프롬프트에 넣을 청크 상한 (이미 칸에 연결된 청크 → 이번 라운드 새 청크 순)
+MAX_CLARIFY_FIELDS = 2      # 한 번에 되물을 사용자 칸 최대 수 (체크리스트 4.2절)
+MAX_NO_PROGRESS_ROUNDS = 2  # 연속으로 새 근거가 없던 검색이 이만큼이면 더 검색하지 않음 (체크리스트 7절)
+
+# ④가 LLM에게 허용하는 칸 상태. unavailable_in_corpus는 자료 범위표로만 정하므로 ④가 쓰지 않는다(2.1절).
+VERIFIABLE_STATUSES = {"supported", "partial", "missing", "conflicting", "not_applicable"}
+RESOLVED_STATUSES = {"supported", "not_applicable"}   # 답변에 필요한 확인이 끝난 상태
+
+# ④가 고르는 다음 행동 (서버 규칙으로 결정, 체크리스트 2.4절)
+VERIFY_ACTIONS = {
+    "answer": "완결 답변",
+    "answer_by_condition": "조건별 일반 안내 (개인별 결론은 확정하지 않음)",
+    "ask_clarification": "개인별 결론을 바꾸는 사용자 조건만 확인",
+    "continue_search": "② 검색 계획으로 돌아가 재검색·원문 확장",
+    "partial_answer": "확인된 내용·미확인 항목·이유를 구분한 부분 답변",
+    "no_evidence": "사용할 근거가 없음 → 확인 불가 안내",
+}
+
 # ② 검색 계획이 문서 칸 status를 보고 다음 행동을 정할 때 쓰는 분류.
 # (체크리스트 v1 2.1절 문서 칸 상태 기준)
 NEEDS_EXPAND_STATUSES = {"partial"}

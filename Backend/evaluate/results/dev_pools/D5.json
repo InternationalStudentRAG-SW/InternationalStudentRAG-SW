@@ -1,0 +1,346 @@
+{
+  "question": "기숙사 신청 방법을 알려주세요.",
+  "analysis": {
+    "intent_summary": "기숙사 신청 방법을 알고 싶다는 요청",
+    "answer_scope": "general",
+    "primary_type": "T4",
+    "additional_types": [],
+    "type_reason": "신청 절차를 묻고 있으므로 T4로 분류",
+    "conditions": [],
+    "document_slots": [
+      {
+        "slot_id": "step_sequence",
+        "active": true,
+        "requirement": "required",
+        "activation_state": null,
+        "activation_reason": "신청 절차의 단계가 필요",
+        "status": "unchecked",
+        "evidence_refs": [],
+        "value": "",
+        "missing_detail": ""
+      },
+      {
+        "slot_id": "application_channel",
+        "active": true,
+        "requirement": "required",
+        "activation_state": null,
+        "activation_reason": "신청 방법이 필요",
+        "status": "unchecked",
+        "evidence_refs": [],
+        "value": "",
+        "missing_detail": ""
+      },
+      {
+        "slot_id": "prerequisites",
+        "active": true,
+        "requirement": "conditional",
+        "activation_state": "unresolved",
+        "activation_reason": "선행 요건이 있을 수 있으나 명시적 요구는 없음",
+        "status": "unchecked",
+        "evidence_refs": [],
+        "value": "",
+        "missing_detail": ""
+      },
+      {
+        "slot_id": "deadline",
+        "active": true,
+        "requirement": "conditional",
+        "activation_state": "unresolved",
+        "activation_reason": "신청 기한이 있을 수 있으나 명시적 요구는 없음",
+        "status": "unchecked",
+        "evidence_refs": [],
+        "value": "",
+        "missing_detail": ""
+      },
+      {
+        "slot_id": "approval_exceptions",
+        "active": true,
+        "requirement": "conditional",
+        "activation_state": "unresolved",
+        "activation_reason": "승인 예외가 있을 수 있으나 명시적 요구는 없음",
+        "status": "unchecked",
+        "evidence_refs": [],
+        "value": "",
+        "missing_detail": ""
+      },
+      {
+        "slot_id": "extra_info",
+        "active": false,
+        "requirement": "optional",
+        "activation_state": null,
+        "activation_reason": "추가 안내가 필요할 수 있으나 명시적 요구는 없음",
+        "status": "unchecked",
+        "evidence_refs": [],
+        "value": "",
+        "missing_detail": ""
+      }
+    ],
+    "user_slots": [],
+    "first_search": {
+      "query_ko": "기숙사 신청 절차",
+      "target_slot_ids": [
+        "step_sequence",
+        "application_channel"
+      ],
+      "reason": "신청 방법과 절차를 확인하기 위해"
+    },
+    "next_action": "search",
+    "next_action_reason": "신청 절차에 대한 일반 규정으로 안내 가능",
+    "clarification_question": null
+  },
+  "plan": {
+    "action": "search",
+    "target_slot_id": "step_sequence",
+    "search_type": "new",
+    "query_ko": "기숙사 신청 절차",
+    "reason": "신청 방법과 절차를 확인하기 위해",
+    "is_duplicate": false,
+    "from_first_search": true,
+    "exhausted_slot_ids": [],
+    "skipped": []
+  },
+  "runs": [
+    {
+      "plan": {
+        "action": "search",
+        "target_slot_id": "step_sequence",
+        "search_type": "new",
+        "query_ko": "기숙사 신청 절차",
+        "reason": "신청 방법과 절차를 확인하기 위해",
+        "is_duplicate": false,
+        "from_first_search": true,
+        "exhausted_slot_ids": [],
+        "skipped": []
+      },
+      "ok": true,
+      "error": null,
+      "error_type": null,
+      "attempt": {
+        "target_slot_id": "step_sequence",
+        "search_type": "new",
+        "query_ko": "기숙사 신청 절차",
+        "found_new_evidence": true
+      },
+      "budget": {
+        "total_calls": 1,
+        "expand_calls": 0,
+        "subqueries": 1
+      },
+      "chunk_ids": [
+        "[동아대]2026학년도+후기+학부+외국인+신(편)입학+특별전형+모집요강_한국어트랙.pdf#p21#c3",
+        "[Dong-A+univ]2026+FALL+Admission+Guidelines_English+track+for+the+Undergraduates_English+Track.pdf#p5#c4",
+        "[Dong-A+univ]2026+FALL+Admission+Guidelines_English+track+for+the+Undergraduates_English+Track.pdf#p5#c0",
+        "[동아대]2026학년도+후기+학부+외국인+신(편)입학+특별전형+모집요강_한국어트랙.pdf#p21#c2",
+        "English_2026-2027+Korean+Language+Course.pdf#p3#c12",
+        "[동아대]2026학년도+후기+학부+외국인+신(편)입학+특별전형+모집요강_한국어트랙.pdf#p13#c1",
+        "[동아대]2026학년도+후기+학부+외국인+신(편)입학+특별전형+모집요강_한국어트랙.pdf#p26#c0"
+      ],
+      "new_chunk_ids": [
+        "[동아대]2026학년도+후기+학부+외국인+신(편)입학+특별전형+모집요강_한국어트랙.pdf#p21#c3",
+        "[Dong-A+univ]2026+FALL+Admission+Guidelines_English+track+for+the+Undergraduates_English+Track.pdf#p5#c4",
+        "[Dong-A+univ]2026+FALL+Admission+Guidelines_English+track+for+the+Undergraduates_English+Track.pdf#p5#c0",
+        "[동아대]2026학년도+후기+학부+외국인+신(편)입학+특별전형+모집요강_한국어트랙.pdf#p21#c2",
+        "English_2026-2027+Korean+Language+Course.pdf#p3#c12",
+        "[동아대]2026학년도+후기+학부+외국인+신(편)입학+특별전형+모집요강_한국어트랙.pdf#p13#c1",
+        "[동아대]2026학년도+후기+학부+외국인+신(편)입학+특별전형+모집요강_한국어트랙.pdf#p26#c0"
+      ],
+      "anchor_ids": [],
+      "warnings": [],
+      "tool_attempts": 1,
+      "latency_ms": 22067,
+      "checklist_version": "v1-2026-09-28"
+    },
+    {
+      "plan": {
+        "action": "search",
+        "target_slot_id": "step_sequence",
+        "search_type": "expand_context",
+        "query_ko": "기숙사 신청 절차",
+        "reason": "live 확인: 1순위 청크를 앵커로 앞뒤 확장",
+        "is_duplicate": false,
+        "from_first_search": false,
+        "exhausted_slot_ids": [],
+        "skipped": []
+      },
+      "ok": true,
+      "error": null,
+      "error_type": null,
+      "attempt": {
+        "target_slot_id": "step_sequence",
+        "search_type": "expand_context",
+        "query_ko": "기숙사 신청 절차",
+        "found_new_evidence": true
+      },
+      "budget": {
+        "total_calls": 2,
+        "expand_calls": 1,
+        "subqueries": 1
+      },
+      "chunk_ids": [
+        "[동아대]2026학년도+후기+학부+외국인+신(편)입학+특별전형+모집요강_한국어트랙.pdf#p21#c2",
+        "[동아대]2026학년도+후기+학부+외국인+신(편)입학+특별전형+모집요강_한국어트랙.pdf#p22#c0"
+      ],
+      "new_chunk_ids": [
+        "[동아대]2026학년도+후기+학부+외국인+신(편)입학+특별전형+모집요강_한국어트랙.pdf#p22#c0"
+      ],
+      "anchor_ids": [
+        "[동아대]2026학년도+후기+학부+외국인+신(편)입학+특별전형+모집요강_한국어트랙.pdf#p21#c3"
+      ],
+      "warnings": [],
+      "tool_attempts": 1,
+      "latency_ms": 4,
+      "checklist_version": "v1-2026-09-28"
+    }
+  ],
+  "pool": {
+    "chunks": {
+      "[동아대]2026학년도+후기+학부+외국인+신(편)입학+특별전형+모집요강_한국어트랙.pdf#p21#c3": {
+        "evidence_id": "[동아대]2026학년도+후기+학부+외국인+신(편)입학+특별전형+모집요강_한국어트랙.pdf#p21#c3",
+        "source": "[동아대]2026학년도+후기+학부+외국인+신(편)입학+특별전형+모집요강_한국어트랙.pdf",
+        "page": 21,
+        "chunk_index": 3,
+        "lang": "ko",
+        "text": "## 13. 기타사항  \n- ※ 상기금액은2026년기숙사비기준이며, 2027년기숙사비책정시변동될수있음  \n- ※ 기숙사홈페이지: http://hanlim.donga.ac.kr  \n- ※ 기숙사신청방법: 합격자대상으로추후공지  \n**==> picture [152 x 102] intentionally omitted <==**  \n**==> picture [154 x 103] intentionally omitted <==**  \n**==> picture [154 x 103] intentionally omitted <==**  \n- 17 -",
+        "score": 0.800851583480835,
+        "tags": [
+          {
+            "target_slot_id": "step_sequence",
+            "search_type": "new",
+            "query_ko": "기숙사 신청 절차",
+            "round_no": 1
+          }
+        ]
+      },
+      "[Dong-A+univ]2026+FALL+Admission+Guidelines_English+track+for+the+Undergraduates_English+Track.pdf#p5#c4": {
+        "evidence_id": "[Dong-A+univ]2026+FALL+Admission+Guidelines_English+track+for+the+Undergraduates_English+Track.pdf#p5#c4",
+        "source": "[Dong-A+univ]2026+FALL+Admission+Guidelines_English+track+for+the+Undergraduates_English+Track.pdf",
+        "page": 5,
+        "chunk_index": 4,
+        "lang": "en",
+        "text": "Register Online Application at (applydonga.accomsystem.co.kr) ↓ Log-in(sign up) and Choose your Undergraduate course ‘New’ ↓ Fill out the online application form and **attach all required documents online** ↓ Application Submission and Application fee payment *** Application is complete after the payment** ↓ Document Screening (Based on submitted document at online) ↓ Interview by the department ↓ Admission Result Notification ↓ Tuition fee payment ↓ Issuance of Certificate of Admission(University) and Visa Application(Applicants) ***University only issue visa documents for whom submitted",
+        "score": 0.19696451723575592,
+        "tags": [
+          {
+            "target_slot_id": "step_sequence",
+            "search_type": "new",
+            "query_ko": "기숙사 신청 절차",
+            "round_no": 1
+          }
+        ]
+      },
+      "[Dong-A+univ]2026+FALL+Admission+Guidelines_English+track+for+the+Undergraduates_English+Track.pdf#p5#c0": {
+        "evidence_id": "[Dong-A+univ]2026+FALL+Admission+Guidelines_English+track+for+the+Undergraduates_English+Track.pdf#p5#c0",
+        "source": "[Dong-A+univ]2026+FALL+Admission+Guidelines_English+track+for+the+Undergraduates_English+Track.pdf",
+        "page": 5,
+        "chunk_index": 0,
+        "lang": "en",
+        "text": "## 1.  Admission Schedule  \n |**Process**|**Dates**|**Dates**|**Remarks**|\n |---|---|---|---|\n ||**1st Round**|**2nd Round**||\n |**Online**<br>**Application**|2026.4.1.(Wed) ~ 4.14.(Tue)|**2026.6.15.(Mon) ~   6.21.(Sun)**|Online Application<br>(applydonga.accomsystem.co.kr)|\n |**Document**<br>**Screening**|2026.5.4.(Mon)<br>(Scheduled)|2026.7.7.(Tue)<br>(Scheduled)|Interview details will be<br>announced on the Office of<br>International Affairs<br>website on:<br>- 1st: 2026.5.4.(Mon)<br>- 2nd: 2026.7.7.(Tue)|\n",
+        "score": 0.10232669115066528,
+        "tags": [
+          {
+            "target_slot_id": "step_sequence",
+            "search_type": "new",
+            "query_ko": "기숙사 신청 절차",
+            "round_no": 1
+          }
+        ]
+      },
+      "[동아대]2026학년도+후기+학부+외국인+신(편)입학+특별전형+모집요강_한국어트랙.pdf#p21#c2": {
+        "evidence_id": "[동아대]2026학년도+후기+학부+외국인+신(편)입학+특별전형+모집요강_한국어트랙.pdf#p21#c2",
+        "source": "[동아대]2026학년도+후기+학부+외국인+신(편)입학+특별전형+모집요강_한국어트랙.pdf",
+        "page": 21,
+        "chunk_index": 2,
+        "lang": "ko",
+        "text": "13. 기타사항|||||||||\n||**가. 기숙사**<br>**구분**<br>**시설**<br>**가격**<br>**위치**<br>**한림생활관**<br>가. 기본시설<br>: 침대, 책상, 옷장, 신발장, 수납장등<br>나. 그외시설<br>:카페테리아, 휴게실, 세탁실등<br>한학기(방학제외)<br>승학1관(여자기숙사): 939,000원<br>승학2관(남자기숙사): 1,070,000원<br>승학|||||||||\n||**구분**||**시설**||||**가격**|**위치**||\n||**한림생활관**||가. 기본시설<br>: 침대, 책상, 옷장, 신발장, 수납장등<br>나. 그외시설<br>:카페테리아, 휴게실, 세탁실등||||한학기(방학제외)<br>승학1관(여자기숙사): 939,000원<br>승학2관(남자기숙사): 1,070,000원|승학||",
+        "score": 0.09259413182735443,
+        "tags": [
+          {
+            "target_slot_id": "step_sequence",
+            "search_type": "new",
+            "query_ko": "기숙사 신청 절차",
+            "round_no": 1
+          },
+          {
+            "target_slot_id": "step_sequence",
+            "search_type": "expand_context",
+            "query_ko": "기숙사 신청 절차",
+            "round_no": 2
+          }
+        ]
+      },
+      "English_2026-2027+Korean+Language+Course.pdf#p3#c12": {
+        "evidence_id": "English_2026-2027+Korean+Language+Course.pdf#p3#c12",
+        "source": "English_2026-2027+Korean+Language+Course.pdf",
+        "page": 3,
+        "chunk_index": 12,
+        "lang": "en",
+        "text": "## **Procdeures**",
+        "score": 0.06151801347732544,
+        "tags": [
+          {
+            "target_slot_id": "step_sequence",
+            "search_type": "new",
+            "query_ko": "기숙사 신청 절차",
+            "round_no": 1
+          }
+        ]
+      },
+      "[동아대]2026학년도+후기+학부+외국인+신(편)입학+특별전형+모집요강_한국어트랙.pdf#p13#c1": {
+        "evidence_id": "[동아대]2026학년도+후기+학부+외국인+신(편)입학+특별전형+모집요강_한국어트랙.pdf#p13#c1",
+        "source": "[동아대]2026학년도+후기+학부+외국인+신(편)입학+특별전형+모집요강_한국어트랙.pdf",
+        "page": 13,
+        "chunk_index": 1,
+        "lang": "ko",
+        "text": "## **가. 필수제출서류**  \n|**순번**|**제출서류**|**제출서류**|**구분**|**구분**|**비고**|\n|---|---|---|---|---|---|\n||||**신입**|**편입**||\n|**1**|입학지원서||●|●|-<br>온라인접수후출력<br>(applydonga.accomsystem.co.kr<br>)|\n|**2**|자기소개서||●|●|(양식1)|\n|**3**|학력조회동의서||●|●|(양식2)|\n|**4**|고등학교졸업(예정)증명서||●|●|-<br>‘유의사항마.’",
+        "score": 0.038119520992040634,
+        "tags": [
+          {
+            "target_slot_id": "step_sequence",
+            "search_type": "new",
+            "query_ko": "기숙사 신청 절차",
+            "round_no": 1
+          }
+        ]
+      },
+      "[동아대]2026학년도+후기+학부+외국인+신(편)입학+특별전형+모집요강_한국어트랙.pdf#p26#c0": {
+        "evidence_id": "[동아대]2026학년도+후기+학부+외국인+신(편)입학+특별전형+모집요강_한국어트랙.pdf#p26#c0",
+        "source": "[동아대]2026학년도+후기+학부+외국인+신(편)입학+특별전형+모집요강_한국어트랙.pdf",
+        "page": 26,
+        "chunk_index": 0,
+        "lang": "ko",
+        "text": "## 별첨: 각종지원서양식  \n1. [Form 1] 자기소개서  \n2. [Form 2] 학력조회동의서  \n3. [Form 3] 재정보증확인서  \n4. [Form 4] 한부모가정확인서  \n- 22 -",
+        "score": 0.020729074254631996,
+        "tags": [
+          {
+            "target_slot_id": "step_sequence",
+            "search_type": "new",
+            "query_ko": "기숙사 신청 절차",
+            "round_no": 1
+          }
+        ]
+      },
+      "[동아대]2026학년도+후기+학부+외국인+신(편)입학+특별전형+모집요강_한국어트랙.pdf#p22#c0": {
+        "evidence_id": "[동아대]2026학년도+후기+학부+외국인+신(편)입학+특별전형+모집요강_한국어트랙.pdf#p22#c0",
+        "source": "[동아대]2026학년도+후기+학부+외국인+신(편)입학+특별전형+모집요강_한국어트랙.pdf",
+        "page": 22,
+        "chunk_index": 0,
+        "lang": "ko",
+        "text": "## 13. 기타사항",
+        "score": null,
+        "tags": [
+          {
+            "target_slot_id": "step_sequence",
+            "search_type": "expand_context",
+            "query_ko": "기숙사 신청 절차",
+            "round_no": 2
+          }
+        ]
+      }
+    }
+  },
+  "stopped": null,
+  "dev_id": "D5",
+  "dev_type": "T4",
+  "dev_check": "자료에 절차가 없는 경우('추후 공지'). 절차를 지어내지 않고 partial_answer/no_evidence로 가는지",
+  "collected_at": "2026-09-29T19:14:31"
+}

@@ -1,0 +1,346 @@
+{
+  "question": "What documents do I need to apply for a student visa?",
+  "analysis": {
+    "intent_summary": "학생 비자 신청에 필요한 서류를 알고 싶다는 요청",
+    "answer_scope": "general",
+    "primary_type": "T3",
+    "additional_types": [],
+    "type_reason": "비자 신청에 필요한 서류 목록을 요청했기 때문에 T3으로 분류",
+    "conditions": [],
+    "document_slots": [
+      {
+        "slot_id": "requested_documents",
+        "active": true,
+        "requirement": "required",
+        "activation_state": null,
+        "activation_reason": "비자 신청에 필요한 서류 목록이 필수적이기 때문",
+        "status": "unchecked",
+        "evidence_refs": [],
+        "value": "",
+        "missing_detail": ""
+      },
+      {
+        "slot_id": "conditional_documents",
+        "active": false,
+        "requirement": "conditional",
+        "activation_state": "not_triggered",
+        "activation_reason": "추가 서류가 필요한 경우는 질문과 무관함",
+        "status": "unchecked",
+        "evidence_refs": [],
+        "value": "",
+        "missing_detail": ""
+      },
+      {
+        "slot_id": "format_validity",
+        "active": false,
+        "requirement": "conditional",
+        "activation_state": "not_triggered",
+        "activation_reason": "서류 형식 및 유효기간은 질문과 무관함",
+        "status": "unchecked",
+        "evidence_refs": [],
+        "value": "",
+        "missing_detail": ""
+      },
+      {
+        "slot_id": "country_exceptions",
+        "active": false,
+        "requirement": "conditional",
+        "activation_state": "not_triggered",
+        "activation_reason": "국가별 예외는 질문과 무관함",
+        "status": "unchecked",
+        "evidence_refs": [],
+        "value": "",
+        "missing_detail": ""
+      },
+      {
+        "slot_id": "submission_method",
+        "active": false,
+        "requirement": "optional",
+        "activation_state": null,
+        "activation_reason": "제출 방법은 질문과 무관함",
+        "status": "unchecked",
+        "evidence_refs": [],
+        "value": "",
+        "missing_detail": ""
+      }
+    ],
+    "user_slots": [],
+    "first_search": {
+      "query_ko": "학생 비자 신청 서류",
+      "target_slot_ids": [
+        "requested_documents"
+      ],
+      "reason": "비자 신청에 필요한 서류 목록을 확인하기 위해"
+    },
+    "next_action": "search",
+    "next_action_reason": "일반 규정으로 먼저 안내 가능",
+    "clarification_question": null
+  },
+  "plan": {
+    "action": "search",
+    "target_slot_id": "requested_documents",
+    "search_type": "new",
+    "query_ko": "학생 비자 신청 서류",
+    "reason": "비자 신청에 필요한 서류 목록을 확인하기 위해",
+    "is_duplicate": false,
+    "from_first_search": true,
+    "exhausted_slot_ids": [],
+    "skipped": []
+  },
+  "runs": [
+    {
+      "plan": {
+        "action": "search",
+        "target_slot_id": "requested_documents",
+        "search_type": "new",
+        "query_ko": "학생 비자 신청 서류",
+        "reason": "비자 신청에 필요한 서류 목록을 확인하기 위해",
+        "is_duplicate": false,
+        "from_first_search": true,
+        "exhausted_slot_ids": [],
+        "skipped": []
+      },
+      "ok": true,
+      "error": null,
+      "error_type": null,
+      "attempt": {
+        "target_slot_id": "requested_documents",
+        "search_type": "new",
+        "query_ko": "학생 비자 신청 서류",
+        "found_new_evidence": true
+      },
+      "budget": {
+        "total_calls": 1,
+        "expand_calls": 0,
+        "subqueries": 1
+      },
+      "chunk_ids": [
+        "English_2026-2027+Korean+Language+Course.pdf#p4#c1",
+        "Study in KOREA! 한국 유학 가이드.pdf#p17#c2",
+        "Study in KOREA! 한국 유학 가이드.pdf#p11#c5",
+        "English_2026-2027+Korean+Language+Course.pdf#p3#c13",
+        "Study in KOREA! 한국 유학 가이드.pdf#p5#c5",
+        "English_2026-2027+Korean+Language+Course.pdf#p3#c7",
+        "Study in KOREA! 한국 유학 가이드.pdf#p12#c5"
+      ],
+      "new_chunk_ids": [
+        "English_2026-2027+Korean+Language+Course.pdf#p4#c1",
+        "Study in KOREA! 한국 유학 가이드.pdf#p17#c2",
+        "Study in KOREA! 한국 유학 가이드.pdf#p11#c5",
+        "English_2026-2027+Korean+Language+Course.pdf#p3#c13",
+        "Study in KOREA! 한국 유학 가이드.pdf#p5#c5",
+        "English_2026-2027+Korean+Language+Course.pdf#p3#c7",
+        "Study in KOREA! 한국 유학 가이드.pdf#p12#c5"
+      ],
+      "anchor_ids": [],
+      "warnings": [],
+      "tool_attempts": 1,
+      "latency_ms": 19582,
+      "checklist_version": "v1-2026-09-28"
+    },
+    {
+      "plan": {
+        "action": "search",
+        "target_slot_id": "requested_documents",
+        "search_type": "expand_context",
+        "query_ko": "학생 비자 신청 서류",
+        "reason": "live 확인: 1순위 청크를 앵커로 앞뒤 확장",
+        "is_duplicate": false,
+        "from_first_search": false,
+        "exhausted_slot_ids": [],
+        "skipped": []
+      },
+      "ok": true,
+      "error": null,
+      "error_type": null,
+      "attempt": {
+        "target_slot_id": "requested_documents",
+        "search_type": "expand_context",
+        "query_ko": "학생 비자 신청 서류",
+        "found_new_evidence": true
+      },
+      "budget": {
+        "total_calls": 2,
+        "expand_calls": 1,
+        "subqueries": 1
+      },
+      "chunk_ids": [
+        "English_2026-2027+Korean+Language+Course.pdf#p4#c0",
+        "English_2026-2027+Korean+Language+Course.pdf#p4#c2"
+      ],
+      "new_chunk_ids": [
+        "English_2026-2027+Korean+Language+Course.pdf#p4#c0",
+        "English_2026-2027+Korean+Language+Course.pdf#p4#c2"
+      ],
+      "anchor_ids": [
+        "English_2026-2027+Korean+Language+Course.pdf#p4#c1"
+      ],
+      "warnings": [],
+      "tool_attempts": 1,
+      "latency_ms": 3,
+      "checklist_version": "v1-2026-09-28"
+    }
+  ],
+  "pool": {
+    "chunks": {
+      "English_2026-2027+Korean+Language+Course.pdf#p4#c1": {
+        "evidence_id": "English_2026-2027+Korean+Language+Course.pdf#p4#c1",
+        "source": "English_2026-2027+Korean+Language+Course.pdf",
+        "page": 4,
+        "chunk_index": 1,
+        "lang": "en",
+        "text": "## **D-4 (Language Course student visa)**  \n - A. Applicants: a student who wants to enroll for a period of 6 months or longer  \n - B. Where to Apply: Overseas Korean embassy or consulate office  \n - C.  Required Documents  \n - Visa issuance application, a copy of passport, photo, visa issuance fee  \n - School documents (school will send documents after a student transfers the tuition fee): Admission letter by Dong-A University, a confirmation letter of tuition fee, etc.  \n - A graduation certificate of the most recently attended school  \n",
+        "score": 0.9798761606216431,
+        "tags": [
+          {
+            "target_slot_id": "requested_documents",
+            "search_type": "new",
+            "query_ko": "학생 비자 신청 서류",
+            "round_no": 1
+          }
+        ]
+      },
+      "Study in KOREA! 한국 유학 가이드.pdf#p17#c2": {
+        "evidence_id": "Study in KOREA! 한국 유학 가이드.pdf#p17#c2",
+        "source": "Study in KOREA! 한국 유학 가이드.pdf",
+        "page": 17,
+        "chunk_index": 2,
+        "lang": "en",
+        "text": "## <신청서 작성방법>  \n - ‣ 신청인은 사실에 근거하여 빠짐없이 정확하게 신청서를 작성해야 합니다.  \n - ‣ 신청서상의 모든 질문에 대한 답변은 한글 또는 영문으로 기재해야 합니다.  \n *All D-2 student visa types are issued for single entry only.  (Only German, Japanese nationals have Multiple entry)  Therefore, please refrain from paying the fee for double or multiple entry visas when applying for a student visa at KVAC.  \n - ‣ 선택사항은 해당 칸[  ] 안에 √ 표시를 하시기 바랍니다.  \n - ‣‘기타’를 선택한 경우, 상세내용을 기재하시기 바랍니다.  \n <How to fill out this form>  \n - ‣ The applicant must fill out this form completely and correctly.  \n",
+        "score": 0.9532240629196167,
+        "tags": [
+          {
+            "target_slot_id": "requested_documents",
+            "search_type": "new",
+            "query_ko": "학생 비자 신청 서류",
+            "round_no": 1
+          }
+        ]
+      },
+      "Study in KOREA! 한국 유학 가이드.pdf#p11#c5": {
+        "evidence_id": "Study in KOREA! 한국 유학 가이드.pdf#p11#c5",
+        "source": "Study in KOREA! 한국 유학 가이드.pdf",
+        "page": 11,
+        "chunk_index": 5,
+        "lang": "en",
+        "text": "|**7**|**Financial proof**<br> **재정증명**<br>- Applicant’s Bank Statement (650EUR * 00months) issued within 2weeks. <br> 신청인은행계좌내역<br>- or Confirmation of research allowance: If your research allowance is above 650 EUR per month, you need to apply<br>for another visa type. <br> 또는연구수당지급확인서(연구수당이월60-70만원상회시,다른비자타입을신청하여야함)<br>- or Guarantee from a Korean university<br> 또는신원보증서|\n |**8**|Confirmation of Foreign Research Student stamped by head of university<br>외국인연구생확인서(대학총장직인날인반드시필요)|\n |**9**|Proof of Payment Receipt /송금내역서|\n",
+        "score": 0.9295851588249207,
+        "tags": [
+          {
+            "target_slot_id": "requested_documents",
+            "search_type": "new",
+            "query_ko": "학생 비자 신청 서류",
+            "round_no": 1
+          }
+        ]
+      },
+      "English_2026-2027+Korean+Language+Course.pdf#p3#c13": {
+        "evidence_id": "English_2026-2027+Korean+Language+Course.pdf#p3#c13",
+        "source": "English_2026-2027+Korean+Language+Course.pdf",
+        "page": 3,
+        "chunk_index": 13,
+        "lang": "en",
+        "text": "## **Application Procedure**  \n**==> picture [440 x 67] intentionally omitted <==**  \n**----- Start of picture text -----**<br>\nScreening,   Issuing of<br>Submit the  Visa application<br>Interview, notice   admission  Opening of<br>required  Payment (Korean  Entry<br>of admissions,  letter and other  classes<br>document embassy)<br>issuing of invoice documents<br>Student →  University →<br>Student University Student Student Student<br>University Student<br>**----- End of picture text -----**<br>  \n**Dong-A University**  \n**2026-2027 Korean Language Course**",
+        "score": 0.9026066064834595,
+        "tags": [
+          {
+            "target_slot_id": "requested_documents",
+            "search_type": "new",
+            "query_ko": "학생 비자 신청 서류",
+            "round_no": 1
+          }
+        ]
+      },
+      "Study in KOREA! 한국 유학 가이드.pdf#p5#c5": {
+        "evidence_id": "Study in KOREA! 한국 유학 가이드.pdf#p5#c5",
+        "source": "Study in KOREA! 한국 유학 가이드.pdf",
+        "page": 5,
+        "chunk_index": 5,
+        "lang": "en",
+        "text": "## ➢ **필수제출서류 / Mandatory document to be submitted**  \n **1 Visa Application Form (Form no. 17) / 사증발급신청서 (제17호서식) e-signature not permitted/전자서명불가** Passport with at least 6 months remainder validity **2** 여권유효기간이최소 6개월이상남아있는여권 One 3.5X4.5 cm picture taken in the past 6 months.  Please glue the photo on the Application Form.  **3** 최근 6개월이내촬영한3.5X4.5 cm 사진.  사증발급신청서사진란에풀로부착.  **Certificate of Admission/표준입학허가서** ❖ Please make sure the following points are valid:  1) Stamp of the University is clearly visible ",
+        "score": 0.9013006687164307,
+        "tags": [
+          {
+            "target_slot_id": "requested_documents",
+            "search_type": "new",
+            "query_ko": "학생 비자 신청 서류",
+            "round_no": 1
+          }
+        ]
+      },
+      "English_2026-2027+Korean+Language+Course.pdf#p3#c7": {
+        "evidence_id": "English_2026-2027+Korean+Language+Course.pdf#p3#c7",
+        "source": "English_2026-2027+Korean+Language+Course.pdf",
+        "page": 3,
+        "chunk_index": 7,
+        "lang": "en",
+        "text": "|**Documents**|**Note**|\n |---|---|\n |A completed application form|Download at http://global.donga.ac.kr|\n |A copy of the student’s certificate of graduation|Need to verify education|\n |A copy of passport and alien registration card|Alien registration card is required only for visa holders|\n |2 photos (3cmX4cm) – visa holders<br>5 photos (3cmX4cm) – non-holders|Background color must be white|\n |Screening fee 50,000KRW|Non-refundable|  \n - B.  Additional Documents (required for those who live overseas)  \n - 1) Study plan  \n - 2) Bank statement (verifying a balance of over 8,000,000 KRW)",
+        "score": 0.8976543545722961,
+        "tags": [
+          {
+            "target_slot_id": "requested_documents",
+            "search_type": "new",
+            "query_ko": "학생 비자 신청 서류",
+            "round_no": 1
+          }
+        ]
+      },
+      "Study in KOREA! 한국 유학 가이드.pdf#p12#c5": {
+        "evidence_id": "Study in KOREA! 한국 유학 가이드.pdf#p12#c5",
+        "source": "Study in KOREA! 한국 유학 가이드.pdf",
+        "page": 12,
+        "chunk_index": 5,
+        "lang": "en",
+        "text": "## ➢ **필수제출서류 / Mandatory document to be submitted**  \n |**CASE 1: If your university is onthe**<br>**Excellent**<br>**accredited Universities list**|**CASE 1: If your university is onthe**<br>**Excellent**<br>**accredited Universities list**|\n |---|---|\n |**1**|Visa Application Form (Form no. 17) /사증발급신청서(제17호서식)**e-signature not permitted/전자서명불가**|\n |**2**|Passport with at least 6 months remainder validity<br> 여권유효기간이최소6개월이상남아있는여권|\n |**3**|One 3.5X4.5 cm picture taken in the past 6 months.  Please glue the photo on the Application Form. <br> 최근6개월이내촬영한3.5X4.5 cm사진. 사증발급신청서사진란에풀로부착. |\n",
+        "score": 0.884178102016449,
+        "tags": [
+          {
+            "target_slot_id": "requested_documents",
+            "search_type": "new",
+            "query_ko": "학생 비자 신청 서류",
+            "round_no": 1
+          }
+        ]
+      },
+      "English_2026-2027+Korean+Language+Course.pdf#p4#c0": {
+        "evidence_id": "English_2026-2027+Korean+Language+Course.pdf#p4#c0",
+        "source": "English_2026-2027+Korean+Language+Course.pdf",
+        "page": 4,
+        "chunk_index": 0,
+        "lang": "en",
+        "text": "**Visa information 05**",
+        "score": null,
+        "tags": [
+          {
+            "target_slot_id": "requested_documents",
+            "search_type": "expand_context",
+            "query_ko": "학생 비자 신청 서류",
+            "round_no": 2
+          }
+        ]
+      },
+      "English_2026-2027+Korean+Language+Course.pdf#p4#c2": {
+        "evidence_id": "English_2026-2027+Korean+Language+Course.pdf#p4#c2",
+        "source": "English_2026-2027+Korean+Language+Course.pdf",
+        "page": 4,
+        "chunk_index": 2,
+        "lang": "en",
+        "text": "- A graduation certificate of the most recently attended school  \n - Proof of Financial Capability (at least USD 8,000 per year): Parents’ proof of income and certificate of employment  \n - Certificate of Bank Balance (at least KRW 8,000,000)  \n - TB Test Certificate",
+        "score": null,
+        "tags": [
+          {
+            "target_slot_id": "requested_documents",
+            "search_type": "expand_context",
+            "query_ko": "학생 비자 신청 서류",
+            "round_no": 2
+          }
+        ]
+      }
+    }
+  },
+  "stopped": null,
+  "dev_id": "D9",
+  "dev_type": "T3",
+  "dev_check": "영어 질문, 관할이 제한된 비자 자료(체크리스트 5.3절)",
+  "collected_at": "2026-09-29T19:16:13"
+}

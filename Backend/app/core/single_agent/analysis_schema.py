@@ -22,14 +22,24 @@ class Condition(BaseModel):
     quote: str = Field(description="해당 메시지에서 그대로 옮긴 구절")
 
 
+class EvidenceRef(BaseModel):
+    """문서 칸을 뒷받침하는 근거 1건. ④가 채우고 서버가 청크 본문과 인용을 대조한다."""
+    evidence_id: str  # source#p{page}#c{chunk_index} (evidence_schema.make_evidence_id)
+    quote: str        # 그 청크 본문에서 그대로 옮긴 구절
+
+
 class DocSlot(BaseModel):
-    """이번 질문에 대한 문서 칸. ① 단계에서는 status가 항상 unchecked."""
+    """이번 질문에 대한 문서 칸. ① 단계에서는 status가 항상 unchecked, 근거 필드는 비어 있다."""
     slot_id: str
     active: bool
     requirement: str = Field(description="required / conditional / optional")
     activation_state: Optional[str] = None  # 조건부 필수일 때만: triggered / unresolved / not_triggered
     activation_reason: str = ""
     status: str = "unchecked"
+    # ④ 충분성 검증이 채우는 필드 (체크리스트 6.2절)
+    evidence_refs: List[EvidenceRef] = []
+    value: str = ""           # 근거로 확인한 내용 요약
+    missing_detail: str = ""  # 남은 확인 사항 (partial·missing·conflicting일 때)
 
 
 class UserSlot(BaseModel):

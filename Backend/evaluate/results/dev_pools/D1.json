@@ -1,0 +1,335 @@
+{
+  "question": "한국어학당 수업료가 얼마예요?",
+  "analysis": {
+    "intent_summary": "한국어학당 수업료에 대한 질문",
+    "answer_scope": "general",
+    "primary_type": "T1",
+    "additional_types": [],
+    "type_reason": "특정 금액을 요청하는 질문이므로 T1으로 분류",
+    "conditions": [],
+    "document_slots": [
+      {
+        "slot_id": "requested_value",
+        "active": true,
+        "requirement": "required",
+        "activation_state": null,
+        "activation_reason": "수업료 금액을 요청했기 때문에 필수",
+        "status": "unchecked",
+        "evidence_refs": [],
+        "value": "",
+        "missing_detail": ""
+      },
+      {
+        "slot_id": "applicable_scope",
+        "active": true,
+        "requirement": "required",
+        "activation_state": null,
+        "activation_reason": "한국어학당 수업료에 대한 정보가 필요",
+        "status": "unchecked",
+        "evidence_refs": [],
+        "value": "",
+        "missing_detail": ""
+      },
+      {
+        "slot_id": "reference_time",
+        "active": true,
+        "requirement": "conditional",
+        "activation_state": "unresolved",
+        "activation_reason": "특정 시점에 대한 언급이 없으므로 선택적",
+        "status": "unchecked",
+        "evidence_refs": [],
+        "value": "",
+        "missing_detail": ""
+      },
+      {
+        "slot_id": "variation_notes",
+        "active": true,
+        "requirement": "conditional",
+        "activation_state": "unresolved",
+        "activation_reason": "변동 사항에 대한 언급이 없으므로 선택적",
+        "status": "unchecked",
+        "evidence_refs": [],
+        "value": "",
+        "missing_detail": ""
+      },
+      {
+        "slot_id": "extra_info",
+        "active": false,
+        "requirement": "optional",
+        "activation_state": null,
+        "activation_reason": "추가 안내에 대한 언급이 없으므로 선택적",
+        "status": "unchecked",
+        "evidence_refs": [],
+        "value": "",
+        "missing_detail": ""
+      }
+    ],
+    "user_slots": [],
+    "first_search": {
+      "query_ko": "한국어학당 수업료",
+      "target_slot_ids": [
+        "requested_value",
+        "applicable_scope"
+      ],
+      "reason": "수업료 금액과 적용 범위를 확인하기 위해"
+    },
+    "next_action": "search",
+    "next_action_reason": "일반 규정으로 먼저 안내 가능",
+    "clarification_question": null
+  },
+  "plan": {
+    "action": "search",
+    "target_slot_id": "requested_value",
+    "search_type": "new",
+    "query_ko": "한국어학당 수업료",
+    "reason": "수업료 금액과 적용 범위를 확인하기 위해",
+    "is_duplicate": false,
+    "from_first_search": true,
+    "exhausted_slot_ids": [],
+    "skipped": []
+  },
+  "runs": [
+    {
+      "plan": {
+        "action": "search",
+        "target_slot_id": "requested_value",
+        "search_type": "new",
+        "query_ko": "한국어학당 수업료",
+        "reason": "수업료 금액과 적용 범위를 확인하기 위해",
+        "is_duplicate": false,
+        "from_first_search": true,
+        "exhausted_slot_ids": [],
+        "skipped": []
+      },
+      "ok": true,
+      "error": null,
+      "error_type": null,
+      "attempt": {
+        "target_slot_id": "requested_value",
+        "search_type": "new",
+        "query_ko": "한국어학당 수업료",
+        "found_new_evidence": true
+      },
+      "budget": {
+        "total_calls": 1,
+        "expand_calls": 0,
+        "subqueries": 1
+      },
+      "chunk_ids": [
+        "[동아대]2026학년도+후기+학부+외국인+신(편)입학+특별전형+모집요강_한국어트랙.pdf#p20#c3",
+        "English_2026-2027+Korean+Language+Course.pdf#p2#c1",
+        "[동아대]2026학년도+후기+학부+외국인+신(편)입학+특별전형+모집요강_한국어트랙.pdf#p19#c6",
+        "[동아대]2026학년도+후기+학부+외국인+신(편)입학+특별전형+모집요강_한국어트랙.pdf#p20#c2",
+        "[동아대]2026학년도+후기+학부+외국인+신(편)입학+특별전형+모집요강_한국어트랙.pdf#p21#c0",
+        "English_2026-2027+Korean+Language+Course.pdf#p2#c2",
+        "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p3#c0"
+      ],
+      "new_chunk_ids": [
+        "[동아대]2026학년도+후기+학부+외국인+신(편)입학+특별전형+모집요강_한국어트랙.pdf#p20#c3",
+        "English_2026-2027+Korean+Language+Course.pdf#p2#c1",
+        "[동아대]2026학년도+후기+학부+외국인+신(편)입학+특별전형+모집요강_한국어트랙.pdf#p19#c6",
+        "[동아대]2026학년도+후기+학부+외국인+신(편)입학+특별전형+모집요강_한국어트랙.pdf#p20#c2",
+        "[동아대]2026학년도+후기+학부+외국인+신(편)입학+특별전형+모집요강_한국어트랙.pdf#p21#c0",
+        "English_2026-2027+Korean+Language+Course.pdf#p2#c2",
+        "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p3#c0"
+      ],
+      "anchor_ids": [],
+      "warnings": [],
+      "tool_attempts": 1,
+      "latency_ms": 32933,
+      "checklist_version": "v1-2026-09-28"
+    },
+    {
+      "plan": {
+        "action": "search",
+        "target_slot_id": "requested_value",
+        "search_type": "expand_context",
+        "query_ko": "한국어학당 수업료",
+        "reason": "live 확인: 1순위 청크를 앵커로 앞뒤 확장",
+        "is_duplicate": false,
+        "from_first_search": false,
+        "exhausted_slot_ids": [],
+        "skipped": []
+      },
+      "ok": true,
+      "error": null,
+      "error_type": null,
+      "attempt": {
+        "target_slot_id": "requested_value",
+        "search_type": "expand_context",
+        "query_ko": "한국어학당 수업료",
+        "found_new_evidence": true
+      },
+      "budget": {
+        "total_calls": 2,
+        "expand_calls": 1,
+        "subqueries": 1
+      },
+      "chunk_ids": [
+        "[동아대]2026학년도+후기+학부+외국인+신(편)입학+특별전형+모집요강_한국어트랙.pdf#p20#c2",
+        "[동아대]2026학년도+후기+학부+외국인+신(편)입학+특별전형+모집요강_한국어트랙.pdf#p20#c4"
+      ],
+      "new_chunk_ids": [
+        "[동아대]2026학년도+후기+학부+외국인+신(편)입학+특별전형+모집요강_한국어트랙.pdf#p20#c4"
+      ],
+      "anchor_ids": [
+        "[동아대]2026학년도+후기+학부+외국인+신(편)입학+특별전형+모집요강_한국어트랙.pdf#p20#c3"
+      ],
+      "warnings": [],
+      "tool_attempts": 1,
+      "latency_ms": 4,
+      "checklist_version": "v1-2026-09-28"
+    }
+  ],
+  "pool": {
+    "chunks": {
+      "[동아대]2026학년도+후기+학부+외국인+신(편)입학+특별전형+모집요강_한국어트랙.pdf#p20#c3": {
+        "evidence_id": "[동아대]2026학년도+후기+학부+외국인+신(편)입학+특별전형+모집요강_한국어트랙.pdf#p20#c3",
+        "source": "[동아대]2026학년도+후기+학부+외국인+신(편)입학+특별전형+모집요강_한국어트랙.pdf",
+        "page": 20,
+        "chunk_index": 3,
+        "lang": "ko",
+        "text": "|||**D**|수업료40%|동아한국어능력시험(Dong-A TOPIK) 3급이상소지자|\n|||**E**|수업료30%|본교입학자격요건을갖춘신(편)입생중,<br>외국인우수신입생장학금A,B,C,D에해당되지않는자|\n|**DAU**<br>**외국인**<br>**우수신입생**<br>**장학금**<br>**A,B,C,D**|**외국인신(편)입학**<br>**특별전형합격자중,**<br>**본교**<br>**한국어학당을**<br>**2개학기이상수료**<br>**하고**<br>**최종2개학기**<br>**출석률이**<br>**80% 이**<br>**상인**<br>**자**|<br>**A**|수업료100%|한국어능력시험(TOPIK PBT, TOPIK iBT) 5급이상소지자|\n|||<br>**B**|수업료70%|한국어능력시험(TOPIK PBT, TOPIK iBT) 4급소지자|\n|||**C**|수업료60%|한국어능력시험(TOPIK PBT, TOPIK iBT) 3급소지자|\n|||**D**|수업료50%|본교입학자격요건을갖춘신(편)입생중,<br>DAU 외국인우수신입생장학금A,B,C에해당되지않는자|  \n※ 위장학금은입학학기에만적용되며2번째학기부터는재학생장학금기준에따라지급",
+        "score": 0.917791485786438,
+        "tags": [
+          {
+            "target_slot_id": "requested_value",
+            "search_type": "new",
+            "query_ko": "한국어학당 수업료",
+            "round_no": 1
+          }
+        ]
+      },
+      "English_2026-2027+Korean+Language+Course.pdf#p2#c1": {
+        "evidence_id": "English_2026-2027+Korean+Language+Course.pdf#p2#c1",
+        "source": "English_2026-2027+Korean+Language+Course.pdf",
+        "page": 2,
+        "chunk_index": 1,
+        "lang": "en",
+        "text": "## **Program outline**  \n |**Semester**<br>Four quarters(10 weeks per quarter)<br>**Hours**<br>20 hours × 10 weeks = 200 hours|\n |---|\n |**Days**<br>Mon – Fri (4 hrs per day)<br>**Lessons**<br>Korean language and cultural activities|\n |**Class size**<br>Approximately 15 students (Class may be cancelled if the number of the students is less than 10)|\n |**Tuition Fee**<br>1,300,000 KRW per semester<br>※ Screening fee (50,000KRW) is a non-refundable initial payment due at the time of admission. |\n",
+        "score": 0.7831544876098633,
+        "tags": [
+          {
+            "target_slot_id": "requested_value",
+            "search_type": "new",
+            "query_ko": "한국어학당 수업료",
+            "round_no": 1
+          }
+        ]
+      },
+      "[동아대]2026학년도+후기+학부+외국인+신(편)입학+특별전형+모집요강_한국어트랙.pdf#p19#c6": {
+        "evidence_id": "[동아대]2026학년도+후기+학부+외국인+신(편)입학+특별전형+모집요강_한국어트랙.pdf#p19#c6",
+        "source": "[동아대]2026학년도+후기+학부+외국인+신(편)입학+특별전형+모집요강_한국어트랙.pdf",
+        "page": 19,
+        "chunk_index": 6,
+        "lang": "en",
+        "text": "## **다. 등록금액**  \n|**계열**|**수업료**<br>(단위: 원)|**수업료**<br>(단위: 원)|\n|---|---|---|\n||**최초1학기**|**최초1학기대상자를제외한**<br>**전체납부대상자**|\n|**인문·사회**|3,476,700|3,318,500|\n|**미디어커뮤니케이션학과**|3,653,500|3,495,300|\n|**이학·체육**|4,085,200|3,927,000|\n|**수학과(정보수학과)**|3,780,900|3,622,700|\n|**공학**|4,608,800|4,450,600|\n|**예능**|4,690,300|4,532,100|  \n- ※ 상기등록금은2026학년도기준이며2027학년도등록금은인상될수있음  \n- **라. 등록금납부방법:** 합격자에게별도공지예정  \n- 가상계좌는국내송금만가능하며등록금납부는은행영업시간에만가능함  \n- **해외에서 직접가상계좌납부가불가능하므로해외송금자는국제교류로인보이스요청**",
+        "score": 0.1905660778284073,
+        "tags": [
+          {
+            "target_slot_id": "requested_value",
+            "search_type": "new",
+            "query_ko": "한국어학당 수업료",
+            "round_no": 1
+          }
+        ]
+      },
+      "[동아대]2026학년도+후기+학부+외국인+신(편)입학+특별전형+모집요강_한국어트랙.pdf#p20#c2": {
+        "evidence_id": "[동아대]2026학년도+후기+학부+외국인+신(편)입학+특별전형+모집요강_한국어트랙.pdf#p20#c2",
+        "source": "[동아대]2026학년도+후기+학부+외국인+신(편)입학+특별전형+모집요강_한국어트랙.pdf",
+        "page": 20,
+        "chunk_index": 2,
+        "lang": "ko",
+        "text": "## **1) 외국인우수신입생장학금**  \n|**구분**|**구분**||**수혜금액**|**수혜조건**|\n|---|---|---|---|---|\n|**장학명**|**자격요건**|**종류**|||\n|**외국인**<br>**우수신입생**<br>**장학금**<br>**A,B,C,D,E**|**외국인신(편)입학**<br>**특별전형합격자**|**A**|수업료100%|한국어능력시험(TOPIK PBT, TOPIK iBT) 5급이상소지자|\n|||**B**|수업료60%|한국어능력시험(TOPIK PBT, TOPIK iBT) 4급소지자|\n|||**C**|수업료50%|한국어능력시험(TOPIK PBT, TOPIK iBT) 3급소지자|\n|||**D**|수업료40%|동아한국어능력시험(Dong-A TOPIK) 3급이상소지자|\n|||**E**|수업료30%|본교입학자격요건을갖춘신(편)입생중,<br>외국인우수신입생장학금A,B,C,D에해당되지않는자|",
+        "score": 0.09801603108644485,
+        "tags": [
+          {
+            "target_slot_id": "requested_value",
+            "search_type": "new",
+            "query_ko": "한국어학당 수업료",
+            "round_no": 1
+          },
+          {
+            "target_slot_id": "requested_value",
+            "search_type": "expand_context",
+            "query_ko": "한국어학당 수업료",
+            "round_no": 2
+          }
+        ]
+      },
+      "[동아대]2026학년도+후기+학부+외국인+신(편)입학+특별전형+모집요강_한국어트랙.pdf#p21#c0": {
+        "evidence_id": "[동아대]2026학년도+후기+학부+외국인+신(편)입학+특별전형+모집요강_한국어트랙.pdf#p21#c0",
+        "source": "[동아대]2026학년도+후기+학부+외국인+신(편)입학+특별전형+모집요강_한국어트랙.pdf",
+        "page": 21,
+        "chunk_index": 0,
+        "lang": "ko",
+        "text": "## **나. 재학생장학금**  \n||**구분**|**구분**|**구분**||**수혜금액**|**수혜조건**|**수혜조건**|**수혜조건**|**수혜조건**|\n|---|---|---|---|---|---|---|---|---|---|\n||**장학명**|**자격요건**||**종류**||||||\n||**외국인**<br>**성적우수**<br>**장학금**<br>**A,B,C,D**|**외국인유학생**<br>**특별전형으로**<br>**입학한자**<br>**(융합경영학과**<br>**학생제외)**||**A**|수업료100%|직전학기성적순위가10% 미만||||\n|||||**B**|수업료70%|직전학기성적순위가40% 미만||||\n|||||**C**|수업료40%|직전학기성적순위가60% 미만||||\n|||||**D**|수업료20%|직전학기성적순위가80% 미만||||\n||**근로장학금**|**교내행정업무지원**|||월평균500,000원|국제교류과선발기준에따름||||\n||*",
+        "score": 0.09300453215837479,
+        "tags": [
+          {
+            "target_slot_id": "requested_value",
+            "search_type": "new",
+            "query_ko": "한국어학당 수업료",
+            "round_no": 1
+          }
+        ]
+      },
+      "English_2026-2027+Korean+Language+Course.pdf#p2#c2": {
+        "evidence_id": "English_2026-2027+Korean+Language+Course.pdf#p2#c2",
+        "source": "English_2026-2027+Korean+Language+Course.pdf",
+        "page": 2,
+        "chunk_index": 2,
+        "lang": "en",
+        "text": "|**Tuition Fee**<br>1,300,000 KRW per semester<br>※ Screening fee (50,000KRW) is a non-refundable initial payment due at the time of admission. |\n |**Level and**<br>**class hours**<br>**Beginner 1 & 2**<br>Afternoon class(13:20~17:20)<br>**Intermediate 1 & 2** <br>**Advanced 1 & 2**<br>Morning class (09:00 ~ 13:00)<br>※ Class hours can be adjusted|",
+        "score": 0.08805746585130692,
+        "tags": [
+          {
+            "target_slot_id": "requested_value",
+            "search_type": "new",
+            "query_ko": "한국어학당 수업료",
+            "round_no": 1
+          }
+        ]
+      },
+      "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p3#c0": {
+        "evidence_id": "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p3#c0",
+        "source": "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf",
+        "page": 3,
+        "chunk_index": 0,
+        "lang": "en",
+        "text": "provision applies only to the GKS recipient who has achieved 70% or higher of the passing score for the TOPIK level three (3).  \n - ⑤ A GKS recipient undergoing additional Korean language program as outlined in Paragraph 4 must bear fifty percent (50%) of the language training tuition as specified in the \"Scholarship Payment Guideline\" for GKS recipients by the National Institute for International Education.  \n",
+        "score": 0.08475441485643387,
+        "tags": [
+          {
+            "target_slot_id": "requested_value",
+            "search_type": "new",
+            "query_ko": "한국어학당 수업료",
+            "round_no": 1
+          }
+        ]
+      },
+      "[동아대]2026학년도+후기+학부+외국인+신(편)입학+특별전형+모집요강_한국어트랙.pdf#p20#c4": {
+        "evidence_id": "[동아대]2026학년도+후기+학부+외국인+신(편)입학+특별전형+모집요강_한국어트랙.pdf#p20#c4",
+        "source": "[동아대]2026학년도+후기+학부+외국인+신(편)입학+특별전형+모집요강_한국어트랙.pdf",
+        "page": 20,
+        "chunk_index": 4,
+        "lang": "ko",
+        "text": "|||**D**|수업료50%|본교입학자격요건을갖춘신(편)입생중,<br>DAU 외국인우수신입생장학금A,B,C에해당되지않는자|  \n※ 위장학금은입학학기에만적용되며2번째학기부터는재학생장학금기준에따라지급  \n※ 장학금지급기준및지급액은본교장학제도에따라변동될수있음",
+        "score": null,
+        "tags": [
+          {
+            "target_slot_id": "requested_value",
+            "search_type": "expand_context",
+            "query_ko": "한국어학당 수업료",
+            "round_no": 2
+          }
+        ]
+      }
+    }
+  },
+  "stopped": null,
+  "dev_id": "D1",
+  "dev_type": "T1",
+  "dev_check": "표 안의 값, 통화·산정 단위, 표가 청크에서 잘리는지 (partial/cut_at)",
+  "collected_at": "2026-09-29T19:12:45"
+}

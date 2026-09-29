@@ -1,0 +1,323 @@
+{
+  "question": "휴학 기간이 끝났는데 복학 안 하면 어떻게 돼요?",
+  "analysis": {
+    "intent_summary": "휴학 기간 종료 후 복학하지 않을 경우의 결과에 대한 질문",
+    "answer_scope": "general",
+    "primary_type": "T6",
+    "additional_types": [],
+    "type_reason": "복학하지 않을 경우의 결과를 묻고 있으므로 T6으로 분류",
+    "conditions": [],
+    "document_slots": [
+      {
+        "slot_id": "event_trigger",
+        "active": true,
+        "requirement": "required",
+        "activation_state": null,
+        "activation_reason": "복학하지 않는 경우에 대한 결과 필요",
+        "status": "unchecked",
+        "evidence_refs": [],
+        "value": "",
+        "missing_detail": ""
+      },
+      {
+        "slot_id": "full_reason_list",
+        "active": true,
+        "requirement": "conditional",
+        "activation_state": "unresolved",
+        "activation_reason": "(서버 보완) 분석 결과에 없어 기본값으로 추가",
+        "status": "unchecked",
+        "evidence_refs": [],
+        "value": "",
+        "missing_detail": ""
+      },
+      {
+        "slot_id": "consequence",
+        "active": true,
+        "requirement": "required",
+        "activation_state": null,
+        "activation_reason": "복학하지 않을 경우의 조치 필요",
+        "status": "unchecked",
+        "evidence_refs": [],
+        "value": "",
+        "missing_detail": ""
+      },
+      {
+        "slot_id": "applicable_scope",
+        "active": true,
+        "requirement": "required",
+        "activation_state": null,
+        "activation_reason": "적용 범위 확인 필요",
+        "status": "unchecked",
+        "evidence_refs": [],
+        "value": "",
+        "missing_detail": ""
+      },
+      {
+        "slot_id": "exceptions_remedies",
+        "active": true,
+        "requirement": "conditional",
+        "activation_state": "unresolved",
+        "activation_reason": "(서버 보완) 분석 결과에 없어 기본값으로 추가",
+        "status": "unchecked",
+        "evidence_refs": [],
+        "value": "",
+        "missing_detail": ""
+      }
+    ],
+    "user_slots": [],
+    "first_search": {
+      "query_ko": "휴학 후 복학하지 않을 경우의 결과",
+      "target_slot_ids": [
+        "event_trigger",
+        "consequence",
+        "applicable_scope"
+      ],
+      "reason": "복학하지 않을 경우의 결과와 조치 확인"
+    },
+    "next_action": "search",
+    "next_action_reason": "일반 규정으로 먼저 안내 가능",
+    "clarification_question": null
+  },
+  "plan": {
+    "action": "search",
+    "target_slot_id": "event_trigger",
+    "search_type": "new",
+    "query_ko": "휴학 후 복학하지 않을 경우의 결과",
+    "reason": "복학하지 않을 경우의 결과와 조치 확인",
+    "is_duplicate": false,
+    "from_first_search": true,
+    "exhausted_slot_ids": [],
+    "skipped": []
+  },
+  "runs": [
+    {
+      "plan": {
+        "action": "search",
+        "target_slot_id": "event_trigger",
+        "search_type": "new",
+        "query_ko": "휴학 후 복학하지 않을 경우의 결과",
+        "reason": "복학하지 않을 경우의 결과와 조치 확인",
+        "is_duplicate": false,
+        "from_first_search": true,
+        "exhausted_slot_ids": [],
+        "skipped": []
+      },
+      "ok": true,
+      "error": null,
+      "error_type": null,
+      "attempt": {
+        "target_slot_id": "event_trigger",
+        "search_type": "new",
+        "query_ko": "휴학 후 복학하지 않을 경우의 결과",
+        "found_new_evidence": true
+      },
+      "budget": {
+        "total_calls": 1,
+        "expand_calls": 0,
+        "subqueries": 1
+      },
+      "chunk_ids": [
+        "(KO)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p7#c0",
+        "(KO)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p5#c0",
+        "(KO)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p6#c1",
+        "(KO)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p9#c0",
+        "(KO)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p7#c1",
+        "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p7#c3",
+        "[동아대]2026학년도+후기+학부+외국인+신(편)입학+특별전형+모집요강_한국어트랙.pdf#p18#c1"
+      ],
+      "new_chunk_ids": [
+        "(KO)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p7#c0",
+        "(KO)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p5#c0",
+        "(KO)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p6#c1",
+        "(KO)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p9#c0",
+        "(KO)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p7#c1",
+        "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p7#c3",
+        "[동아대]2026학년도+후기+학부+외국인+신(편)입학+특별전형+모집요강_한국어트랙.pdf#p18#c1"
+      ],
+      "anchor_ids": [],
+      "warnings": [],
+      "tool_attempts": 1,
+      "latency_ms": 21283,
+      "checklist_version": "v1-2026-09-28"
+    },
+    {
+      "plan": {
+        "action": "search",
+        "target_slot_id": "event_trigger",
+        "search_type": "expand_context",
+        "query_ko": "휴학 후 복학하지 않을 경우의 결과",
+        "reason": "live 확인: 1순위 청크를 앵커로 앞뒤 확장",
+        "is_duplicate": false,
+        "from_first_search": false,
+        "exhausted_slot_ids": [],
+        "skipped": []
+      },
+      "ok": true,
+      "error": null,
+      "error_type": null,
+      "attempt": {
+        "target_slot_id": "event_trigger",
+        "search_type": "expand_context",
+        "query_ko": "휴학 후 복학하지 않을 경우의 결과",
+        "found_new_evidence": false
+      },
+      "budget": {
+        "total_calls": 2,
+        "expand_calls": 1,
+        "subqueries": 1
+      },
+      "chunk_ids": [
+        "(KO)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p6#c1",
+        "(KO)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p7#c1"
+      ],
+      "new_chunk_ids": [],
+      "anchor_ids": [
+        "(KO)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p7#c0"
+      ],
+      "warnings": [],
+      "tool_attempts": 1,
+      "latency_ms": 4,
+      "checklist_version": "v1-2026-09-28"
+    }
+  ],
+  "pool": {
+    "chunks": {
+      "(KO)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p7#c0": {
+        "evidence_id": "(KO)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p7#c0",
+        "source": "(KO)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf",
+        "page": 7,
+        "chunk_index": 0,
+        "lang": "ko",
+        "text": "3. 수학기관이 정한 등록 기간 내에 등록하지 않는 경우  \n4. 수학기관이 정한 학기 시작일 이후 정당한 사유 없이 입국하지 않는 경우  \n5. 휴학 기간 종료 후 정당 한 사유 없이 복학원서를 제출하지 않은 경우  \n6. 제12조제3항에 명시된 휴학 기간을 초과한 경우  \n7. 외국대학과의 학점 교류 등의 목적으로 출신국 또는 제3국으로 출국한 경우  \n다만, 다음 각 목의 어느 하나에 해당하는 경우는 제외한다. - 가. 외국대학과의 공동학위 등을 운영하는 경우  \n- 나. 수학대학의 교육과정에 근거하여 방학 기간 중 운영되는 외국대학 학점 교류의 경우  \n8. 제15조 각호의 기준에 따른 일시출국 최대허용기간을 초과한 경우. 다만, 교육원장이 그 행위에 부득이한 사유가 있다고 인정하는 경우는 예외로 한다.",
+        "score": 0.4607661962509155,
+        "tags": [
+          {
+            "target_slot_id": "event_trigger",
+            "search_type": "new",
+            "query_ko": "휴학 후 복학하지 않을 경우의 결과",
+            "round_no": 1
+          }
+        ]
+      },
+      "(KO)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p5#c0": {
+        "evidence_id": "(KO)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p5#c0",
+        "source": "(KO)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf",
+        "page": 5,
+        "chunk_index": 0,
+        "lang": "ko",
+        "text": "사정, 본인의 중대한 질병 등 부득이한 사유가 있는 경우에 한하여 허용한다. 이 경 우 장학생은 휴학 신청서와 함께 해당 사유를 증빙하는 자료를 제출하여야 한다. - ④휴학은 학기 단위로 신청하여야 하며, 총 휴학 기간은 1년을 초과할 수 없다. - 다만, 수학기관장이 특별한 사유로 인정하는 경우에는 최대 1년의 범위에서 휴학 기 간을 추가로 연장할 수 있다. - ⑤수학대학장은 장학생의 휴학 처리 결과를 교육원장에게 보고하여야 한다. - 제13조(복학) ①복학하고자 하는 장학생은 휴학 기간 종료 1개월 전까지 수학기관의 학칙에 따라 복학 신고를 하여야 한다. - ②수학기관장은 장학생의 복학 처리 결과를 매학기 개시일 2주 전까지 교육원장에게 보고하여야 한다. - 제14조(비상연락망 유지) 장학생은 체류지, 연락처 등 정보가 변경된 즉시 수학기관에 신고하여야 하며, 수학기관장은 수학대학의 장학생 및 교육원과의 비상 연락 체계를 상시 유지하여야 한다. - 제15조(일시출국) ①한국어연수과정 장학생의 일시출국은 다음 각호에 한하여 일시출국 7일 전까지 일시출국신청서 및 증빙서류를 제출하여 한국어 연수기관장의 승인을 받아야 한다.",
+        "score": 0.06784900277853012,
+        "tags": [
+          {
+            "target_slot_id": "event_trigger",
+            "search_type": "new",
+            "query_ko": "휴학 후 복학하지 않을 경우의 결과",
+            "round_no": 1
+          }
+        ]
+      },
+      "(KO)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p6#c1": {
+        "evidence_id": "(KO)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p6#c1",
+        "source": "(KO)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf",
+        "page": 6,
+        "chunk_index": 1,
+        "lang": "ko",
+        "text": "- 제18조(경고) 다음 각 호의 어느 하나에 해당하는 경우, 교육원장은 해당 장학생을 경고 조치한다. 1. 한국어연수 기간 중 무단결석일이 연속하여 3일 이상이거나 월 누계 5일 이상인 경우 이 경우 출결의 세부기준(지각, 조퇴, 결석의 환산 기준 등)은 한국어연수기관 내부 규 정에 따라 적용할 수 있다. - ․  \n- 2. 학기 단위 평점평균(백분위 환산점수)이 기준 점수 미만인 경우(전문학사 학사과정 ․  \n- 70점/100점, 석 박사 과정 80점/100점)  \n3. 무단으로 일시출국하거나, 허가 기간 내 입국하지 않는 경우. 다만, 위반 사유가 부득이하다고 교육원장이 인정하는 경우에는 예외로 할 수 있다. 4. 제24조제2항의 시간제 취업 허용 범위를 위반한 경우  \n5. 이외에 정부초청 외국인 장학생 징계위원회(이하 ‘징계위원회’라 한다)에서 경고 조치가 필요하다고 인정하는 경우  \n- 제19조(장학생 자격상실) 다음 각 호의 어느 하나에 해당하는 경우, 교육원장은 해당 장학 생을 자격상실 처분한다. 1. 수학기관으로부터 제적 처분을 받은 경우  \n2. 제5조 한국어연수과정 이수 후 수학대학에 진학하지 못한 경우  \n- 6 -",
+        "score": 0.04643674194812775,
+        "tags": [
+          {
+            "target_slot_id": "event_trigger",
+            "search_type": "new",
+            "query_ko": "휴학 후 복학하지 않을 경우의 결과",
+            "round_no": 1
+          },
+          {
+            "target_slot_id": "event_trigger",
+            "search_type": "expand_context",
+            "query_ko": "휴학 후 복학하지 않을 경우의 결과",
+            "round_no": 2
+          }
+        ]
+      },
+      "(KO)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p9#c0": {
+        "evidence_id": "(KO)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p9#c0",
+        "source": "(KO)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf",
+        "page": 9,
+        "chunk_index": 0,
+        "lang": "ko",
+        "text": "에는 귀국 지원을 할 수 있다. - ⑦다음 각호의 어느 하나에 해당하는 경우에는 귀국 항공료를 지급하지 않는다. 1. 수학종료보고서를 제출하지 않는 경우  \n2. 장학 기간 내 학위취득을 하지 못한 경우  \n3. 장학 기간 이후에도 한국에 체류하는 경우  \n- ⑧학위과정 장학생이 최초 수학 시작 후 3개월 이내에 수학을 포기하면 기존에 받은 장학금의 전부 또는 일부를 반납하여야 한다. 한국어연수과정을 거치는 경우에는 한국어연수과정 입학 후 3개월 이내로 한다. 다만, 천재지변, 본국의 소환, 중대한 질병 등 교육원장이 인정하는 부득이한 사유에는 예외로 한다. - 제23조(준용규정) 본 지침에 규정된 이외의 학사에 관한 사항은 장학생의 소속 수학기 관의 학칙을 준용한다. - 제24조(장학생 관리·점검) ①교육원장은 수시 또는 정기적으로 수학기관의 장학생 관리 실태를 점검할 수 있으며 수학기관은 관리 서류 제출 등에 적극적으로 협조하여야 한다. - ②수학기관장은 장학생이 건전한 면학과 내실있는 유학생활을 할 수 있도록 시간제 취 업을 관리하여야 한다. 장학생은 법무부 등이 정하는 시간제 취업 허가 요건을 충족하고, 다음 각 호의 기준을 준수하여야 한다.",
+        "score": 0.04364558681845665,
+        "tags": [
+          {
+            "target_slot_id": "event_trigger",
+            "search_type": "new",
+            "query_ko": "휴학 후 복학하지 않을 경우의 결과",
+            "round_no": 1
+          }
+        ]
+      },
+      "(KO)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p7#c1": {
+        "evidence_id": "(KO)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p7#c1",
+        "source": "(KO)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf",
+        "page": 7,
+        "chunk_index": 1,
+        "lang": "ko",
+        "text": "수학대학의 교육과정에 근거하여 방학 기간 중 운영되는 외국대학 학점 교류의 경우  \n8. 제15조 각호의 기준에 따른 일시출국 최대허용기간을 초과한 경우. 다만, 교육원장이 그 행위에 부득이한 사유가 있다고 인정하는 경우는 예외로 한다. 9. 제18조에 따른 경고를 3회 이상 받은 경우  \n10. 성범죄로 벌금 이상의 형 또는 기소유예 처분을 받거나,  그 외 범죄로 300만원을 초과하는 벌금형 또는 금고 이상의 형이 확정된 경우  \n- ․  \n- 11. 사망, 정신적 신체적 무능력, 연락두절, 체류기간 종료, 출국 명령 등으로 더 이상 학업을 수행할 수 없다고 교육원장이 인정하는 경우  \n12. 장학을 중도 포기한 경우  \n13. 이 외에 징계위원회에서 자격상실 처분의 의결을 받은 경우  \n- 제20조(징계) ①징계는 ‘정부초청외국인 장학생 상벌 규정’에 따라 징계위원회 의결을 거쳐 장학금 일시정지, 자격상실 처분을 말한다. - ②교육원장은 다음 각호의 어느 하나에 해당하는 경우 징계할 수 있다.",
+        "score": 0.030780358240008354,
+        "tags": [
+          {
+            "target_slot_id": "event_trigger",
+            "search_type": "new",
+            "query_ko": "휴학 후 복학하지 않을 경우의 결과",
+            "round_no": 1
+          },
+          {
+            "target_slot_id": "event_trigger",
+            "search_type": "expand_context",
+            "query_ko": "휴학 후 복학하지 않을 경우의 결과",
+            "round_no": 2
+          }
+        ]
+      },
+      "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p7#c3": {
+        "evidence_id": "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p7#c3",
+        "source": "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf",
+        "page": 7,
+        "chunk_index": 3,
+        "lang": "en",
+        "text": "2. Failure to achieve the required grades by semester, (70/100) for associate and undergraduate programs, (80/100) for master’s and doctoral programs;  \n 3. Temporary departure without permission or failure to re-enter Korea within the permitted period; However, the GKS recipient may be excused for exceeding the temporary departure length due to unavoidable circumstances;  \n 4. Violation of the permitted scope of part-time employment as stipulated in Article 24, Paragraph 2;  \n",
+        "score": 0.02245165780186653,
+        "tags": [
+          {
+            "target_slot_id": "event_trigger",
+            "search_type": "new",
+            "query_ko": "휴학 후 복학하지 않을 경우의 결과",
+            "round_no": 1
+          }
+        ]
+      },
+      "[동아대]2026학년도+후기+학부+외국인+신(편)입학+특별전형+모집요강_한국어트랙.pdf#p18#c1": {
+        "evidence_id": "[동아대]2026학년도+후기+학부+외국인+신(편)입학+특별전형+모집요강_한국어트랙.pdf#p18#c1",
+        "source": "[동아대]2026학년도+후기+학부+외국인+신(편)입학+특별전형+모집요강_한국어트랙.pdf",
+        "page": 18,
+        "chunk_index": 1,
+        "lang": "ko",
+        "text": "- **사. 전형에관한모든공지사항은본교국제교류과홈페이지를통해공지합니다. 인터넷원서접수시연락가능한연 락처와E-mail 주소를정확하게입력하지않거나지원자와연락이되지않아불이익이발생한경우본교는책임을 지지않습니다.* *  \n- ‧  \n- 아. 다음사항에해당하는경우에는입학이후라도합격또는입학을취소하고학적을말소하며민 형사상의책임을 물을수있습니다. 입학이취소되는경우해당자가납부한등록금은반환하지않습니다. 또한본교및타대학교에 서아래의사유로합격또는입학이취소된경우, 취소된날로부터3년간본대학교에지원할수없습니다. - 대리면접등부정한방법으로지원하거나이에협조하여공정한학생선발업무를방해한경우  \n- 입학사정에사용된전형자료에주요사항이누락되거나 서류 허위작성, 위·변조등부정이있다고판단되는경우  \n- 자. 기타전형에관한모든심의및평가에따른사항은본대학교에서결정합니다. - 차. **본전형에합격한후비자취득및변경에문제가없어야합니다. 학업을위한비자취득및변경을하지못할경우, 본교에서입학허가를취소할수있습니다.* *  \n- 카. **입학후첫학기에는휴학불가합니다.* *  \n- **※ 동아대학교 학부외국인특별전형모집에관한권한과책임은본대학교국제교류과에있으며, 기타유학원이나 제3자가제공하는정보에대해서는동아대학교가책임지지않습니다.* *  \n- 14 -",
+        "score": 0.02132113091647625,
+        "tags": [
+          {
+            "target_slot_id": "event_trigger",
+            "search_type": "new",
+            "query_ko": "휴학 후 복학하지 않을 경우의 결과",
+            "round_no": 1
+          }
+        ]
+      }
+    }
+  },
+  "stopped": null,
+  "dev_id": "D7",
+  "dev_type": "T6",
+  "dev_check": "결과·제재, GKS 지침인지 학칙인지 적용 범위",
+  "collected_at": "2026-09-29T19:15:20"
+}

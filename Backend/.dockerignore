@@ -1,9 +1,10 @@
-.env
 .venv
 __pycache__
 *.pyc
 *.pyo
-*.pyd
-.pytest_cache
-logs/
+.env
+tests/
 evaluate/
+logs/
+.mcp.json
+*.md

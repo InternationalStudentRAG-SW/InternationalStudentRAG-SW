@@ -1,5 +1,6 @@
-// Node.js Serverless Function (maxDuration 60s covers RunPod cold start ~40s)
-export const config = { maxDuration: 60 }
+import type { VercelRequest, VercelResponse } from '@vercel/node'
+
+export const config = { maxDuration: 180 }
 
 const CORS_HEADERS = {
   'Access-Control-Allow-Origin': '*',
@@ -7,98 +8,67 @@ const CORS_HEADERS = {
   'Access-Control-Allow-Headers': 'Authorization, Content-Type, X-Admin-Secret',
 }
 
-function json(data: unknown, status = 200): Response {
-  return new Response(JSON.stringify(data), {
-    status,
-    headers: { 'Content-Type': 'application/json', ...CORS_HEADERS },
-  })
-}
+export default async function handler(req: VercelRequest, res: VercelResponse) {
+  Object.entries(CORS_HEADERS).forEach(([k, v]) => res.setHeader(k, v))
 
-export default async function handler(request: Request): Promise<Response> {
-  if (request.method === 'OPTIONS') {
-    return new Response(null, { status: 204, headers: CORS_HEADERS })
+  if (req.method === 'OPTIONS') {
+    return res.status(204).end()
   }
 
-  const url = new URL(request.url, `https://${request.headers.get('host') ?? 'localhost'}`)
-  // Strip /api prefix added by VITE_API_BASE_URL=/api
+  const BACKEND_URL = process.env.BACKEND_URL
+  if (!BACKEND_URL) {
+    return res.status(500).json({ error: 'BACKEND_URL is not configured' })
+  }
+
+  const url = new URL(req.url ?? '/', `https://${req.headers['host'] ?? 'localhost'}`)
   const backendPath = url.pathname.replace(/^\/api/, '') || '/'
-  const method = request.method
-
-  const RUNPOD_API_KEY = process.env.RUNPOD_API_KEY
-  const RUNPOD_ENDPOINT_ID = process.env.RUNPOD_ENDPOINT_ID
-  if (!RUNPOD_API_KEY || !RUNPOD_ENDPOINT_ID) {
-    return json({ error: 'RunPod configuration missing' }, 500)
-  }
+  const targetUrl = `${BACKEND_URL}${backendPath}${url.search}`
 
   const forwardHeaders: Record<string, string> = {}
-  const auth = request.headers.get('Authorization')
-  if (auth) forwardHeaders['Authorization'] = auth
-  const adminSecret = request.headers.get('X-Admin-Secret')
-  if (adminSecret) forwardHeaders['X-Admin-Secret'] = adminSecret
-
-  let body: unknown = null
-  if (method !== 'GET' && method !== 'HEAD') {
-    const ct = request.headers.get('content-type') ?? ''
-    if (ct.includes('multipart/form-data')) {
-      return json({ error: 'File upload is not supported through the Vercel proxy. Use the RunPod endpoint directly.' }, 501)
-    }
-    try {
-      body = await request.json()
-    } catch {
-      // empty or non-JSON body
-    }
-  }
+  const auth = req.headers['authorization']
+  if (auth) forwardHeaders['Authorization'] = String(auth)
+  const ct = req.headers['content-type']
+  if (ct) forwardHeaders['Content-Type'] = String(ct)
 
   try {
-    const runpodRes = await fetch(
-      `https://api.runpod.ai/v2/${RUNPOD_ENDPOINT_ID}/runsync`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${RUNPOD_API_KEY}`,
-        },
-        body: JSON.stringify({
-          input: { path: backendPath, method, body, headers: forwardHeaders },
-        }),
+    let body: BodyInit | undefined
+    if (req.method !== 'GET' && req.method !== 'HEAD') {
+      if (String(ct ?? '').includes('multipart/form-data')) {
+        // 파일 업로드: raw body 그대로 전달
+        body = req.body
+      } else {
+        body = JSON.stringify(req.body ?? {})
       }
-    )
-
-    if (!runpodRes.ok) {
-      const text = await runpodRes.text()
-      return json({ error: `RunPod error ${runpodRes.status}: ${text}` }, 502)
     }
 
-    const result = await runpodRes.json()
-    const output = result.output
-
-    if (!output) {
-      return json({ error: 'RunPod returned no output', raw: result }, 502)
-    }
-
-    const statusCode: number = output.status_code ?? 200
-    const responseBody = output.body
-
-    // /chat/stream returns SSE text — re-emit as event-stream
-    if (backendPath === '/chat/stream') {
-      return new Response(typeof responseBody === 'string' ? responseBody : '', {
-        status: statusCode,
-        headers: {
-          'Content-Type': 'text/event-stream',
-          'Cache-Control': 'no-cache',
-          ...CORS_HEADERS,
-        },
-      })
-    }
-
-    const bodyStr =
-      typeof responseBody === 'string' ? responseBody : JSON.stringify(responseBody ?? {})
-
-    return new Response(bodyStr, {
-      status: statusCode,
-      headers: { 'Content-Type': 'application/json', ...CORS_HEADERS },
+    const backendRes = await fetch(targetUrl, {
+      method: req.method,
+      headers: forwardHeaders,
+      body,
     })
+
+    const contentType = backendRes.headers.get('content-type') ?? ''
+    res.status(backendRes.status)
+
+    if (contentType.includes('text/event-stream')) {
+      res.setHeader('Content-Type', 'text/event-stream')
+      res.setHeader('Cache-Control', 'no-cache')
+      res.setHeader('X-Accel-Buffering', 'no')
+
+      const reader = backendRes.body!.getReader()
+      const decoder = new TextDecoder()
+      while (true) {
+        const { done, value } = await reader.read()
+        if (done) break
+        res.write(decoder.decode(value, { stream: true }))
+      }
+      return res.end()
+    }
+
+    const data = await backendRes.text()
+    res.setHeader('Content-Type', contentType || 'application/json')
+    return res.send(data)
   } catch (e) {
-    return json({ error: String(e) }, 500)
+    return res.status(500).json({ error: String(e) })
   }
 }

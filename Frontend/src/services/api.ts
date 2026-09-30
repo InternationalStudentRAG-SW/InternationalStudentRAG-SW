@@ -46,7 +46,7 @@ export async function sendMessageStream(
 
   const controller = new AbortController()
   // 60초 안에 응답이 완전히 끝나지 않으면 연결 강제 종료
-  const timeoutId = setTimeout(() => controller.abort(), 60_000)
+  const timeoutId = setTimeout(() => controller.abort(), 120_000)
 
   try {
     const response = await fetch(`${BASE_URL}/chat/stream`, {
@@ -184,6 +184,7 @@ export async function uploadPDF(file: File): Promise<{ message: string }> {
   form.append('file', file)
   const { data } = await client.post<{ message: string }>('/admin/upload', form, {
     headers: { 'Content-Type': 'multipart/form-data' },
+    timeout: 180_000,
   })
   return data
 }

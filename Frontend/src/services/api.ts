@@ -133,7 +133,7 @@ export async function adminSignup(
   password: string,
   adminSecret: string,
 ): Promise<{ message: string; user_id: string }> {
-  const { data } = await client.post('/api/admin-signup', {
+  const { data } = await client.post('/admin-signup', {
     email,
     password,
     admin_secret: adminSecret,
@@ -142,7 +142,7 @@ export async function adminSignup(
 }
 
 export async function getMe(): Promise<UserProfile> {
-  const { data } = await client.get<UserProfile>('/api/me')
+  const { data } = await client.get<UserProfile>('/me')
   return data
 }
 
@@ -150,7 +150,7 @@ export async function login(
   email: string,
   password: string,
 ): Promise<{ access_token: string; token_type: string; user_id: string; role: string }> {
-  const { data } = await client.post('/api/login', { email, password })
+  const { data } = await client.post('/login', { email, password })
   return data
 }
 
@@ -160,7 +160,7 @@ export async function signup(
   nationality: string,
   major?: string,
 ): Promise<{ message: string; user_id: string }> {
-  const { data } = await client.post('/api/signup', {
+  const { data } = await client.post('/signup', {
     email,
     password,
     nationality,
@@ -175,7 +175,7 @@ export async function updateAdditionalInfo(
   nationality: string,
   major?: string,
 ): Promise<{ message: string }> {
-  const { data } = await client.post('/api/update-additional-info', { nationality, major })
+  const { data } = await client.post('/update-additional-info', { nationality, major })
   return data
 }
 

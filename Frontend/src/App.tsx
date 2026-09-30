@@ -13,6 +13,7 @@ import AdminDocumentPage from './pages/AdminDocumentPage'
 import AdminChatLogPage from './pages/AdminChatLogPage'
 import AdminMemberPage from './pages/AdminMemberPage'
 import AdminFaqPage from './pages/AdminFaqPage'
+import AuthCallbackPage from './pages/AuthCallbackPage'
 import './App.css'
 
 function BackgroundGlow() {
@@ -156,6 +157,7 @@ export default function App() {
       <Route path="/admin/members" element={<AdminMemberRoute />} />
       <Route path="/admin/faq" element={<AdminFaqRoute />} />
       <Route path="/additional-info" element={<AdditionalInfoPage />} />
+      <Route path="/auth/callback" element={<AuthCallbackPage />} />
     </Routes>
   )
 }

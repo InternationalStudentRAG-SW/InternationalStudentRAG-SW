@@ -155,20 +155,12 @@ def graph_search_node(state: AgentState) -> AgentState:
     keywords = _extract_graph_keywords(query)
     print(f"[graph] keywords={keywords}")
 
-    merged = {"entities": {}, "relations": [], "chunks": {}}
-    for kw in keywords:
-        result = knowledge_graph.search_by_embedding(kw)
-        for e in result.get("entities", []):
-            merged["entities"][e["name"]] = e
-        merged["relations"].extend(result.get("relations", []))
-        for c in result.get("chunks", []):
-            key = (c["source"], c["page"], c["chunk_index"])
-            merged["chunks"][key] = c
+    result = knowledge_graph.search_by_keywords_batch(keywords)
 
     final_result = {
-        "entities": list(merged["entities"].values()),
-        "relations": merged["relations"],
-        "chunks": list(merged["chunks"].values()),
+        "entities": result.get("entities", []),
+        "relations": result.get("relations", []),
+        "chunks": result.get("chunks", []),
     }
     entities = [e["name"] for e in final_result["entities"]]
     print(f"[graph] entities={entities} | relations={len(final_result['relations'])}개 | chunks={len(final_result['chunks'])}개")

@@ -32,7 +32,6 @@ jobs:
 
       - name: Deploy preview
         if: github.event_name == 'pull_request'
-        working-directory: ./Frontend
         run: vercel deploy --token=${{ secrets.VERCEL_TOKEN }}
         env:
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}

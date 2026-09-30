@@ -55,5 +55,5 @@ jobs:
       - name: Restart RunPod Pod
         if: github.event_name == 'push'
         run: |
-          curl -s -X POST "https://rest.runpod.io/v1/pod/${{ secrets.RUNPOD_POD_ID }}/start" \
+          curl -s -X POST "https://rest.runpod.io/v2/pod/${{ secrets.RUNPOD_POD_ID }}/restart" \
             -H "Authorization: Bearer ${{ secrets.RUNPOD_API_KEY }}"

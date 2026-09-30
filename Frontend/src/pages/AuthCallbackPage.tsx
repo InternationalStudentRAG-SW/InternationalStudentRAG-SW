@@ -10,10 +10,11 @@ export default function AuthCallbackPage() {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (event === 'SIGNED_IN' && session) {
         localStorage.setItem('token', session.access_token)
+        navigate('/', { replace: true })
         try {
           const user = await getMe()
           localStorage.setItem('role', user.role)
-          navigate(user.nationality ? '/' : '/additional-info', { replace: true })
+          if (!user.nationality) navigate('/additional-info', { replace: true })
         } catch {
           navigate('/additional-info', { replace: true })
         }
@@ -22,9 +23,5 @@ export default function AuthCallbackPage() {
     return () => subscription.unsubscribe()
   }, [navigate])
 
-  return (
-    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
-      <p>로그인 처리 중...</p>
-    </div>
-  )
+  return null
 }

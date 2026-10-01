@@ -28,7 +28,7 @@ from app.core.single_agent.evidence_schema import EvidencePool
 from app.core.single_agent.search_planner import check_budget, plan_search
 from app.core.single_agent.search_schema import SearchAttempt, SearchBudget, SearchPlan
 from app.core.single_agent.searcher import execute_search
-from app.core.single_agent.verifier import verify_evidence
+from app.core.single_agent.verifier import decide, verify_evidence
 from app.core.single_agent.verify_schema import VerifyDecision
 
 EventFn = Callable[[str, Dict], None]
@@ -105,10 +105,14 @@ def run_pipeline(
     attempts: List[SearchAttempt] = []
     decision: Optional[VerifyDecision] = None
     anchors_by_slot: Dict[str, List[str]] = {}
+    completed_expansions = set()
 
     for rnd in range(1, max_rounds + 1):
         # ② 검색 계획
-        p_run = plan_search(analysis, budget=budget, history=attempts, model=model, client=client)
+        p_run = plan_search(
+            analysis, budget=budget, history=attempts, model=model, client=client,
+            anchors_by_slot=anchors_by_slot, completed_expansions=completed_expansions,
+        )
         run.plan_runs.append(p_run)
         plan = p_run.plan
         if plan is None or plan.action != "search":
@@ -129,7 +133,10 @@ def run_pipeline(
             break
         budget = ex.budget
         attempts.append(ex.attempt)
+        if plan.search_type == "expand_context" and ex.anchor_ids:
+            completed_expansions.add((tuple(sorted(set(ex.anchor_ids))), cfg.EXPAND_WINDOW))
         round_chunks += ex.chunk_ids
+        round_new_chunks = list(ex.new_chunk_ids)
         if (rnd == 1 and cfg.AUTO_EXPAND_FIRST_ROUND and plan.search_type == "new" and ex.chunk_ids
                 and check_budget(budget, "expand_context") is None):
             plan2 = SearchPlan(action="search", target_slot_id=plan.target_slot_id, search_type="expand_context",
@@ -140,16 +147,42 @@ def run_pipeline(
             if ex2.ok:
                 budget = ex2.budget
                 attempts.append(ex2.attempt)
+                if ex2.anchor_ids:
+                    completed_expansions.add((tuple(sorted(set(ex2.anchor_ids))), cfg.EXPAND_WINDOW))
                 round_chunks += ex2.chunk_ids
+                round_new_chunks += ex2.new_chunk_ids
             else:
                 run.warnings.append(f"③ 첫 바퀴 확장 실패 [{ex2.error_type}]: {ex2.error}")
         emit("search", {"round": rnd, "chunks": len(round_chunks), "pool": len(pool),
-                        "new": sum(len(r.new_chunk_ids) for r in run.search_runs[-2:] if r.ok)})
+                        "new": len(round_new_chunks)})
+
+        # 이전 성공 판정에서 이미 본 청크만 다시 반환됐으면 상태 입력이 변하지 않았다.
+        # 같은 전체 근거를 다시 LLM에 보내지 않고 서버 규칙으로 다음 행동을 정한다.
+        previously_shown = {cid for v in run.verify_runs if v.decision is not None
+                            for cid in v.shown_chunk_ids}
+        if (decision is not None and not round_new_chunks
+                and set(round_chunks).issubset(previously_shown)):
+            decision = decide(analysis, budget, attempts)
+            anchors_by_slot = decision.expand_anchors
+            run.rounds = rnd
+            run.verification_skips += 1
+            msg = f"④ 건너뜀: 신규·미판정 근거 없음 ({len(round_chunks)}개 모두 이전 판정 입력)"
+            run.warnings.append(msg)
+            emit("verify", {"round": rnd, "next_action": decision.next_action, "reason": msg,
+                            "statuses": {s.slot_id: s.status for s in analysis.document_slots if s.active},
+                            "skipped": True})
+            if decision.next_action != "continue_search":
+                run.stopped = f"decided: {decision.next_action}"
+                break
+            continue
 
         # ④ 충분성 검증
         emit("verify_start", {"round": rnd})
-        v_run = verify_evidence(analysis, pool, budget, attempts, round_chunk_ids=round_chunks,
-                                question=question, model=verify_model, client=client)
+        v_run = verify_evidence(
+            analysis, pool, budget, attempts, round_chunk_ids=round_chunks,
+            round_new_chunk_ids=round_new_chunks, prior_runs=run.verify_runs,
+            question=question, model=verify_model, client=client,
+        )
         run.verify_runs.append(v_run)
         run.rounds = rnd
         if v_run.decision is None:

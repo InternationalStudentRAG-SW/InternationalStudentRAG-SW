@@ -9,7 +9,8 @@ from __future__ import annotations
 
 from typing import List, Optional
 
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator
+from app.core.single_agent.metrics import LLMMetrics
 
 from app.core.single_agent.analysis_schema import EvidenceRef, QuestionAnalysis
 
@@ -21,8 +22,15 @@ class SlotVerdict(BaseModel):
     evidence_refs: List[EvidenceRef] = []
     value: str = ""
     missing_detail: str = ""
+    missing_kind: Optional[str] = None           # partial·missing의 다음 검색 행동 분류
     activation_state: Optional[str] = None   # 조건부 칸만: triggered / unresolved / not_triggered
     reason: str = ""
+
+    @field_validator("value", "missing_detail", "reason", mode="before")
+    @classmethod
+    def empty_text_for_null(cls, value):
+        """JSON 모델이 선택적 설명을 null로 보내도 빈 문자열과 같은 의미로 정규화한다."""
+        return "" if value is None else value
 
 
 class AppliesTo(BaseModel):
@@ -36,6 +44,7 @@ class ChunkNote(BaseModel):
     evidence_id: str
     applies_to: List[AppliesTo] = []    # 비어 있으면 대상 제한 없음 (모든 유학생)
     relevant_slots: List[str] = []      # 이 청크가 근거가 될 수 있는 문서 칸
+    conflicting_slots: List[str] = []   # 기존 supported 값과 실제로 모순되는 새 내용이 있는 칸
 
 
 class UserFieldNeed(BaseModel):
@@ -64,7 +73,7 @@ class VerifyDecision(BaseModel):
     expand_anchors: dict = {}             # continue_search일 때 partial 칸별 원문 확장 앵커 {slot_id: [evidence_id]}
 
 
-class VerificationRun(BaseModel):
+class VerificationRun(LLMMetrics):
     """④ 1회 실행 기록. 실패해도 예외 대신 error에 이유를 담는다."""
     analysis: Optional[QuestionAnalysis] = None   # 칸 상태·근거가 갱신된 분석 (입력은 바꾸지 않음)
     decision: Optional[VerifyDecision] = None
@@ -73,6 +82,10 @@ class VerificationRun(BaseModel):
     llm_called: bool = False
     chunk_notes: List[ChunkNote] = []  # 서버 검증을 통과한 청크 메모
     recheck_slot_ids: List[str] = []   # 1-2 재판정 대상이었던 칸 (비었으면 재판정 안 함)
+    recheck_evidence_ids: dict = {}    # 실제 재판정한 {slot_id: [누락/모순 evidence_id]}
+    recheck_keys: List[str] = []       # 동일 상태·동일 청크 재판정 방지용 요청 내 키
+    new_chunk_ids: List[str] = []      # 이번 판정에서 새로 추가된 청크
+    delta_only: bool = False           # 기존 전체 풀이 아니라 신규 근거+대상 슬롯 근거만 봤는지
     warnings: List[str] = []
     error: Optional[str] = None
     model: str = ""

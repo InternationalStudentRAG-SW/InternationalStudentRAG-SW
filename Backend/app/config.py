@@ -25,6 +25,8 @@ class Settings(BaseSettings):
     # RAG Retrieval
     top_k_results: int = 10 # LLM에게 최종적으로 넘길 chunk 수
     initial_fetch_k: int = 25 # Reranker에게 넘기기 전 1차로 가져올 chunk 수
+    # 개발셋에서 최종 채택 근거를 모두 보존한 최소값. 0이면 RRF 병합 후보를 모두 BGE에 전달한다.
+    rerank_candidate_limit: int = 40
     min_similarity_score: float = 0.5
 
     supabase_url: str

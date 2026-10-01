@@ -26,6 +26,7 @@
 from __future__ import annotations
 
 import time
+import sys
 from typing import Any, Callable, List, Optional, Protocol, Tuple
 
 from app.core.single_agent import checklist_config as cfg
@@ -94,10 +95,16 @@ class ChromaChunkStore:
         return max(idxs) if idxs else None
 
 
-def _default_search_fn(query: str, k: int) -> List[Any]:
+def _default_search_fn(query: str, k: int, metrics: Optional[dict] = None) -> List[Any]:
     """실제 하이브리드 + rerank 검색. import 시점에 무거운 초기화가 일어나므로 호출 때 import한다."""
-    from app.core.retriever import retriever
-    return retriever.retrieve(query, k=k)
+    stats = metrics if metrics is not None else {}
+    stats["retriever_already_imported"] = "app.core.retriever" in sys.modules
+    started = time.perf_counter()
+    try:
+        from app.core.retriever import retriever
+    finally:
+        stats["import_init_ms"] = (time.perf_counter() - started) * 1000
+    return retriever.retrieve(query, k=k, metrics=stats)
 
 
 # ── 변환 ─────────────────────────────────────────────────────────────────
@@ -255,8 +262,14 @@ def _execute(
 
     # 3) 청크 확보 (풀은 도구 호출이 성공한 뒤에만 건드린다)
     if plan.search_type == "new":
-        fn = search_fn or _default_search_fn
-        ok, docs = _call_with_retries(run, lambda: fn(tag.query_ko, cfg.SEARCH_TOP_K))
+        def search():
+            if search_fn is not None:
+                return search_fn(tag.query_ko, cfg.SEARCH_TOP_K)
+            stats = {}
+            run.retrieval_calls.append(stats)
+            return _default_search_fn(tag.query_ko, cfg.SEARCH_TOP_K, metrics=stats)
+
+        ok, docs = _call_with_retries(run, search)
         if not ok:
             return
         chunks = _docs_to_chunks(list(docs or []), run.warnings)

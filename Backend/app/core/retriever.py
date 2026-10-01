@@ -1,4 +1,5 @@
 import os
+import time
 import numpy as np
 from typing import List, Tuple, Optional, Dict, Any, Literal
 from langchain_community.retrievers import BM25Retriever
@@ -17,6 +18,7 @@ class RAGRetriever:
     def __init__(self, mode: RetrieverMode = "hybrid"):
         self.top_k = settings.top_k_results
         self.initial_fetch_k = getattr(settings, 'initial_fetch_k', self.top_k)
+        self.rerank_candidate_limit = getattr(settings, "rerank_candidate_limit", 0)
         self.min_similarity = settings.min_similarity_score
         self.mode = mode
 
@@ -71,47 +73,73 @@ class RAGRetriever:
         return knowledge_base.vector_store.similarity_search(query, k=fetch_k)
 
     def retrieve(self, query: str, k: Optional[int] = None, ko_query: Optional[str] = None,
-                 prefetched_vector_docs: Optional[List[Document]] = None) -> List[Document]:
+                 prefetched_vector_docs: Optional[List[Document]] = None,
+                 metrics: Optional[Dict[str, Any]] = None) -> List[Document]:
+        # Request-local: never store timing on the shared retriever instance.
+        stats = metrics if metrics is not None else {}
+
+        def timed(name, fn):
+            started = time.perf_counter()
+            try:
+                return fn()
+            finally:
+                stats[name] = stats.get(name, 0) + (time.perf_counter() - started) * 1000
+
         bm25_q_ko = ko_query or query  # BM25: 한국어 번역 (없으면 원문)
         vector_q  = query              # Vector: 원문 (다국어 임베딩)
         rerank_q  = ko_query or query  # 리랭커: 한국어 번역 (없으면 원문)
 
         if self.mode in ("hybrid", "hybrid_rerank"):
-            bm25_docs_ko = self.keyword_retriever.invoke(bm25_q_ko)
+            bm25_docs_ko = timed("bm25_ms", lambda: self.keyword_retriever.invoke(bm25_q_ko))
 
             # 원문이 한국어와 다를 때(영어 등) 원문으로 추가 BM25 → 영어 PDF 커버
             if ko_query and ko_query != query:
-                bm25_docs_orig = self.keyword_retriever.invoke(query)
-                bm25_docs = self._rrf.weighted_reciprocal_rank(
-                    [bm25_docs_ko, bm25_docs_orig]
-                )
+                bm25_docs_orig = timed("bm25_ms", lambda: self.keyword_retriever.invoke(query))
+                bm25_docs = timed("rrf_ms", lambda: self._rrf.weighted_reciprocal_rank(
+                    [bm25_docs_ko, bm25_docs_orig]))
             else:
                 bm25_docs = bm25_docs_ko
 
             # 병렬로 미리 가져온 벡터 검색 결과가 있으면 재사용, 없으면 직접 검색
             vector_docs = prefetched_vector_docs if prefetched_vector_docs is not None \
-                else self.vector_retriever.invoke(vector_q)
-            docs = self._rrf.weighted_reciprocal_rank([bm25_docs, vector_docs])
+                else timed("vector_with_embedding_ms", lambda: self.vector_retriever.invoke(vector_q))
+            docs = timed("rrf_ms", lambda: self._rrf.weighted_reciprocal_rank([bm25_docs, vector_docs]))
+            stats["bm25_candidates"] = len(bm25_docs)
+            stats["vector_candidates"] = len(vector_docs)
         else:
             docs = prefetched_vector_docs if prefetched_vector_docs is not None \
-                else self.vector_retriever.invoke(vector_q)
+                else timed("vector_with_embedding_ms", lambda: self.vector_retriever.invoke(vector_q))
+
+        stats["vector_prefetched"] = prefetched_vector_docs is not None
+        stats["merged_candidates"] = len(docs)
 
         if self.mode == "hybrid_rerank":
-            pairs = [[rerank_q, doc.page_content] for doc in docs]
-            # batch_size를 작게 나눠서 처리 → MPS/GPU OOM 방지
-            scores = self.reranker.predict(pairs, batch_size=8)
-
-            scored_docs = sorted(zip(scores, docs), key=lambda x: x[0], reverse=True)
-
             final_k = k or self.top_k
+            configured_limit = max(0, int(getattr(self, "rerank_candidate_limit", 0) or 0))
+            # 최종 반환 수보다 적게 재정렬하면 결과 수 자체가 줄어드므로 final_k를 하한으로 둔다.
+            effective_limit = max(final_k, configured_limit) if configured_limit else len(docs)
+            rerank_docs = docs[:effective_limit]
+            pairs = [[rerank_q, doc.page_content] for doc in rerank_docs]
+            # batch_size를 작게 나눠서 처리 → MPS/GPU OOM 방지
+            stats["rerank_candidate_limit"] = configured_limit
+            stats["rerank_effective_limit"] = effective_limit
+            stats["rerank_dropped_candidates"] = len(docs) - len(rerank_docs)
+            stats["rerank_pairs"] = len(pairs)
+            stats["reranker_device"] = str(getattr(self.reranker, "device", "unknown"))
+            scores = timed("rerank_ms", lambda: self.reranker.predict(pairs, batch_size=8))
+
+            scored_docs = sorted(zip(scores, rerank_docs), key=lambda x: x[0], reverse=True)
+
             final_docs = []
             for score, doc in scored_docs[:final_k]:
                 doc.metadata["similarity_score"] = float(score)
                 final_docs.append(doc)
+            stats["returned_chunks"] = len(final_docs)
             return final_docs
 
         # hybrid 모드: RRF 결과를 top_k로 자름 (BM25+Vector 합집합이 top_k 초과 가능)
         final_k = k or self.top_k
+        stats["returned_chunks"] = len(docs[:final_k])
         return docs[:final_k]
 
     def format_context(self, retrieved_docs: List[Document]) -> str:

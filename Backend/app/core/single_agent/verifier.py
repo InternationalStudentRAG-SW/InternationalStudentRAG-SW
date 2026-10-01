@@ -84,17 +84,29 @@ def judge_targets(analysis: QuestionAnalysis) -> List[DocSlot]:
 
 def select_chunks(
     analysis: QuestionAnalysis, pool: EvidencePool, round_chunk_ids: Optional[List[str]],
+    target_slot_ids: Optional[Set[str]] = None,
+    new_chunk_ids: Optional[List[str]] = None,
+    previously_shown: Optional[Set[str]] = None,
 ) -> List[str]:
     """
     보여줄 청크 순서: 칸에 연결된 청크 → 이번 라운드에 검색된 청크 → 나머지 풀(들어온 순서), 상한까지.
     round_chunk_ids는 ③이 이번에 돌려준 청크 전부(run.chunk_ids)다. 새 청크만 넘기면, 예전에 LLM이
     놓친 청크가 다시 검색돼도 '새 것이 아니라서' 영영 안 보이는 문제가 생긴다.
     """
-    linked = [r.evidence_id for s in analysis.document_slots for r in s.evidence_refs]
+    target_slot_ids = target_slot_ids or {s.slot_id for s in analysis.document_slots}
+    linked = [r.evidence_id for s in analysis.document_slots if s.slot_id in target_slot_ids
+              for r in s.evidence_refs]
     this_round = list(round_chunk_ids or [])
-    rest = list(pool.chunks.keys())
+    if new_chunk_ids is None:
+        # 독립 검증·첫 호출의 기존 동작: 연결 근거 → 이번 검색 → 나머지 풀.
+        candidates = linked + this_round + list(pool.chunks.keys())
+    else:
+        # 반복 라운드: 새 근거를 우선하고, 대상 슬롯의 기존 근거와 아직 한 번도 보여주지 않은 반환 청크만 붙인다.
+        prior = previously_shown or set()
+        unseen_round = [cid for cid in this_round if cid not in prior]
+        candidates = list(new_chunk_ids) + linked + unseen_round
     ordered: List[str] = []
-    for cid in linked + this_round + rest:
+    for cid in candidates:
         if cid in pool and cid not in ordered:
             ordered.append(cid)
     return ordered[: cfg.VERIFY_MAX_CHUNKS]
@@ -131,6 +143,8 @@ SYSTEM_PROMPT = """당신은 동아대학교 유학생 챗봇의 '충분성 검�
 8. 조건부 칸의 activation_state: 문서상 이 칸이 필요하면 triggered, 문서가 성립하지 않는다고 명시하면 not_triggered(이때 status는 not_applicable, 그 문장을 인용),
    관련 내용을 못 찾았거나 아직 모르면 unresolved(status는 missing)입니다.
 9. value에는 근거로 확인한 내용을 한국어로 짧게 요약합니다. partial·missing·conflicting이면 missing_detail에 무엇이 부족한지 적습니다.
+   이때 missing_kind도 적습니다: 표·문장·바로 다음 조항이 이어지면 continuation, 다른 조항을 찾아야 하면 different_section,
+   적용 대상 범위가 부족하면 scope_gap, 서로 다른 내용을 해소해야 하면 conflict, 판단하기 어려우면 unknown입니다.
 10. user_field_needs: 문서가 어떤 사용자 조건(교육 과정, GKS 단계 등)에 따라 답을 다르게 정하고 있으면 그 칸 ID와 근거 청크 ID, 갈래 요약을 적습니다.
     문서 근거 없이 '물어보면 좋겠다'는 이유로 적지 않습니다. 사용자의 언어·이름으로 국적 등을 추정하지 않습니다.
 11. 판정 대상 칸은 빠짐없이 모두 slot_verdicts에 적습니다.
@@ -149,6 +163,8 @@ SYSTEM_PROMPT = """당신은 동아대학교 유학생 챗봇의 '충분성 검�
       청크 ID의 문서 이름, 표·조항 제목, 본문 문구로 판단합니다. 모든 유학생에게 적용되면 빈 목록입니다.
       field_id는 아래 '사용자 칸 후보'의 ID만 씁니다. 추측으로 대상을 붙이지 않습니다.
     - relevant_slots: 이 청크가 근거가 될 수 있는 판정 대상 칸 ID. 관련 없으면 빈 목록입니다.
+    - conflicting_slots: 이 청크의 값·조건·적용 범위가 현재 supported인 칸의 기존 내용과 실제로 모순될 때만 그 칸 ID를 적습니다.
+      단순히 관련 있거나 추가 설명이 있다는 이유로 적지 않습니다. 신규 청크에 모순이 없으면 빈 목록입니다.
 18. 같은 조건의 값이 청크마다 다르면(예: 학위과정 조항과 어학연수 조항) 서버가 그것을 갈래로 봅니다.
     그러니 applies_to의 value는 청크마다 같은 대상이면 같은 표현으로 씁니다.
 
@@ -156,13 +172,13 @@ SYSTEM_PROMPT = """당신은 동아대학교 유학생 챗봇의 '충분성 검�
 {
   "chunk_notes": [
     {"evidence_id": "문서.pdf#p11#c0", "applies_to": [{"field_id": "gks_stage", "value": "학위과정"}],
-     "relevant_slots": ["rule", "applicable_scope"]},
-    {"evidence_id": "문서.pdf#p3#c2", "applies_to": [], "relevant_slots": []}
+     "relevant_slots": ["rule", "applicable_scope"], "conflicting_slots": []},
+    {"evidence_id": "문서.pdf#p3#c2", "applies_to": [], "relevant_slots": [], "conflicting_slots": []}
   ],
   "slot_verdicts": [
     {"slot_id": "rule", "status": "supported",
      "evidence_refs": [{"evidence_id": "문서.pdf#p11#c0", "quote": "청크 본문에서 그대로 옮긴 구절"}],
-     "value": "학위과정 GKS 장학생은 총장 승인 시에만 시간제 취업 가능", "missing_detail": "",
+      "value": "학위과정 GKS 장학생은 총장 승인 시에만 시간제 취업 가능", "missing_detail": "", "missing_kind": null,
      "activation_state": null, "reason": "판정 이유 한 줄"}
   ],
   "user_field_needs": [
@@ -187,12 +203,14 @@ def _slot_block(slot: DocSlot) -> str:
         lines.append("  기존 근거: " + ", ".join(r.evidence_id for r in slot.evidence_refs))
     if slot.missing_detail:
         lines.append(f"  이전 판정에서 부족했던 점: {slot.missing_detail}")
+    if slot.missing_kind:
+        lines.append(f"  이전 판정의 부족 유형: {slot.missing_kind}")
     return "\n".join(lines)
 
 
 def build_user_prompt(
     analysis: QuestionAnalysis, targets: List[DocSlot], chunk_ids: List[str],
-    pool: EvidencePool, question: Optional[str],
+    pool: EvidencePool, question: Optional[str], new_chunk_ids: Optional[Set[str]] = None,
 ) -> str:
     types = [t for t in [analysis.primary_type] + analysis.additional_types if t in cfg.PROFILES]
     field_ids: List[str] = []
@@ -210,8 +228,9 @@ def build_user_prompt(
     conds = "\n".join(
         f"- {c.field_id}={c.value} ({cfg.CONDITION_SUBJECTS.get(c.subject, c.subject)})" for c in analysis.conditions
     ) or "(확인된 조건 없음)"
+    new_set = new_chunk_ids or set()
     chunks = "\n\n".join(
-        f"### 청크 ID: {cid}\n{pool.get(cid).text.strip()}" for cid in chunk_ids
+        f"### {'신규 ' if cid in new_set else ''}청크 ID: {cid}\n{pool.get(cid).text.strip()}" for cid in chunk_ids
     )
     return (
         (f"## 사용자 질문\n{question}\n\n" if question else "")
@@ -356,6 +375,12 @@ def apply_verdicts(
         slot.evidence_refs = refs
         slot.value = v.value.strip() if refs else ""
         slot.missing_detail = v.missing_detail.strip()
+        if status in cfg.RESOLVED_STATUSES:
+            slot.missing_kind = None
+        elif v.missing_kind in cfg.MISSING_KINDS:
+            slot.missing_kind = v.missing_kind
+        else:
+            slot.missing_kind = "conflict" if status == "conflicting" else "unknown"
         if slot.requirement == "conditional":
             slot.activation_state = activation or "unresolved"
 
@@ -464,7 +489,9 @@ def decide(
         core = [s for s in needed if s.slot_id in es["core"]]
         rest = [s for s in needed if s.slot_id in unresolved]
         if (len(core) == len(es["core"]) and all(s.status == "supported" and s.evidence_refs for s in core)
-                and all(s.slot_id in es["aux"] and s.status in ("unchecked", "partial", "missing") for s in rest)):
+                # 사용자가 요구해서 required로 승격한 시점·단서도 반드시 확인한다.
+                and all(s.slot_id in es["aux"] and s.requirement != "required"
+                        and s.status in ("unchecked", "partial", "missing") for s in rest)):
             early = f"핵심 칸 {[s.slot_id for s in core]} 확인됨 → 부수 칸 {unresolved}은 더 찾지 않음"
             unresolved = []
 
@@ -524,16 +551,86 @@ def find_uncited_relevant(
     return out
 
 
-def build_recheck_prompt(uncited: Dict[str, List[str]], targets: Dict[str, DocSlot]) -> str:
-    lines = [f"- {sid} (현재 {targets[sid].status}): 관련 있다고 적었지만 인용하지 않은 청크 {', '.join(ids)}"
-             for sid, ids in uncited.items()]
+def find_new_conflicts(
+    analysis: QuestionAnalysis, notes: Dict[str, ChunkNote], new_chunk_ids: Set[str],
+) -> Dict[str, List[str]]:
+    """신규 청크 메모가 기존 supported 칸과 실제 모순이라고 표시한 경우만 재판정 대상으로 연다."""
+    supported = {s.slot_id for s in analysis.document_slots if s.active and s.status == "supported"}
+    out: Dict[str, List[str]] = {}
+    for eid in new_chunk_ids:
+        note = notes.get(eid)
+        if note is None:
+            continue
+        for sid in note.conflicting_slots:
+            if sid in supported:
+                out.setdefault(sid, []).append(eid)
+    return out
+
+
+def _recheck_key(slot_id: str, evidence_id: str, slot: DocSlot) -> str:
+    refs = ",".join(sorted(r.evidence_id for r in slot.evidence_refs))
+    return "|".join((slot_id, evidence_id, slot.status, refs, normalize(slot.missing_detail)))
+
+
+RECHECK_SYSTEM_PROMPT = """당신은 문서 칸의 누락·모순 근거만 재확인합니다.
+아래에 제공된 현재 근거와 후보 청크만 사용합니다. 각 요청 칸을 정확히 한 번씩 판정합니다.
+
+규칙
+1. status는 supported / partial / conflicting 중 하나이며 반드시 적습니다.
+2. evidence_refs의 각 항목은 반드시 evidence_id와 quote 두 문자열을 가집니다.
+3. evidence_id는 '### 청크 ID:' 뒤의 전체 문자열을 그대로 씁니다. source/page/chunk 객체로 나누거나
+   reference, source, page 같은 다른 필드 이름을 만들지 않습니다.
+4. quote는 해당 청크에서 그대로 옮긴 짧은 구절입니다. 요약·번역하지 않습니다.
+5. 현재 근거를 유지해야 하면 evidence_refs에 다시 적습니다. 후보가 관련 없으면 기존 상태·근거를 유지합니다.
+6. 결과는 아래 JSON 객체 하나로만 출력합니다. chunk_notes나 user_field_needs는 출력하지 않습니다.
+
+{
+  "slot_verdicts": [
+    {
+      "slot_id": "rule",
+      "status": "partial",
+      "evidence_refs": [{"evidence_id": "문서.pdf#p1#c0", "quote": "본문의 정확한 구절"}],
+      "value": "현재까지 확인된 내용",
+      "missing_detail": "아직 부족한 내용",
+      "missing_kind": "different_section",
+      "activation_state": null,
+      "reason": "판정 이유"
+    }
+  ]
+}"""
+
+RECHECK_FORMAT_HINT = (
+    '반드시 {"slot_verdicts":[{"slot_id":"...","status":"supported|partial|conflicting",'
+    '"evidence_refs":[{"evidence_id":"문서.pdf#p1#c0","quote":"본문 그대로"}],'
+    '"value":"...","missing_detail":"...","missing_kind":"unknown","reason":"..."}]} 형식으로 출력하세요.'
+)
+
+
+def build_recheck_prompt(
+    uncited: Dict[str, List[str]], targets: Dict[str, DocSlot], pool: EvidencePool,
+    analysis: QuestionAnalysis, question: Optional[str],
+) -> str:
+    conds = ", ".join(f"{c.field_id}={c.value}" for c in analysis.conditions) or "없음"
+    blocks: List[str] = []
+    for sid, ids in uncited.items():
+        slot = targets[sid]
+        definition = cfg.DOC_SLOTS.get(sid, {})
+        evidence_ids = list(dict.fromkeys([r.evidence_id for r in slot.evidence_refs] + ids))
+        chunks = "\n\n".join(
+            f"### 청크 ID: {eid}\n{pool.get(eid).text.strip()}" for eid in evidence_ids if pool.get(eid)
+        )
+        refs = "\n".join(f"- {r.evidence_id}: {r.quote}" for r in slot.evidence_refs) or "- 없음"
+        blocks.append(
+            f"## 칸 {sid} ({definition.get('label', sid)})\n"
+            f"충족 기준: {definition.get('criterion', '')}\n"
+            f"현재 상태: {slot.status}\n현재 값: {slot.value or '-'}\n"
+            f"현재 근거:\n{refs}\n"
+            f"재확인할 청크: {', '.join(ids)}\n\n{chunks}"
+        )
     return (
-        "## 재확인 요청\n"
-        "아래 칸은 chunk_notes에서 관련 있다고 적은 청크를 evidence_refs에 인용하지 않았습니다.\n"
-        + "\n".join(lines) + "\n\n"
-        "칸마다 그 청크를 다시 읽고, 충족 기준에 필요한 값·조건·한도·예외·승인 주체가 있으면 evidence_refs에 추가한 뒤\n"
-        "status를 다시 판정하세요. 기존 근거도 모두 다시 적습니다. 그 청크가 이 칸에 필요 없다고 판단하면 reason에 이유를 적습니다.\n"
-        '출력: {"slot_verdicts": [...]} (위 칸들만, 같은 형식)'
+        f"## 사용자 질문\n{question or analysis.intent_summary}\n"
+        f"## 확인된 조건\n{conds}\n\n" + "\n\n".join(blocks)
+        + "\n\n각 칸만 다시 판정해 JSON으로 출력하세요."
     )
 
 
@@ -553,7 +650,9 @@ def apply_recheck(
         keys = {(r.evidence_id, normalize(r.quote)) for r in merged}
         added = [r for r in new_refs if (r.evidence_id, normalize(r.quote)) not in keys]
         merged += added
-        status = v.status if v.status in ("supported", "partial") and merged else slot.status
+        status = v.status if v.status in ("supported", "partial", "conflicting") and merged else slot.status
+        if status == "conflicting" and len({r.evidence_id for r in merged}) < 2:
+            status = "partial"
         if slot.requirement == "conditional" and status == "supported" and slot.activation_state in (None, "unresolved"):
             slot.activation_state = "triggered"
         w.append(f"[재확인] {v.slot_id}: {slot.status} → {status}, 근거 +{len(added)}"
@@ -563,6 +662,12 @@ def apply_recheck(
         if added and v.value.strip():
             slot.value = v.value.strip()
         slot.missing_detail = v.missing_detail.strip() if status != "supported" else ""
+        if status == "supported":
+            slot.missing_kind = None
+        elif v.missing_kind in cfg.MISSING_KINDS:
+            slot.missing_kind = v.missing_kind
+        elif not slot.missing_kind:
+            slot.missing_kind = "unknown"
     for sid in uncited:
         if sid not in seen:
             w.append(f"[재확인] {sid}: 재판정 결과에 없음 (상태 유지)")
@@ -574,6 +679,8 @@ def verify_evidence(
     budget: Optional[SearchBudget] = None,
     history: Optional[List[SearchAttempt]] = None,
     round_chunk_ids: Optional[List[str]] = None,
+    round_new_chunk_ids: Optional[List[str]] = None,
+    prior_runs: Optional[List[VerificationRun]] = None,
     question: Optional[str] = None,
     model: Optional[str] = None,
     client=None,
@@ -585,6 +692,7 @@ def verify_evidence(
     """
     budget = budget or SearchBudget()
     history = history or []
+    prior_runs = prior_runs or []
     run = VerificationRun(checklist_version=cfg.CHECKLIST_VERSION)
     started = time.perf_counter()
     a = analysis.model_copy(deep=True)
@@ -592,7 +700,17 @@ def verify_evidence(
 
     targets = judge_targets(a)
     run.judged_slot_ids = [s.slot_id for s in targets]
-    shown = select_chunks(a, pool, round_chunk_ids)
+    prior_shown = {cid for prior in prior_runs if prior.decision is not None for cid in prior.shown_chunk_ids}
+    delta_mode = bool(prior_runs) and round_new_chunk_ids is not None
+    new_ids = list(dict.fromkeys(round_new_chunk_ids or []))
+    run.new_chunk_ids = new_ids
+    run.delta_only = delta_mode
+    shown = select_chunks(
+        a, pool, round_chunk_ids,
+        target_slot_ids={s.slot_id for s in targets} if delta_mode else None,
+        new_chunk_ids=new_ids if delta_mode else None,
+        previously_shown=prior_shown,
+    )
     run.shown_chunk_ids = shown
     if targets and shown:
         model = model or model_for("verify")
@@ -600,7 +718,7 @@ def verify_evidence(
         client = client or get_client()
         messages = [
             {"role": "system", "content": SYSTEM_PROMPT},
-            {"role": "user", "content": build_user_prompt(a, targets, shown, pool, question)},
+            {"role": "user", "content": build_user_prompt(a, targets, shown, pool, question, set(new_ids))},
         ]
         run.llm_called = True
         output, ok = run_json_loop(
@@ -622,19 +740,39 @@ def verify_evidence(
             {s.slot_id for s in a.document_slots if s.active}, run.warnings,
         )
 
-        # 1-2: 관련 있다고 적고 인용하지 않은 청크 → 그 칸만 1회 재판정
+        # 관련 있다고 적고 인용하지 않은 청크, 또는 신규 모순 신호가 있는 supported 칸만 좁게 재판정한다.
         uncited = find_uncited_relevant(target_map, notes)
+        conflicts = find_new_conflicts(a, notes, set(new_ids))
+        slot_by_id = {s.slot_id: s for s in a.document_slots}
+        for sid, ids in conflicts.items():
+            target_map[sid] = slot_by_id[sid]
+            uncited.setdefault(sid, []).extend(i for i in ids if i not in uncited.get(sid, []))
+
+        # 같은 슬롯 상태에서 같은 누락·모순 청크를 이미 재판정했다면 반복하지 않는다.
+        previous_keys = {key for prior in prior_runs for key in prior.recheck_keys}
+        filtered: Dict[str, List[str]] = {}
+        for sid, ids in uncited.items():
+            for eid in ids:
+                key = _recheck_key(sid, eid, target_map[sid])
+                if key in previous_keys:
+                    run.warnings.append(f"[재확인 생략] {sid}: 동일 상태에서 {eid} 이미 재판정")
+                    continue
+                filtered.setdefault(sid, []).append(eid)
+                run.recheck_keys.append(key)
+        uncited = filtered
         if uncited:
             run.recheck_slot_ids = list(uncited)
-            recheck_msgs = messages + [
-                {"role": "assistant", "content": run.raw_output},
-                {"role": "user", "content": build_recheck_prompt(uncited, target_map)},
+            run.recheck_evidence_ids = {sid: list(ids) for sid, ids in uncited.items()}
+            recheck_msgs = [
+                {"role": "system", "content": RECHECK_SYSTEM_PROMPT},
+                {"role": "user", "content": build_recheck_prompt(uncited, target_map, pool, a, question)},
             ]
             rechecked, ok2 = run_json_loop(
                 run, client, model, recheck_msgs,
                 parse=lambda raw: VerifyOutput.model_validate(json.loads(raw)),
                 temperature=0, max_tokens=VERIFY_MAX_TOKENS,
-                format_hint="JSON 형식을 지켜 JSON만 다시 출력하세요.",
+                format_hint=RECHECK_FORMAT_HINT,
+                purpose="recheck",
             )
             if ok2:
                 apply_recheck(target_map, uncited, rechecked.slot_verdicts, shown_set, pool, run.warnings)

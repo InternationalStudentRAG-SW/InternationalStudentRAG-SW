@@ -48,7 +48,9 @@ def validate_notes(notes: List[ChunkNote], resolve, slot_ids: Set[str], w: List[
                 continue
             applies.append(AppliesTo(field_id=a.field_id, value=a.value.strip()))
         rel = [s for s in dict.fromkeys(n.relevant_slots) if s in slot_ids]
-        out[eid] = ChunkNote(evidence_id=eid, applies_to=applies, relevant_slots=rel)
+        conflicts = [s for s in dict.fromkeys(n.conflicting_slots) if s in slot_ids]
+        out[eid] = ChunkNote(evidence_id=eid, applies_to=applies, relevant_slots=rel,
+                             conflicting_slots=conflicts)
     return out
 
 

@@ -10,6 +10,7 @@ from __future__ import annotations
 from typing import List, Optional
 
 from pydantic import BaseModel
+from app.core.single_agent.metrics import LLMMetrics
 
 
 class SearchAttempt(BaseModel):
@@ -43,7 +44,7 @@ class SearchPlan(BaseModel):
     skipped: List[str] = []
 
 
-class SearchPlanRun(BaseModel):
+class SearchPlanRun(LLMMetrics):
     """검색 계획 1회 실행 기록 (확인 스크립트·로그용)."""
     plan: Optional[SearchPlan] = None
     warnings: List[str] = []
@@ -51,4 +52,6 @@ class SearchPlanRun(BaseModel):
     model: str = ""
     latency_ms: int = 0
     attempts: int = 0
+    prompt_tokens: int = 0
+    completion_tokens: int = 0
     checklist_version: str = ""

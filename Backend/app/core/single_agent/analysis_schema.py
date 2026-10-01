@@ -10,6 +10,7 @@ from __future__ import annotations
 from typing import List, Optional
 
 from pydantic import BaseModel, Field
+from app.core.single_agent.metrics import LLMMetrics
 
 
 class Condition(BaseModel):
@@ -40,6 +41,7 @@ class DocSlot(BaseModel):
     evidence_refs: List[EvidenceRef] = []
     value: str = ""           # 근거로 확인한 내용 요약
     missing_detail: str = ""  # 남은 확인 사항 (partial·missing·conflicting일 때)
+    missing_kind: Optional[str] = None  # continuation / different_section / scope_gap / conflict / unknown
 
 
 class Branch(BaseModel):
@@ -82,7 +84,7 @@ class QuestionAnalysis(BaseModel):
     clarification_question: Optional[str] = None
 
 
-class AnalysisRun(BaseModel):
+class AnalysisRun(LLMMetrics):
     """분석 1회 실행 기록 (확인 스크립트·로그용)."""
     question: str
     history: List[dict] = []

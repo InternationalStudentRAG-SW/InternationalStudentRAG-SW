@@ -735,20 +735,71 @@ def test_pipeline_second_round_expands_with_verify_anchors():
     from evaluate.check_verification import FakeClient
     from app.core.single_agent.pipeline import run_pipeline
     t = ["Part-time work requires approval.", "Limited to 20 hours per week.", "Only during vacation.", "Fines apply."]
-    search = FakeSearch([{"source": "d.pdf", "page": 1, "chunk_index": 2, "text": t[2], "score": 0.9}])
+    search = FakeSearch([
+        {"source": "d.pdf", "page": 1, "chunk_index": 2, "text": t[2], "score": 0.9},
+        {"source": "d.pdf", "page": 1, "chunk_index": 0, "text": t[0], "score": 0.8},
+    ])
     store = FakeStore({"d.pdf": {1: t}})
     analysis = dict(_PIPE_ANALYSIS)
-    v1 = {"slot_verdicts": [{"slot_id": "rule", "status": "partial", "missing_detail": "앞 조항 필요",
-                             "evidence_refs": [{"evidence_id": "d.pdf#p1#c2", "quote": "Only during vacation"}]}]}
-    q2 = {"query_ko": "GKS 아르바이트 앞 조항", "reason": "확장"}
-    v2 = {"slot_verdicts": [{"slot_id": "rule", "status": "supported",
-                             "evidence_refs": [{"evidence_id": "d.pdf#p1#c1", "quote": "Limited to 20 hours per week"}]}]}
-    fake = FakeClient([analysis, v1, q2, v2, {"answer": "주 20시간까지입니다 [1]."}])
-    run = run_pipeline("질문", max_rounds=2, client=fake, search_fn=search, store=store)
-    assert fake.calls == 5 and run.rounds == 2
+    # 첫 자동 확장에서 c1/c3까지 이미 풀과 판정 입력에 들어간다. 다음 라운드는 두 청크를
+    # 앵커로 삼아도 가운데 c2만 다시 반환하므로 '다른 앵커 집합, 동일한 기존 근거' 사례가 된다.
+    v1 = {"slot_verdicts": [{"slot_id": "rule", "status": "partial", "missing_detail": "관련 조항 필요",
+                             "missing_kind": "continuation",
+                             "evidence_refs": [
+                                 {"evidence_id": "d.pdf#p1#c1", "quote": "Limited to 20 hours per week"},
+                                 {"evidence_id": "d.pdf#p1#c3", "quote": "Fines apply"},
+                             ]}]}
+    fake = FakeClient([analysis, v1, {"answer": "확인된 내용만 안내합니다 [1]."}])
+    search_events = []
+    run = run_pipeline("질문", max_rounds=2, client=fake, search_fn=search, store=store,
+                       on_event=lambda stage, info: search_events.append(info) if stage == "search" else None)
+    # 두 번째 확장은 첫 판정에서 이미 본 청크만 반환하므로 검증 LLM도 다시 부르지 않는다.
+    assert fake.calls == 3 and run.rounds == 2, (
+        fake.calls, run.rounds, [(p.plan.action, p.plan.target_slot_id, p.plan.search_type) for p in run.plan_runs],
+        len(run.verify_runs), run.warnings, run.answer_run.error,
+    )
     r2 = run.plan_runs[1].plan
     assert r2.target_slot_id == "rule" and r2.search_type == "expand_context"
-    assert run.search_runs[-1].anchor_ids == ["d.pdf#p1#c2"]
-    assert set(run.pool.chunks) == {"d.pdf#p1#c1", "d.pdf#p1#c2", "d.pdf#p1#c3"}
-    # 현재 한계(2-2): 같은 앵커로 다시 확장하면 첫 바퀴와 같은 이웃만 가져와 새 청크가 없다
+    assert run.search_runs[-1].anchor_ids == ["d.pdf#p1#c1", "d.pdf#p1#c3"]
+    assert set(run.pool.chunks) == {"d.pdf#p1#c0", "d.pdf#p1#c1", "d.pdf#p1#c2", "d.pdf#p1#c3"}
+    # 앵커 집합은 달라도 실제 반환 범위가 이미 판정한 청크뿐이면 재검증하지 않는다.
     assert run.search_runs[-1].new_chunk_ids == []
+    assert [event["new"] for event in search_events] == [4, 0]
+    assert len(run.verify_runs) == 1
+    assert run.verification_skips == 1
+    assert any("신규·미판정 근거 없음" in w for w in run.warnings)
+
+
+# ── 기존 방식 vs single agent 비교 (compare_answers) ─────────────────────
+
+def test_compare_answers_scores_both_methods_and_maps_judge_order():
+    """D1 하나로 두 방식을 돌리고, gold 청크 재현율·심판 결과가 방식 이름으로 정리되는지 본다 (API·DB 없음)."""
+    from types import SimpleNamespace
+    from evaluate import compare_answers as ca
+    from evaluate.check_verification import FakeClient
+    from evaluate.dev_questions import DEV_QUESTIONS
+    from app.core.single_agent.pipeline import run_pipeline
+    q = next(x for x in DEV_QUESTIONS if x["id"] == "D1")
+    gold = ca.gold_groups(q)[0][0]
+    src, rest = gold.split("#p", 1)
+    page, idx = rest.split("#c")
+    docs = [SimpleNamespace(page_content="Tuition Fee 1,300,000 KRW per semester",
+                            metadata={"source": src, "page": int(page), "chunk_index": int(idx)}),
+            SimpleNamespace(page_content="other", metadata={"source": "x.pdf", "page": 1, "chunk_index": 0})]
+    judge_out = {"A": {"facts_covered": [1], "condition": 5, "unsupported": [], "overall": 5},
+                 "B": {"facts_covered": [], "condition": 3, "unsupported": ["틀린 금액"], "overall": 2},
+                 "winner": "A", "reason": "r"}
+    client = FakeClient(["학기당 1,300,000원입니다 [1].", judge_out])
+    fake_run = run_pipeline("q", client=FakeClient([{"intent_summary": "x", "answer_scope": "general",
+                                                   "primary_type": None, "next_action": "out_of_scope"},
+                                                  {"answer": "모름"}]))
+    rows = ca.compare({"D1"}, repeat=1, model="fake", k=2, client=client,
+                      search_fn=lambda qq, k: docs, pipeline_fn=lambda qq, **kw: fake_run, log=lambda *a: None)
+    r = rows[0]["results"]
+    assert r["baseline"]["recall_ctx"] > 0 and r["baseline"]["cited_ids"] == [gold]
+    assert r["single_agent"]["mode"] == "out_of_scope" and r["single_agent"]["recall_cited"] == 0
+    j = rows[0]["judge"]
+    winner = j["order"]["A"]
+    assert j["winner"] == winner and j[winner]["overall"] == 5 and j[j["order"]["B"]]["unsupported"] == 1
+    s = ca.summarize_rows(rows)
+    assert s[winner]["wins"] == 1 and s["baseline"]["llm_calls"] == 1

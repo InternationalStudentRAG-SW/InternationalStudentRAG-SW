@@ -6,6 +6,7 @@ from __future__ import annotations
 from typing import List, Optional
 
 from pydantic import BaseModel
+from app.core.single_agent.metrics import LLMMetrics
 
 from app.core.single_agent.analysis_schema import AnalysisRun, QuestionAnalysis
 from app.core.single_agent.evidence_schema import EvidencePool, SearchExecutionRun
@@ -21,7 +22,7 @@ class AnswerSource(BaseModel):
     page: int
 
 
-class AnswerRun(BaseModel):
+class AnswerRun(LLMMetrics):
     """⑤ 답변 1회 실행 기록. 실패해도 예외 대신 error에 이유를 담고 answer에는 안내 문구를 넣는다."""
     mode: str                          # answer / answer_by_condition / ask_clarification / partial_answer / no_evidence
                                        # / clarify_scope / out_of_scope / no_retrieval / error
@@ -45,12 +46,13 @@ class PipelineRun(BaseModel):
     plan_runs: List[SearchPlanRun] = []
     search_runs: List[SearchExecutionRun] = []
     verify_runs: List[VerificationRun] = []
+    verification_skips: int = 0                       # 근거 상태가 같아 ④ LLM을 생략한 라운드 수
     answer_run: Optional[AnswerRun] = None
     analysis: Optional[QuestionAnalysis] = None     # 마지막 상태 (되묻기 후 이어가기용)
     pool: EvidencePool = EvidencePool()
     budget: SearchBudget = SearchBudget()
     decision: Optional[VerifyDecision] = None       # ⑤에 넘긴 최종 결정
-    rounds: int = 0                                 # ④를 부른 횟수
+    rounds: int = 0                                 # 완료한 검색·검증 루프 라운드 수(④ 생략 포함)
     stopped: str = ""                               # 루프가 끝난 이유
     warnings: List[str] = []
     latency_ms: int = 0

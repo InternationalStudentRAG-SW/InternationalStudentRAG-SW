@@ -20,6 +20,7 @@ from typing import Dict, List, Optional
 
 from app.core.single_agent.answer_schema import PipelineRun
 from app.core.single_agent.pipeline import run_pipeline
+from app.core.single_agent.metrics import METRICS_VERSION
 
 RESULTS_DIR = Path(__file__).resolve().parent / "results"
 
@@ -61,9 +62,34 @@ def summarize(run: PipelineRun) -> Dict:
         "④": sum(v.latency_ms for v in run.verify_runs),
         "⑤": a.latency_ms if a else 0,
     }
-    tokens = sum(x.prompt_tokens + x.completion_tokens for x in
-                 [r for r in [run.analysis_run, a] if r] + run.verify_runs)
+    stages = {"analyze": [run.analysis_run] if run.analysis_run else [], "plan": run.plan_runs,
+              "verify": run.verify_runs, "answer": [a] if a else []}
+    stage_usage = {}
+    for name, runs in stages.items():
+        calls = [c for r in runs for c in r.calls]
+        stage_usage[name] = {
+            "prompt_tokens": sum(r.prompt_tokens for r in runs),
+            "completion_tokens": sum(r.completion_tokens for r in runs),
+            "sdk_calls": len(calls),
+            "usage_complete": all(c.prompt_tokens is not None and c.completion_tokens is not None for c in calls)
+                              and all(r.attempts == 0 or r.calls for r in runs),
+            "cached_prompt_tokens": sum(c.cached_prompt_tokens or 0 for c in calls),
+        }
+    all_calls = [c for runs in stages.values() for r in runs for c in r.calls]
+    rechecks = [c for c in all_calls if c.purpose == "recheck"]
+    tokens = sum(s["prompt_tokens"] + s["completion_tokens"] for s in stage_usage.values())
     return {"mode": a.mode if a else None, "rounds": run.rounds, "stopped": run.stopped,
+            "verification_skips": run.verification_skips,
+            "metrics_version": METRICS_VERSION, "stage_usage": stage_usage,
+            "sdk_calls": len(all_calls), "usage_complete": all(s["usage_complete"] for s in stage_usage.values()),
+            "recheck": {"sdk_calls": len(rechecks), "latency_ms": sum(c.latency_ms for c in rechecks),
+                        "tokens": sum((c.prompt_tokens or 0) + (c.completion_tokens or 0) for c in rechecks)},
+            "searches": [{"type": s.plan.search_type if s.plan else None, "ok": s.ok,
+                          "returned_chunks": len(s.chunk_ids), "new_chunks": len(s.new_chunk_ids),
+                          "latency_ms": s.latency_ms, "retrieval_calls": s.retrieval_calls}
+                         for s in run.search_runs],
+            "adopted_evidence_count": len({r.evidence_id for slot in run.analysis.document_slots
+                                           if slot.active for r in slot.evidence_refs}) if run.analysis else 0,
             "latency_ms": run.latency_ms, "stage_ms": stage_ms, "tokens": tokens,
             "llm_calls": (run.analysis_run.attempts if run.analysis_run else 0)
             + sum(p.attempts for p in run.plan_runs) + sum(v.attempts for v in run.verify_runs)
@@ -109,7 +135,21 @@ def main() -> int:
     ap.add_argument("--answer-model", help="⑤ 모델 (기본: OPENAI_MODEL)")
     ap.add_argument("--max-rounds", type=int, help="②③④ 라운드 상한 (기본: MAX_VERIFY_ROUNDS)")
     ap.add_argument("--no-save", action="store_true", help="결과 JSON 저장 안 함")
+    ap.add_argument("--label", default="", help="실험 변경 이름")
+    ap.add_argument("--corpus-version", default="", help="사용한 문서/색인 버전 (미지정이면 unknown)")
+    ap.add_argument("--rerank-candidates", type=int, default=None,
+                    help="BGE에 전달할 RRF 상위 후보 수 (0=제한 없음, 권장 실험값: 12/20/30)")
     args = ap.parse_args()
+
+    if args.rerank_candidates is not None:
+        if args.rerank_candidates < 0:
+            ap.error("--rerank-candidates는 0 이상의 정수여야 합니다")
+        # retriever는 첫 검색에서 지연 import되므로 여기서 설정하면 해당 실행 전체에 동일하게 적용된다.
+        from app.config import settings
+        settings.rerank_candidate_limit = args.rerank_candidates
+
+    from evaluate.experiment_metadata import experiment_metadata
+    metadata = experiment_metadata(args.label, args.corpus_version)
 
     items: List[Dict] = []
     if args.dev:
@@ -133,7 +173,7 @@ def main() -> int:
     if not args.no_save:
         RESULTS_DIR.mkdir(exist_ok=True)
         out = RESULTS_DIR / f"pipeline_{datetime.now():%Y%m%d_%H%M%S}.json"
-        out.write_text(json.dumps({"items": items}, ensure_ascii=False, indent=2), encoding="utf-8")
+        out.write_text(json.dumps({"meta": metadata, "items": items}, ensure_ascii=False, indent=2), encoding="utf-8")
         print(f"\n결과 저장: {out}")
     return 0
 

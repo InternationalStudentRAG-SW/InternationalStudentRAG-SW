@@ -123,6 +123,11 @@ NEEDS_EXPAND_STATUSES = {"partial"}
 NEEDS_NEW_SEARCH_STATUSES = {"unchecked", "missing", "conflicting"}
 NO_SEARCH_NEEDED_STATUSES = {"supported", "not_applicable", "unavailable_in_corpus"}
 
+# partial 판정이 다음 검색 행동으로 이어지도록 하는 구조화된 부족 유형.
+# continuation만 인접 청크를 읽고, 다른 조항·범위·충돌 문제는 새 검색으로 전환한다.
+MISSING_KINDS = {"continuation", "different_section", "scope_gap", "conflict", "unknown"}
+MISSING_KINDS_REQUIRING_NEW_SEARCH = {"different_section", "scope_gap", "conflict"}
+
 # ── 문서 칸 정의 ──────────────────────────────────────────────────────────
 
 DOC_SLOTS: Dict[str, Dict[str, str]] = {

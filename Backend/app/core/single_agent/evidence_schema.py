@@ -109,4 +109,5 @@ class SearchExecutionRun(BaseModel):
     warnings: List[str] = []
     tool_attempts: int = 0                    # 검색 도구를 실제로 부른 횟수 (재시도 포함)
     latency_ms: int = 0
+    retrieval_calls: List[dict] = []  # default retriever only; one entry per tool attempt
     checklist_version: str = ""

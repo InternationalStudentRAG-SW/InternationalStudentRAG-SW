@@ -19,6 +19,7 @@ from __future__ import annotations
 
 import time
 from typing import Any, Callable, Dict, List, Optional, Tuple
+from app.core.single_agent.metrics import LLMCallMetric
 
 MAX_ATTEMPTS = 2              # 최초 1회 + 형식 오류·RetryWith 재시도 1회
 API_RETRIES = 1               # API 오류 시 추가 호출 횟수 (형식 재시도 횟수와 별개)
@@ -59,17 +60,30 @@ def model_for(stage: str) -> str:
     return settings.openai_model
 
 
-def _create(run, client, kwargs: Dict) -> Tuple[Any, Optional[Exception]]:
+def _create(run, client, kwargs: Dict, purpose: str = "main") -> Tuple[Any, Optional[Exception]]:
     last: Optional[Exception] = None
     for n in range(1 + API_RETRIES):
+        metric = LLMCallMetric(purpose=purpose)
+        started = time.perf_counter()
         try:
-            return client.chat.completions.create(**kwargs), None
+            resp = client.chat.completions.create(**kwargs)
+            usage = getattr(resp, "usage", None)
+            if usage is not None:
+                metric.prompt_tokens = getattr(usage, "prompt_tokens", None)
+                metric.completion_tokens = getattr(usage, "completion_tokens", None)
+                details = getattr(usage, "prompt_tokens_details", None)
+                metric.cached_prompt_tokens = getattr(details, "cached_tokens", None)
+            return resp, None
         except Exception as e:  # 네트워크·API 오류
+            metric.error_type = type(e).__name__
             last = e
             if n < API_RETRIES:
                 run.warnings.append(f"[API 재시도] {type(e).__name__}: {str(e)[:200]}")
                 if API_RETRY_WAIT_S > 0:
                     time.sleep(API_RETRY_WAIT_S)
+        finally:
+            metric.latency_ms = round((time.perf_counter() - started) * 1000, 3)
+            run.calls.append(metric)
     return None, last
 
 
@@ -82,6 +96,7 @@ def run_json_loop(
     temperature: float,
     max_tokens: int,
     format_hint: str,
+    purpose: str = "main",
 ) -> Tuple[Any, bool]:
     """
     반환: (값, 성공 여부)
@@ -98,7 +113,7 @@ def run_json_loop(
         resp, err = _create(run, client, dict(
             model=model, messages=messages, temperature=temperature, max_tokens=tokens,
             response_format={"type": "json_object"},
-        ))
+        ), purpose=purpose)
         if resp is None:
             run.error = f"LLM 호출 실패 ({1 + API_RETRIES}회 시도): {type(err).__name__}: {err}"
             return fallback, False

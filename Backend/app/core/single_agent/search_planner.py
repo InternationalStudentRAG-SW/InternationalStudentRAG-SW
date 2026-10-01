@@ -9,7 +9,7 @@
   - 대상 문서 칸 선택은 규칙 기반이다. LLM에게 고르라고 하지 않는다.
     우선순위: 필수도(필수 > 조건부 필수 > 선택) > 같은 필수도 안에서는
     원문 확장(partial)이 신규 검색보다 먼저 > 유형에 정의된 칸 순서.
-  - LLM은 선택된 슬롯 하나에 대한 자연어 검색어 문구만 만든다.
+  - LLM은 신규 검색의 검색어만 만든다. 원문 확장은 앵커로 실행하므로 서버가 계획한다.
   - 예산(하위 질문 3개 / 검색 호출 총 6회 / 원문 확장 3회)은 서버가 강제한다.
     LLM이 뭐라고 하든 한도를 넘으면 budget_exhausted로 덮어쓴다.
   - 예산은 후보 칸마다 검사한다. 1순위 칸이 막혀도 예산이 되는 다음 후보로 넘어간다.
@@ -18,7 +18,7 @@
     conflicting 유지). 검색 한도 소진은 unavailable_in_corpus의 근거가 아니다(체크리스트 2.1절).
     남은 미해결 칸은 ④·⑤가 부분 답변으로 처리한다.
   - 첫 바퀴(검색 기록 없음)에는 ①이 만든 first_search를 그대로 쓴다(LLM 호출 없음).
-  - 이미 시도한 검색어(칸 무관)와 같은 문구는 실행하지 않는다. 한 번 다시 만들게 하고,
+  - 신규 검색어가 이미 시도한 검색어(칸 무관)와 같으면 한 번 다시 만들게 하고,
     그래도 같으면 그 칸은 이번 바퀴에서 건너뛴다.
 """
 from __future__ import annotations
@@ -56,8 +56,8 @@ def rank_candidates(document_slots: List[DocSlot]) -> List[Tuple[DocSlot, str]]:
 
     우선순위
       1) 필수도: 필수 > 조건부 필수 > 선택
-      2) 같은 필수도 안에서는 원문 확장(partial)이 신규 검색보다 먼저
-         (이미 찾은 근거를 완성하는 쪽이 새 슬롯을 여는 것보다 저렴하고 실패 위험이 낮음)
+    2) 같은 필수도 안에서는 인접 내용이 부족한 partial 확장이 신규 검색보다 먼저
+       (다른 조항·적용 범위·충돌이 부족 원인이면 partial도 신규 검색으로 전환)
       3) document_slots에 나열된 순서(유형 프로파일 순서)
     """
     order = {s.slot_id: i for i, s in enumerate(document_slots)}
@@ -66,7 +66,9 @@ def rank_candidates(document_slots: List[DocSlot]) -> List[Tuple[DocSlot, str]]:
         if not s.active:
             continue
         if s.status in cfg.NEEDS_EXPAND_STATUSES:
-            candidates.append((s, "expand_context"))
+            search_type = ("new" if s.missing_kind in cfg.MISSING_KINDS_REQUIRING_NEW_SEARCH
+                           else "expand_context")
+            candidates.append((s, search_type))
         elif s.status in cfg.NEEDS_NEW_SEARCH_STATUSES:
             candidates.append((s, "new"))
         # NO_SEARCH_NEEDED_STATUSES(supported/not_applicable/unavailable_in_corpus)는 건너뜀
@@ -137,13 +139,18 @@ def _build_query_user_prompt(
     tried_slot_lines = "\n".join(f"- {q}" for q in tried_for_slot) or "(없음)"
     tried_other_lines = "\n".join(f"- {q}" for q in tried_other) or "(없음)"
     slot_def = cfg.DOC_SLOTS.get(slot.slot_id, {})
+    current_value = slot.value.strip() or "(아직 확인된 값 없음)"
+    missing_detail = slot.missing_detail.strip() or "(구체적인 부족 내용 없음)"
     return (
         f"## 질문 의도\n{analysis_intent}\n\n"
         f"## 확인된 조건\n{cond_lines}\n\n"
         f"## 확인할 문서 칸\n"
         f"- ID: {slot.slot_id}\n- 이름: {slot_def.get('label', slot.slot_id)}\n"
         f"- 충족 기준: {slot_def.get('criterion', '')}\n"
-        f"- 이 칸을 확인하려는 이유: {slot.activation_reason}\n\n"
+        f"- 이 칸을 확인하려는 이유: {slot.activation_reason}\n"
+        f"- 현재까지 확인된 내용: {current_value}\n"
+        f"- 이전 판정에서 부족했던 점: {missing_detail}\n"
+        f"- 부족 유형: {slot.missing_kind or 'unknown'}\n\n"
         f"## 검색 종류\n{search_type} ({'원문 확장' if search_type == 'expand_context' else '신규 검색'})\n\n"
         f"## 이미 시도한 검색어 (이 칸)\n{tried_slot_lines}\n\n"
         f"## 이미 시도한 검색어 (다른 칸, 같은 문구 금지)\n{tried_other_lines}\n\n"
@@ -222,6 +229,8 @@ def plan_search(
     history: Optional[List[SearchAttempt]] = None,
     model: Optional[str] = None,
     client=None,
+    anchors_by_slot: Optional[dict] = None,
+    completed_expansions: Optional[set] = None,
 ) -> SearchPlanRun:
     """
     이번 바퀴에 실행할 검색 액션 1개를 정한다.
@@ -280,6 +289,27 @@ def plan_search(
             if budget_block is None:
                 budget_block = (slot, search_type, budget_msg)
             continue
+
+        # 확장은 query_ko로 검색하지 않는다. 기록용 문구를 만들기 위해 LLM을 호출하지 않는다.
+        # 실제 앵커/이웃 탐색과 예산·슬롯 상한은 기존 규칙을 유지한다.
+        if search_type == "expand_context":
+            anchor_ids = list((anchors_by_slot or {}).get(slot.slot_id) or [])
+            signature = (tuple(sorted(set(anchor_ids))), cfg.EXPAND_WINDOW)
+            if anchor_ids and signature in (completed_expansions or set()):
+                skipped.append(f"{slot.slot_id}(expand_context): 동일 앵커·범위 확장 완료")
+                run.warnings.append(
+                    f"[건너뜀] {slot.slot_id}: 동일 앵커 {anchor_ids} / window={cfg.EXPAND_WINDOW} 재확장"
+                )
+                continue
+            query = next((h.query_ko for h in reversed(history)
+                          if h.target_slot_id == slot.slot_id and h.query_ko.strip()),
+                         f"{analysis.intent_summary} {cfg.DOC_SLOTS.get(slot.slot_id, {}).get('label', slot.slot_id)}")
+            run.plan = SearchPlan(action="search", target_slot_id=slot.slot_id,
+                                  search_type=search_type, query_ko=query,
+                                  reason="(서버 계획) 근거 앵커의 앞뒤 청크 확인",
+                                  exhausted_slot_ids=exhausted, skipped=skipped)
+            run.latency_ms = int((time.perf_counter() - started) * 1000)
+            return run
 
         # 3) 검색어 문구 생성 — LLM (슬롯·종류는 이미 정해져 있음)
         if not model:

@@ -1,0 +1,1905 @@
+{
+  "items": [
+    {
+      "label": null,
+      "question": "GKS 장학생은 아르바이트 할 수 있어?",
+      "summary": {
+        "mode": "partial_answer",
+        "rounds": 3,
+        "stopped": "decided: partial_answer",
+        "latency_ms": 101195,
+        "stage_ms": {
+          "①": 5309,
+          "②": 2402,
+          "③": 33931,
+          "④": 57790,
+          "⑤": 1089
+        },
+        "tokens": 44743,
+        "llm_calls": 10,
+        "sources": 3
+      },
+      "run": {
+        "question": "GKS 장학생은 아르바이트 할 수 있어?",
+        "analysis_run": {
+          "question": "GKS 장학생은 아르바이트 할 수 있어?",
+          "history": [],
+          "analysis": {
+            "intent_summary": "GKS 장학생의 아르바이트 허용 여부에 대한 질문",
+            "answer_scope": "general",
+            "primary_type": "T5",
+            "additional_types": [],
+            "type_reason": "GKS 장학생의 아르바이트 가능 여부를 묻는 질문이므로 T5로 분류",
+            "conditions": [
+              {
+                "field_id": "gks_status",
+                "value": "예",
+                "subject": "question_target",
+                "status": "confirmed",
+                "source_message_id": "m1",
+                "quote": "GKS 장학생은"
+              }
+            ],
+            "document_slots": [
+              {
+                "slot_id": "rule",
+                "active": true,
+                "requirement": "required",
+                "activation_state": null,
+                "activation_reason": "허용 여부의 기본 규정 필요",
+                "status": "unchecked",
+                "evidence_refs": [],
+                "value": "",
+                "missing_detail": ""
+              },
+              {
+                "slot_id": "applicable_scope",
+                "active": true,
+                "requirement": "required",
+                "activation_state": null,
+                "activation_reason": "(서버 보완) 분석 결과에 없어 기본값으로 추가",
+                "status": "unchecked",
+                "evidence_refs": [],
+                "value": "",
+                "missing_detail": ""
+              },
+              {
+                "slot_id": "conditions_limits",
+                "active": true,
+                "requirement": "conditional",
+                "activation_state": "unresolved",
+                "activation_reason": "(서버 보완) 분석 결과에 없어 기본값으로 추가",
+                "status": "unchecked",
+                "evidence_refs": [],
+                "value": "",
+                "missing_detail": ""
+              },
+              {
+                "slot_id": "exceptions_related",
+                "active": true,
+                "requirement": "required",
+                "activation_state": null,
+                "activation_reason": "(서버 보완) 분석 결과에 없어 기본값으로 추가",
+                "status": "unchecked",
+                "evidence_refs": [],
+                "value": "",
+                "missing_detail": ""
+              },
+              {
+                "slot_id": "approval_reporting",
+                "active": true,
+                "requirement": "conditional",
+                "activation_state": "unresolved",
+                "activation_reason": "승인이 허용의 전제인지 문서 확인 필요",
+                "status": "unchecked",
+                "evidence_refs": [],
+                "value": "",
+                "missing_detail": ""
+              }
+            ],
+            "user_slots": [],
+            "first_search": {
+              "query_ko": "GKS 장학생 아르바이트 허용 기준",
+              "target_slot_ids": [
+                "rule",
+                "applicable_scope"
+              ],
+              "reason": "허용 원칙과 적용 범위부터 확인"
+            },
+            "next_action": "search",
+            "next_action_reason": "일반 규정으로 먼저 안내 가능",
+            "clarification_question": null
+          },
+          "warnings": [
+            "[보완] 문서 칸 applicable_scope 누락 → 기본값(required, 활성)",
+            "[보완] 문서 칸 conditions_limits 누락 → 기본값(conditional, 활성)",
+            "[보완] 문서 칸 exceptions_related 누락 → 기본값(required, 활성)"
+          ],
+          "error": null,
+          "model": "gpt-4o-mini",
+          "latency_ms": 5309,
+          "prompt_tokens": 3569,
+          "completion_tokens": 332,
+          "attempts": 1,
+          "raw_output": "{\n  \"intent_summary\": \"GKS 장학생의 아르바이트 허용 여부에 대한 질문\",\n  \"answer_scope\": \"general\",\n  \"primary_type\": \"T5\",\n  \"additional_types\": [],\n  \"type_reason\": \"GKS 장학생의 아르바이트 가능 여부를 묻는 질문이므로 T5로 분류\",\n  \"conditions\": [\n    {\"field_id\": \"gks_status\", \"value\": \"예\", \"subject\": \"question_target\", \"status\": \"confirmed\",\n      \"source_message_id\": \"m1\", \"quote\": \"GKS 장학생은\"}\n  ],\n  \"document_slots\": [\n    {\"slot_id\": \"rule\", \"active\": true, \"requirement\": \"required\", \"activation_state\": null,\n      \"activation_reason\": \"허용 여부의 기본 규정 필요\", \"status\": \"unchecked\"},\n    {\"slot_id\": \"approval_reporting\", \"active\": true, \"requirement\": \"conditional\", \"activation_state\": \"unresolved\",\n      \"activation_reason\": \"승인이 허용의 전제인지 문서 확인 필요\", \"status\": \"unchecked\"}\n  ],\n  \"user_slots\": [],\n  \"first_search\": {\"query_ko\": \"GKS 장학생 아르바이트 허용 기준\", \"target_slot_ids\": [\"rule\", \"applicable_scope\"],\n    \"reason\": \"허용 원칙과 적용 범위부터 확인\"},\n  \"next_action\": \"search\",\n  \"next_action_reason\": \"일반 규정으로 먼저 안내 가능\",\n  \"clarification_question\": null\n}",
+          "checklist_version": "v1-2026-09-28"
+        },
+        "plan_runs": [
+          {
+            "plan": {
+              "action": "search",
+              "target_slot_id": "rule",
+              "search_type": "new",
+              "query_ko": "GKS 장학생 아르바이트 허용 기준",
+              "reason": "허용 원칙과 적용 범위부터 확인",
+              "is_duplicate": false,
+              "from_first_search": true,
+              "exhausted_slot_ids": [],
+              "skipped": []
+            },
+            "warnings": [],
+            "error": null,
+            "model": "",
+            "latency_ms": 0,
+            "attempts": 0,
+            "checklist_version": "v1-2026-09-28"
+          },
+          {
+            "plan": {
+              "action": "search",
+              "target_slot_id": "applicable_scope",
+              "search_type": "expand_context",
+              "query_ko": "GKS 장학생 아르바이트 적용 범위",
+              "reason": "GKS 장학생의 아르바이트 허용 여부와 관련된 적용 범위를 더 구체적으로 확인하기 위해.",
+              "is_duplicate": false,
+              "from_first_search": false,
+              "exhausted_slot_ids": [],
+              "skipped": []
+            },
+            "warnings": [],
+            "error": null,
+            "model": "gpt-4o-mini",
+            "latency_ms": 1298,
+            "attempts": 1,
+            "checklist_version": "v1-2026-09-28"
+          },
+          {
+            "plan": {
+              "action": "search",
+              "target_slot_id": "applicable_scope",
+              "search_type": "expand_context",
+              "query_ko": "GKS 장학생 아르바이트 관련 적용 범위",
+              "reason": "GKS 장학생의 아르바이트 허용 여부와 관련된 적용 범위를 더 구체적으로 확인하기 위해.",
+              "is_duplicate": false,
+              "from_first_search": false,
+              "exhausted_slot_ids": [],
+              "skipped": []
+            },
+            "warnings": [],
+            "error": null,
+            "model": "gpt-4o-mini",
+            "latency_ms": 1104,
+            "attempts": 1,
+            "checklist_version": "v1-2026-09-28"
+          }
+        ],
+        "search_runs": [
+          {
+            "plan": {
+              "action": "search",
+              "target_slot_id": "rule",
+              "search_type": "new",
+              "query_ko": "GKS 장학생 아르바이트 허용 기준",
+              "reason": "허용 원칙과 적용 범위부터 확인",
+              "is_duplicate": false,
+              "from_first_search": true,
+              "exhausted_slot_ids": [],
+              "skipped": []
+            },
+            "ok": true,
+            "error": null,
+            "error_type": null,
+            "attempt": {
+              "target_slot_id": "rule",
+              "search_type": "new",
+              "query_ko": "GKS 장학생 아르바이트 허용 기준",
+              "found_new_evidence": true
+            },
+            "budget": {
+              "total_calls": 1,
+              "expand_calls": 0,
+              "subqueries": 1
+            },
+            "chunk_ids": [
+              "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c3",
+              "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c0",
+              "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c2",
+              "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c4",
+              "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c2",
+              "(KO)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c1",
+              "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c3"
+            ],
+            "new_chunk_ids": [
+              "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c3",
+              "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c0",
+              "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c2",
+              "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c4",
+              "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c2",
+              "(KO)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c1",
+              "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c3"
+            ],
+            "anchor_ids": [],
+            "warnings": [],
+            "tool_attempts": 1,
+            "latency_ms": 33909,
+            "checklist_version": "v1-2026-09-28"
+          },
+          {
+            "plan": {
+              "action": "search",
+              "target_slot_id": "rule",
+              "search_type": "expand_context",
+              "query_ko": "GKS 장학생 아르바이트 허용 기준",
+              "reason": "첫 바퀴 1순위 청크 앞뒤 확장",
+              "is_duplicate": false,
+              "from_first_search": false,
+              "exhausted_slot_ids": [],
+              "skipped": []
+            },
+            "ok": true,
+            "error": null,
+            "error_type": null,
+            "attempt": {
+              "target_slot_id": "rule",
+              "search_type": "expand_context",
+              "query_ko": "GKS 장학생 아르바이트 허용 기준",
+              "found_new_evidence": true
+            },
+            "budget": {
+              "total_calls": 2,
+              "expand_calls": 1,
+              "subqueries": 1
+            },
+            "chunk_ids": [
+              "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c2",
+              "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c4"
+            ],
+            "new_chunk_ids": [
+              "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c4"
+            ],
+            "anchor_ids": [
+              "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c3"
+            ],
+            "warnings": [],
+            "tool_attempts": 1,
+            "latency_ms": 8,
+            "checklist_version": "v1-2026-09-28"
+          },
+          {
+            "plan": {
+              "action": "search",
+              "target_slot_id": "applicable_scope",
+              "search_type": "expand_context",
+              "query_ko": "GKS 장학생 아르바이트 적용 범위",
+              "reason": "GKS 장학생의 아르바이트 허용 여부와 관련된 적용 범위를 더 구체적으로 확인하기 위해.",
+              "is_duplicate": false,
+              "from_first_search": false,
+              "exhausted_slot_ids": [],
+              "skipped": []
+            },
+            "ok": true,
+            "error": null,
+            "error_type": null,
+            "attempt": {
+              "target_slot_id": "applicable_scope",
+              "search_type": "expand_context",
+              "query_ko": "GKS 장학생 아르바이트 적용 범위",
+              "found_new_evidence": true
+            },
+            "budget": {
+              "total_calls": 3,
+              "expand_calls": 2,
+              "subqueries": 1
+            },
+            "chunk_ids": [
+              "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c2",
+              "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c4",
+              "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c1"
+            ],
+            "new_chunk_ids": [
+              "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c1"
+            ],
+            "anchor_ids": [
+              "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c3",
+              "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c0"
+            ],
+            "warnings": [],
+            "tool_attempts": 1,
+            "latency_ms": 7,
+            "checklist_version": "v1-2026-09-28"
+          },
+          {
+            "plan": {
+              "action": "search",
+              "target_slot_id": "applicable_scope",
+              "search_type": "expand_context",
+              "query_ko": "GKS 장학생 아르바이트 관련 적용 범위",
+              "reason": "GKS 장학생의 아르바이트 허용 여부와 관련된 적용 범위를 더 구체적으로 확인하기 위해.",
+              "is_duplicate": false,
+              "from_first_search": false,
+              "exhausted_slot_ids": [],
+              "skipped": []
+            },
+            "ok": true,
+            "error": null,
+            "error_type": null,
+            "attempt": {
+              "target_slot_id": "applicable_scope",
+              "search_type": "expand_context",
+              "query_ko": "GKS 장학생 아르바이트 관련 적용 범위",
+              "found_new_evidence": false
+            },
+            "budget": {
+              "total_calls": 4,
+              "expand_calls": 3,
+              "subqueries": 1
+            },
+            "chunk_ids": [
+              "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c2",
+              "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c4",
+              "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c1"
+            ],
+            "new_chunk_ids": [],
+            "anchor_ids": [
+              "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c3",
+              "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c0"
+            ],
+            "warnings": [],
+            "tool_attempts": 1,
+            "latency_ms": 7,
+            "checklist_version": "v1-2026-09-28"
+          }
+        ],
+        "verify_runs": [
+          {
+            "analysis": {
+              "intent_summary": "GKS 장학생의 아르바이트 허용 여부에 대한 질문",
+              "answer_scope": "general",
+              "primary_type": "T5",
+              "additional_types": [],
+              "type_reason": "GKS 장학생의 아르바이트 가능 여부를 묻는 질문이므로 T5로 분류",
+              "conditions": [
+                {
+                  "field_id": "gks_status",
+                  "value": "예",
+                  "subject": "question_target",
+                  "status": "confirmed",
+                  "source_message_id": "m1",
+                  "quote": "GKS 장학생은"
+                }
+              ],
+              "document_slots": [
+                {
+                  "slot_id": "rule",
+                  "active": true,
+                  "requirement": "required",
+                  "activation_state": null,
+                  "activation_reason": "허용 여부의 기본 규정 필요",
+                  "status": "supported",
+                  "evidence_refs": [
+                    {
+                      "evidence_id": "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c3",
+                      "quote": "A GKS recipient must meet the part-time employment requirements"
+                    },
+                    {
+                      "evidence_id": "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c0",
+                      "quote": "A GKS recipient in a degree program may engage in part-time employment"
+                    }
+                  ],
+                  "value": "GKS 장학생은 조건부로 아르바이트 가능",
+                  "missing_detail": ""
+                },
+                {
+                  "slot_id": "applicable_scope",
+                  "active": true,
+                  "requirement": "required",
+                  "activation_state": null,
+                  "activation_reason": "(서버 보완) 분석 결과에 없어 기본값으로 추가",
+                  "status": "partial",
+                  "evidence_refs": [
+                    {
+                      "evidence_id": "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c3",
+                      "quote": "A GKS recipient in the Korean language program"
+                    },
+                    {
+                      "evidence_id": "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c0",
+                      "quote": "A GKS recipient in a degree program"
+                    }
+                  ],
+                  "value": "한국어연수와 학위과정에 따라 다름",
+                  "missing_detail": "학위과정 내 세부 구분 필요"
+                },
+                {
+                  "slot_id": "conditions_limits",
+                  "active": true,
+                  "requirement": "conditional",
+                  "activation_state": "triggered",
+                  "activation_reason": "(서버 보완) 분석 결과에 없어 기본값으로 추가",
+                  "status": "partial",
+                  "evidence_refs": [
+                    {
+                      "evidence_id": "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c3",
+                      "quote": "Part-time employment shall be permitted only during vacation periods"
+                    },
+                    {
+                      "evidence_id": "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c0",
+                      "quote": "only where the president of the university grants approval"
+                    },
+                    {
+                      "evidence_id": "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c4",
+                      "quote": "Notwithstanding the foregoing, a recipient who has obtained the TOPIK level recognized by the president of the institution as necessary for advancement to a degree program may engage in part-time employment during the semester"
+                    }
+                  ],
+                  "value": "한국어연수는 6개월 후 방학 중, 학위과정은 총장 승인 필요",
+                  "missing_detail": "학위과정 내 세부 조건 필요"
+                },
+                {
+                  "slot_id": "exceptions_related",
+                  "active": true,
+                  "requirement": "required",
+                  "activation_state": null,
+                  "activation_reason": "(서버 보완) 분석 결과에 없어 기본값으로 추가",
+                  "status": "partial",
+                  "evidence_refs": [
+                    {
+                      "evidence_id": "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c2",
+                      "quote": "However, an exception may be granted if all of the following conditions are met"
+                    },
+                    {
+                      "evidence_id": "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c4",
+                      "quote": "The exception under Subparagraph 4 shall not apply"
+                    },
+                    {
+                      "evidence_id": "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c3",
+                      "quote": "an exception may be granted if all of the following conditions are met"
+                    }
+                  ],
+                  "value": "학사 경고 1회 시 예외 가능, 2회 시 불가",
+                  "missing_detail": "예외 조건의 세부 사항 필요"
+                },
+                {
+                  "slot_id": "approval_reporting",
+                  "active": true,
+                  "requirement": "conditional",
+                  "activation_state": "triggered",
+                  "activation_reason": "승인이 허용의 전제인지 문서 확인 필요",
+                  "status": "partial",
+                  "evidence_refs": [
+                    {
+                      "evidence_id": "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c4",
+                      "quote": "Such employment shall require prior approval from the president"
+                    },
+                    {
+                      "evidence_id": "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c0",
+                      "quote": "only where the president of the university grants approval"
+                    },
+                    {
+                      "evidence_id": "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c3",
+                      "quote": "A GKS recipient must meet the part-time employment requirements set by the Ministry of Justice"
+                    }
+                  ],
+                  "value": "한국어연수는 사전 승인 필요, 학위과정은 총장 승인 필요",
+                  "missing_detail": "승인 절차의 세부 사항 필요"
+                }
+              ],
+              "user_slots": [
+                {
+                  "field_id": "gks_stage",
+                  "status": "unknown",
+                  "active": true,
+                  "reason": "단계별로 규정이 다름 | 문서상 GKS 단계에 따라 규정이 다름 (청크 메모)",
+                  "required_by_evidence": [
+                    "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c3",
+                    "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c0",
+                    "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c4"
+                  ],
+                  "branches": [
+                    {
+                      "value": "학위과정",
+                      "summary": "총장 승인 시 가능",
+                      "evidence_ids": [
+                        "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c3",
+                        "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c0"
+                      ],
+                      "source": "notes"
+                    },
+                    {
+                      "value": "한국어연수",
+                      "summary": "6개월 이후 방학 중에만",
+                      "evidence_ids": [
+                        "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c3",
+                        "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c0",
+                        "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c4"
+                      ],
+                      "source": "notes"
+                    }
+                  ]
+                }
+              ],
+              "first_search": {
+                "query_ko": "GKS 장학생 아르바이트 허용 기준",
+                "target_slot_ids": [
+                  "rule",
+                  "applicable_scope"
+                ],
+                "reason": "허용 원칙과 적용 범위부터 확인"
+              },
+              "next_action": "search",
+              "next_action_reason": "일반 규정으로 먼저 안내 가능",
+              "clarification_question": null
+            },
+            "decision": {
+              "next_action": "continue_search",
+              "reason": "미해결 칸 ['applicable_scope', 'conditions_limits', 'exceptions_related', 'approval_reporting'], 예산 남음",
+              "unresolved_slot_ids": [
+                "applicable_scope",
+                "conditions_limits",
+                "exceptions_related",
+                "approval_reporting"
+              ],
+              "clarify_field_ids": [],
+              "condition_field_ids": [],
+              "condition_branches": {},
+              "expand_anchors": {
+                "applicable_scope": [
+                  "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c3",
+                  "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c0"
+                ],
+                "conditions_limits": [
+                  "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c3",
+                  "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c0",
+                  "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c4"
+                ],
+                "exceptions_related": [
+                  "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c2",
+                  "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c4",
+                  "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c3"
+                ],
+                "approval_reporting": [
+                  "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c4",
+                  "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c0",
+                  "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c3"
+                ]
+              }
+            },
+            "judged_slot_ids": [
+              "rule",
+              "applicable_scope",
+              "conditions_limits",
+              "exceptions_related",
+              "approval_reporting"
+            ],
+            "shown_chunk_ids": [
+              "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c3",
+              "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c0",
+              "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c2",
+              "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c4",
+              "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c2",
+              "(KO)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c1",
+              "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c3",
+              "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c4"
+            ],
+            "llm_called": true,
+            "chunk_notes": [
+              {
+                "evidence_id": "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c3",
+                "applies_to": [
+                  {
+                    "field_id": "gks_stage",
+                    "value": "한국어연수"
+                  },
+                  {
+                    "field_id": "gks_status",
+                    "value": "GKS 장학생"
+                  }
+                ],
+                "relevant_slots": [
+                  "rule",
+                  "conditions_limits",
+                  "approval_reporting"
+                ]
+              },
+              {
+                "evidence_id": "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c0",
+                "applies_to": [
+                  {
+                    "field_id": "gks_stage",
+                    "value": "학위과정"
+                  },
+                  {
+                    "field_id": "gks_status",
+                    "value": "GKS 장학생"
+                  }
+                ],
+                "relevant_slots": [
+                  "rule",
+                  "conditions_limits",
+                  "approval_reporting"
+                ]
+              },
+              {
+                "evidence_id": "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c2",
+                "applies_to": [
+                  {
+                    "field_id": "gks_status",
+                    "value": "GKS 장학생"
+                  }
+                ],
+                "relevant_slots": [
+                  "exceptions_related"
+                ]
+              },
+              {
+                "evidence_id": "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c4",
+                "applies_to": [
+                  {
+                    "field_id": "gks_status",
+                    "value": "GKS 장학생"
+                  }
+                ],
+                "relevant_slots": [
+                  "exceptions_related"
+                ]
+              },
+              {
+                "evidence_id": "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c2",
+                "applies_to": [
+                  {
+                    "field_id": "gks_status",
+                    "value": "GKS 장학생"
+                  }
+                ],
+                "relevant_slots": []
+              },
+              {
+                "evidence_id": "(KO)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c1",
+                "applies_to": [
+                  {
+                    "field_id": "gks_status",
+                    "value": "GKS 장학생"
+                  }
+                ],
+                "relevant_slots": []
+              },
+              {
+                "evidence_id": "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c3",
+                "applies_to": [
+                  {
+                    "field_id": "gks_status",
+                    "value": "GKS 장학생"
+                  }
+                ],
+                "relevant_slots": [
+                  "exceptions_related"
+                ]
+              },
+              {
+                "evidence_id": "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c4",
+                "applies_to": [
+                  {
+                    "field_id": "gks_stage",
+                    "value": "한국어연수"
+                  },
+                  {
+                    "field_id": "gks_status",
+                    "value": "GKS 장학생"
+                  }
+                ],
+                "relevant_slots": [
+                  "conditions_limits",
+                  "approval_reporting"
+                ]
+              }
+            ],
+            "recheck_slot_ids": [
+              "conditions_limits",
+              "exceptions_related",
+              "approval_reporting"
+            ],
+            "warnings": [
+              "[재확인] conditions_limits: partial → partial, 근거 +1",
+              "[재확인] exceptions_related: partial → partial, 근거 +1",
+              "[재확인] approval_reporting: partial → partial, 근거 +1",
+              "[확인] 질문이 이미 대상을 가리킴 → 갈래·대상 한정에서 제외: ['gks_status']",
+              "[갈래] gks_stage: 한국어연수(2) / 학위과정(1)"
+            ],
+            "error": null,
+            "model": "gpt-4o",
+            "latency_ms": 22321,
+            "prompt_tokens": 9655,
+            "completion_tokens": 2805,
+            "attempts": 2,
+            "raw_output": "{\n  \"slot_verdicts\": [\n    {\n      \"slot_id\": \"conditions_limits\",\n      \"status\": \"partial\",\n      \"evidence_refs\": [\n        {\n          \"evidence_id\": \"(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c3\",\n          \"quote\": \"Part-time employment shall be permitted only during vacation periods\"\n        },\n        {\n          \"evidence_id\": \"(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c0\",\n          \"quote\": \"only where the president of the university grants approval\"\n        },\n        {\n          \"evidence_id\": \"(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c4\",\n          \"quote\": \"Notwithstanding the foregoing, a recipient who has obtained the TOPIK level recognized by the president of the institution as necessary for advancement to a degree program may engage in part-time employment during the semester\"\n        }\n      ],\n      \"value\": \"한국어연수는 6개월 후 방학 중, 학위과정은 총장 승인 필요\",\n      \"missing_detail\": \"학위과정 내 세부 조건 필요\",\n      \"activation_state\": \"triggered\",\n      \"reason\": \"단계별로 조건이 다름\"\n    },\n    {\n      \"slot_id\": \"exceptions_related\",\n      \"status\": \"partial\",\n      \"evidence_refs\": [\n        {\n          \"evidence_id\": \"(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c2\",\n          \"quote\": \"However, an exception may be granted if all of the following conditions are met\"\n        },\n        {\n          \"evidence_id\": \"(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c4\",\n          \"quote\": \"The exception under Subparagraph 4 shall not apply\"\n        },\n        {\n          \"evidence_id\": \"(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c3\",\n          \"quote\": \"an exception may be granted if all of the following conditions are met\"\n        }\n      ],\n      \"value\": \"학사 경고 1회 시 예외 가능, 2회 시 불가\",\n      \"missing_detail\": \"예외 조건의 세부 사항 필요\",\n      \"activation_state\": null,\n      \"reason\": \"예외 조항이 존재함\"\n    },\n    {\n      \"slot_id\": \"approval_reporting\",\n      \"status\": \"partial\",\n      \"evidence_refs\": [\n        {\n          \"evidence_id\": \"(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c4\",\n          \"quote\": \"Such employment shall require prior approval from the president\"\n        },\n        {\n          \"evidence_id\": \"(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c0\",\n          \"quote\": \"only where the president of the university grants approval\"\n        },\n        {\n          \"evidence_id\": \"(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c3\",\n          \"quote\": \"A GKS recipient must meet the part-time employment requirements set by the Ministry of Justice\"\n        }\n      ],\n      \"value\": \"한국어연수는 사전 승인 필요, 학위과정은 총장 승인 필요\",\n      \"missing_detail\": \"승인 절차의 세부 사항 필요\",\n      \"activation_state\": \"triggered\",\n      \"reason\": \"승인 절차가 필요함\"\n    }\n  ]\n}",
+            "raw_outputs": [
+              "{\n  \"chunk_notes\": [\n    {\n      \"evidence_id\": \"(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c3\",\n      \"applies_to\": [{\"field_id\": \"gks_stage\", \"value\": \"한국어연수\"}],\n      \"relevant_slots\": [\"rule\", \"conditions_limits\", \"approval_reporting\"]\n    },\n    {\n      \"evidence_id\": \"(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c0\",\n      \"applies_to\": [{\"field_id\": \"gks_stage\", \"value\": \"학위과정\"}],\n      \"relevant_slots\": [\"rule\", \"conditions_limits\", \"approval_reporting\"]\n    },\n    {\n      \"evidence_id\": \"(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c2\",\n      \"applies_to\": [],\n      \"relevant_slots\": [\"exceptions_related\"]\n    },\n    {\n      \"evidence_id\": \"(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c4\",\n      \"applies_to\": [],\n      \"relevant_slots\": [\"exceptions_related\"]\n    },\n    {\n      \"evidence_id\": \"(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c2\",\n      \"applies_to\": [],\n      \"relevant_slots\": []\n    },\n    {\n      \"evidence_id\": \"(KO)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c1\",\n      \"applies_to\": [],\n      \"relevant_slots\": []\n    },\n    {\n      \"evidence_id\": \"(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c3\",\n      \"applies_to\": [],\n      \"relevant_slots\": [\"exceptions_related\"]\n    },\n    {\n      \"evidence_id\": \"(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c4\",\n      \"applies_to\": [{\"field_id\": \"gks_stage\", \"value\": \"한국어연수\"}],\n      \"relevant_slots\": [\"conditions_limits\", \"approval_reporting\"]\n    }\n  ],\n  \"slot_verdicts\": [\n    {\n      \"slot_id\": \"rule\",\n      \"status\": \"supported\",\n      \"evidence_refs\": [\n        {\"evidence_id\": \"(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c3\", \"quote\": \"A GKS recipient must meet the part-time employment requirements\"},\n        {\"evidence_id\": \"(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c0\", \"quote\": \"A GKS recipient in a degree program may engage in part-time employment\"}\n      ],\n      \"value\": \"GKS 장학생은 조건부로 아르바이트 가능\",\n      \"missing_detail\": \"\",\n      \"activation_state\": null,\n      \"reason\": \"한국어연수와 학위과정에 따라 아르바이트 허용 여부가 다름\"\n    },\n    {\n      \"slot_id\": \"applicable_scope\",\n      \"status\": \"partial\",\n      \"evidence_refs\": [\n        {\"evidence_id\": \"(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c3\", \"quote\": \"A GKS recipient in the Korean language program\"},\n        {\"evidence_id\": \"(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c0\", \"quote\": \"A GKS recipient in a degree program\"}\n      ],\n      \"value\": \"한국어연수와 학위과정에 따라 다름\",\n      \"missing_detail\": \"학위과정 내 세부 구분 필요\",\n      \"activation_state\": null,\n      \"reason\": \"단계별로 규정이 다름\"\n    },\n    {\n      \"slot_id\": \"conditions_limits\",\n      \"status\": \"partial\",\n      \"evidence_refs\": [\n        {\"evidence_id\": \"(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c3\", \"quote\": \"Part-time employment shall be permitted only during vacation periods\"},\n        {\"evidence_id\": \"(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c0\", \"quote\": \"only where the president of the university grants approval\"}\n      ],\n      \"value\": \"한국어연수는 6개월 후 방학 중, 학위과정은 총장 승인 필요\",\n      \"missing_detail\": \"학위과정 내 세부 조건 필요\",\n      \"activation_state\": \"triggered\",\n      \"reason\": \"단계별로 조건이 다름\"\n    },\n    {\n      \"slot_id\": \"exceptions_related\",\n      \"status\": \"partial\",\n      \"evidence_refs\": [\n        {\"evidence_id\": \"(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c2\", \"quote\": \"However, an exception may be granted if all of the following conditions are met\"},\n        {\"evidence_id\": \"(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c4\", \"quote\": \"The exception under Subparagraph 4 shall not apply\"}\n      ],\n      \"value\": \"학사 경고 1회 시 예외 가능, 2회 시 불가\",\n      \"missing_detail\": \"예외 조건의 세부 사항 필요\",\n      \"activation_state\": null,\n      \"reason\": \"예외 조항이 존재함\"\n    },\n    {\n      \"slot_id\": \"approval_reporting\",\n      \"status\": \"partial\",\n      \"evidence_refs\": [\n        {\"evidence_id\": \"(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c4\", \"quote\": \"Such employment shall require prior approval from the president\"},\n        {\"evidence_id\": \"(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c0\", \"quote\": \"only where the president of the university grants approval\"}\n      ],\n      \"value\": \"한국어연수는 사전 승인 필요, 학위과정은 총장 승인 필요\",\n      \"missing_detail\": \"승인 절차의 세부 사항 필요\",\n      \"activation_state\": \"triggered\",\n      \"reason\": \"승인 절차가 필요함\"\n    }\n  ],\n  \"user_field_needs\": [\n    {\n      \"field_id\": \"gks_stage\",\n      \"evidence_ids\": [\n        \"(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c3\",\n        \"(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c0\"\n      ],\n      \"branches\": [\n        \"학위과정: 총장 승인 시 가능\",\n        \"한국어연수: 6개월 이후 방학 중에만\"\n      ],\n      \"reason\": \"단계별로 규정이 다름\"\n    }\n  ]\n}",
+              "{\n  \"slot_verdicts\": [\n    {\n      \"slot_id\": \"conditions_limits\",\n      \"status\": \"partial\",\n      \"evidence_refs\": [\n        {\n          \"evidence_id\": \"(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c3\",\n          \"quote\": \"Part-time employment shall be permitted only during vacation periods\"\n        },\n        {\n          \"evidence_id\": \"(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c0\",\n          \"quote\": \"only where the president of the university grants approval\"\n        },\n        {\n          \"evidence_id\": \"(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c4\",\n          \"quote\": \"Notwithstanding the foregoing, a recipient who has obtained the TOPIK level recognized by the president of the institution as necessary for advancement to a degree program may engage in part-time employment during the semester\"\n        }\n      ],\n      \"value\": \"한국어연수는 6개월 후 방학 중, 학위과정은 총장 승인 필요\",\n      \"missing_detail\": \"학위과정 내 세부 조건 필요\",\n      \"activation_state\": \"triggered\",\n      \"reason\": \"단계별로 조건이 다름\"\n    },\n    {\n      \"slot_id\": \"exceptions_related\",\n      \"status\": \"partial\",\n      \"evidence_refs\": [\n        {\n          \"evidence_id\": \"(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c2\",\n          \"quote\": \"However, an exception may be granted if all of the following conditions are met\"\n        },\n        {\n          \"evidence_id\": \"(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c4\",\n          \"quote\": \"The exception under Subparagraph 4 shall not apply\"\n        },\n        {\n          \"evidence_id\": \"(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c3\",\n          \"quote\": \"an exception may be granted if all of the following conditions are met\"\n        }\n      ],\n      \"value\": \"학사 경고 1회 시 예외 가능, 2회 시 불가\",\n      \"missing_detail\": \"예외 조건의 세부 사항 필요\",\n      \"activation_state\": null,\n      \"reason\": \"예외 조항이 존재함\"\n    },\n    {\n      \"slot_id\": \"approval_reporting\",\n      \"status\": \"partial\",\n      \"evidence_refs\": [\n        {\n          \"evidence_id\": \"(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c4\",\n          \"quote\": \"Such employment shall require prior approval from the president\"\n        },\n        {\n          \"evidence_id\": \"(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c0\",\n          \"quote\": \"only where the president of the university grants approval\"\n        },\n        {\n          \"evidence_id\": \"(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c3\",\n          \"quote\": \"A GKS recipient must meet the part-time employment requirements set by the Ministry of Justice\"\n        }\n      ],\n      \"value\": \"한국어연수는 사전 승인 필요, 학위과정은 총장 승인 필요\",\n      \"missing_detail\": \"승인 절차의 세부 사항 필요\",\n      \"activation_state\": \"triggered\",\n      \"reason\": \"승인 절차가 필요함\"\n    }\n  ]\n}"
+            ],
+            "checklist_version": "v1-2026-09-28"
+          },
+          {
+            "analysis": {
+              "intent_summary": "GKS 장학생의 아르바이트 허용 여부에 대한 질문",
+              "answer_scope": "general",
+              "primary_type": "T5",
+              "additional_types": [],
+              "type_reason": "GKS 장학생의 아르바이트 가능 여부를 묻는 질문이므로 T5로 분류",
+              "conditions": [
+                {
+                  "field_id": "gks_status",
+                  "value": "예",
+                  "subject": "question_target",
+                  "status": "confirmed",
+                  "source_message_id": "m1",
+                  "quote": "GKS 장학생은"
+                }
+              ],
+              "document_slots": [
+                {
+                  "slot_id": "rule",
+                  "active": true,
+                  "requirement": "required",
+                  "activation_state": null,
+                  "activation_reason": "허용 여부의 기본 규정 필요",
+                  "status": "supported",
+                  "evidence_refs": [
+                    {
+                      "evidence_id": "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c3",
+                      "quote": "A GKS recipient must meet the part-time employment requirements"
+                    },
+                    {
+                      "evidence_id": "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c0",
+                      "quote": "A GKS recipient in a degree program may engage in part-time employment"
+                    }
+                  ],
+                  "value": "GKS 장학생은 조건부로 아르바이트 가능",
+                  "missing_detail": ""
+                },
+                {
+                  "slot_id": "applicable_scope",
+                  "active": true,
+                  "requirement": "required",
+                  "activation_state": null,
+                  "activation_reason": "(서버 보완) 분석 결과에 없어 기본값으로 추가",
+                  "status": "partial",
+                  "evidence_refs": [
+                    {
+                      "evidence_id": "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c3",
+                      "quote": "A GKS recipient in the Korean language program shall not engage in part-time employment until completing at least six (6) months of the program."
+                    },
+                    {
+                      "evidence_id": "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c0",
+                      "quote": "A GKS recipient in a degree program may engage in part-time employment only where the president of the university grants approval"
+                    }
+                  ],
+                  "value": "한국어연수와 학위과정에 따라 규정이 다름",
+                  "missing_detail": "학위과정 내 세부 구분 필요"
+                },
+                {
+                  "slot_id": "conditions_limits",
+                  "active": true,
+                  "requirement": "conditional",
+                  "activation_state": "triggered",
+                  "activation_reason": "(서버 보완) 분석 결과에 없어 기본값으로 추가",
+                  "status": "partial",
+                  "evidence_refs": [
+                    {
+                      "evidence_id": "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c3",
+                      "quote": "A GKS recipient must prioritize studying their major program."
+                    },
+                    {
+                      "evidence_id": "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c0",
+                      "quote": "In making such determination, the president of the university shall comprehensively consider academic achievement, attendance records, and the opinion of the academic advisor."
+                    },
+                    {
+                      "evidence_id": "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c4",
+                      "quote": "Such employment shall require prior approval from the president of the Korean language institution and prior authorization from the Ministry of Justice."
+                    }
+                  ],
+                  "value": "학위과정은 총장 승인 필요, 한국어연수는 6개월 후 방학 중 가능",
+                  "missing_detail": "학위과정 내 세부 조건 필요"
+                },
+                {
+                  "slot_id": "exceptions_related",
+                  "active": true,
+                  "requirement": "required",
+                  "activation_state": null,
+                  "activation_reason": "(서버 보완) 분석 결과에 없어 기본값으로 추가",
+                  "status": "partial",
+                  "evidence_refs": [
+                    {
+                      "evidence_id": "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c2",
+                      "quote": "However, an exception may be granted if all of the following conditions are met"
+                    },
+                    {
+                      "evidence_id": "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c4",
+                      "quote": "The exception under Subparagraph 4 shall not apply to GKS recipients who have received two (2) academic warnings."
+                    },
+                    {
+                      "evidence_id": "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c3",
+                      "quote": "However, an exception may be granted if all of the following conditions are met"
+                    }
+                  ],
+                  "value": "학사 경고 1회 시 예외 가능, 2회 시 불가",
+                  "missing_detail": "예외 조건의 세부 사항 필요"
+                },
+                {
+                  "slot_id": "approval_reporting",
+                  "active": true,
+                  "requirement": "conditional",
+                  "activation_state": "triggered",
+                  "activation_reason": "승인이 허용의 전제인지 문서 확인 필요",
+                  "status": "partial",
+                  "evidence_refs": [
+                    {
+                      "evidence_id": "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c4",
+                      "quote": "Such employment shall require prior approval from the president of the Korean language institution"
+                    },
+                    {
+                      "evidence_id": "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c0",
+                      "quote": "A GKS recipient in a degree program may engage in part-time employment only where the president of the university grants approval"
+                    }
+                  ],
+                  "value": "한국어연수와 학위과정 모두 총장 승인 필요",
+                  "missing_detail": "승인 절차의 세부 사항 필요"
+                }
+              ],
+              "user_slots": [
+                {
+                  "field_id": "gks_stage",
+                  "status": "unknown",
+                  "active": true,
+                  "reason": "단계별로 규정이 다름 | 문서상 GKS 단계에 따라 규정이 다름 (청크 메모)",
+                  "required_by_evidence": [
+                    "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c3",
+                    "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c0",
+                    "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c4",
+                    "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c4"
+                  ],
+                  "branches": [
+                    {
+                      "value": "학위과정",
+                      "summary": "총장 승인 시 가능",
+                      "evidence_ids": [
+                        "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c3",
+                        "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c0",
+                        "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c4"
+                      ],
+                      "source": "notes"
+                    },
+                    {
+                      "value": "한국어연수",
+                      "summary": "6개월 이후 방학 중에만",
+                      "evidence_ids": [
+                        "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c3",
+                        "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c0",
+                        "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c4"
+                      ],
+                      "source": "notes"
+                    }
+                  ]
+                }
+              ],
+              "first_search": {
+                "query_ko": "GKS 장학생 아르바이트 허용 기준",
+                "target_slot_ids": [
+                  "rule",
+                  "applicable_scope"
+                ],
+                "reason": "허용 원칙과 적용 범위부터 확인"
+              },
+              "next_action": "search",
+              "next_action_reason": "일반 규정으로 먼저 안내 가능",
+              "clarification_question": null
+            },
+            "decision": {
+              "next_action": "continue_search",
+              "reason": "미해결 칸 ['applicable_scope', 'conditions_limits', 'exceptions_related', 'approval_reporting'], 예산 남음",
+              "unresolved_slot_ids": [
+                "applicable_scope",
+                "conditions_limits",
+                "exceptions_related",
+                "approval_reporting"
+              ],
+              "clarify_field_ids": [],
+              "condition_field_ids": [],
+              "condition_branches": {},
+              "expand_anchors": {
+                "applicable_scope": [
+                  "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c3",
+                  "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c0"
+                ],
+                "conditions_limits": [
+                  "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c3",
+                  "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c0",
+                  "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c4"
+                ],
+                "exceptions_related": [
+                  "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c2",
+                  "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c4",
+                  "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c3"
+                ],
+                "approval_reporting": [
+                  "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c4",
+                  "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c0"
+                ]
+              }
+            },
+            "judged_slot_ids": [
+              "applicable_scope",
+              "conditions_limits",
+              "exceptions_related",
+              "approval_reporting"
+            ],
+            "shown_chunk_ids": [
+              "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c3",
+              "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c0",
+              "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c4",
+              "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c2",
+              "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c4",
+              "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c3",
+              "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c2",
+              "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c1",
+              "(KO)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c1"
+            ],
+            "llm_called": true,
+            "chunk_notes": [
+              {
+                "evidence_id": "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c3",
+                "applies_to": [
+                  {
+                    "field_id": "gks_stage",
+                    "value": "한국어연수"
+                  },
+                  {
+                    "field_id": "gks_status",
+                    "value": "GKS 장학생"
+                  }
+                ],
+                "relevant_slots": [
+                  "conditions_limits",
+                  "applicable_scope"
+                ]
+              },
+              {
+                "evidence_id": "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c0",
+                "applies_to": [
+                  {
+                    "field_id": "gks_stage",
+                    "value": "학위과정"
+                  },
+                  {
+                    "field_id": "gks_status",
+                    "value": "GKS 장학생"
+                  }
+                ],
+                "relevant_slots": [
+                  "conditions_limits",
+                  "approval_reporting",
+                  "applicable_scope"
+                ]
+              },
+              {
+                "evidence_id": "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c4",
+                "applies_to": [
+                  {
+                    "field_id": "gks_stage",
+                    "value": "한국어연수"
+                  },
+                  {
+                    "field_id": "gks_status",
+                    "value": "GKS 장학생"
+                  }
+                ],
+                "relevant_slots": [
+                  "conditions_limits",
+                  "approval_reporting"
+                ]
+              },
+              {
+                "evidence_id": "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c2",
+                "applies_to": [
+                  {
+                    "field_id": "gks_status",
+                    "value": "GKS 장학생"
+                  }
+                ],
+                "relevant_slots": [
+                  "exceptions_related"
+                ]
+              },
+              {
+                "evidence_id": "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c4",
+                "applies_to": [
+                  {
+                    "field_id": "gks_stage",
+                    "value": "학위과정"
+                  },
+                  {
+                    "field_id": "gks_status",
+                    "value": "GKS 장학생"
+                  }
+                ],
+                "relevant_slots": [
+                  "exceptions_related"
+                ]
+              },
+              {
+                "evidence_id": "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c3",
+                "applies_to": [
+                  {
+                    "field_id": "gks_status",
+                    "value": "GKS 장학생"
+                  }
+                ],
+                "relevant_slots": [
+                  "exceptions_related"
+                ]
+              },
+              {
+                "evidence_id": "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c2",
+                "applies_to": [
+                  {
+                    "field_id": "gks_status",
+                    "value": "GKS 장학생"
+                  }
+                ],
+                "relevant_slots": []
+              },
+              {
+                "evidence_id": "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c1",
+                "applies_to": [
+                  {
+                    "field_id": "gks_status",
+                    "value": "GKS 장학생"
+                  }
+                ],
+                "relevant_slots": []
+              },
+              {
+                "evidence_id": "(KO)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c1",
+                "applies_to": [
+                  {
+                    "field_id": "gks_status",
+                    "value": "GKS 장학생"
+                  }
+                ],
+                "relevant_slots": []
+              }
+            ],
+            "recheck_slot_ids": [
+              "conditions_limits",
+              "exceptions_related"
+            ],
+            "warnings": [
+              "[재확인] conditions_limits: partial → partial, 근거 +1",
+              "[재확인] exceptions_related: partial → partial, 근거 +1",
+              "[확인] 질문이 이미 대상을 가리킴 → 갈래·대상 한정에서 제외: ['gks_status']",
+              "[갈래] gks_stage: 한국어연수(2) / 학위과정(2)"
+            ],
+            "error": null,
+            "model": "gpt-4o",
+            "latency_ms": 17635,
+            "prompt_tokens": 10926,
+            "completion_tokens": 2618,
+            "attempts": 2,
+            "raw_output": "{\n  \"slot_verdicts\": [\n    {\n      \"slot_id\": \"conditions_limits\",\n      \"status\": \"partial\",\n      \"evidence_refs\": [\n        {\n          \"evidence_id\": \"(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c3\",\n          \"quote\": \"A GKS recipient must prioritize studying their major program.\"\n        },\n        {\n          \"evidence_id\": \"(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c0\",\n          \"quote\": \"In making such determination, the president of the university shall comprehensively consider academic achievement, attendance records, and the opinion of the academic advisor.\"\n        },\n        {\n          \"evidence_id\": \"(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c4\",\n          \"quote\": \"Such employment shall require prior approval from the president of the Korean language institution and prior authorization from the Ministry of Justice.\"\n        }\n      ],\n      \"value\": \"학위과정은 총장 승인 필요, 한국어연수는 6개월 후 방학 중 가능\",\n      \"missing_detail\": \"학위과정 내 세부 조건 필요\",\n      \"activation_state\": \"triggered\",\n      \"reason\": \"학위과정과 한국어연수에 따라 조건이 다름\"\n    },\n    {\n      \"slot_id\": \"exceptions_related\",\n      \"status\": \"partial\",\n      \"evidence_refs\": [\n        {\n          \"evidence_id\": \"(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c2\",\n          \"quote\": \"However, an exception may be granted if all of the following conditions are met\"\n        },\n        {\n          \"evidence_id\": \"(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c4\",\n          \"quote\": \"The exception under Subparagraph 4 shall not apply to GKS recipients who have received two (2) academic warnings.\"\n        },\n        {\n          \"evidence_id\": \"(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c3\",\n          \"quote\": \"However, an exception may be granted if all of the following conditions are met\"\n        }\n      ],\n      \"value\": \"학사 경고 1회 시 예외 가능, 2회 시 불가\",\n      \"missing_detail\": \"예외 조건의 세부 사항 필요\",\n      \"activation_state\": null,\n      \"reason\": \"학사 경고 횟수에 따른 예외 규정이 있음\"\n    }\n  ]\n}",
+            "raw_outputs": [
+              "{\n  \"chunk_notes\": [\n    {\n      \"evidence_id\": \"(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c3\",\n      \"applies_to\": [\n        {\n          \"field_id\": \"gks_stage\",\n          \"value\": \"한국어연수\"\n        }\n      ],\n      \"relevant_slots\": [\n        \"conditions_limits\",\n        \"applicable_scope\"\n      ]\n    },\n    {\n      \"evidence_id\": \"(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c0\",\n      \"applies_to\": [\n        {\n          \"field_id\": \"gks_stage\",\n          \"value\": \"학위과정\"\n        }\n      ],\n      \"relevant_slots\": [\n        \"conditions_limits\",\n        \"approval_reporting\",\n        \"applicable_scope\"\n      ]\n    },\n    {\n      \"evidence_id\": \"(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c4\",\n      \"applies_to\": [\n        {\n          \"field_id\": \"gks_stage\",\n          \"value\": \"한국어연수\"\n        }\n      ],\n      \"relevant_slots\": [\n        \"conditions_limits\",\n        \"approval_reporting\"\n      ]\n    },\n    {\n      \"evidence_id\": \"(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c2\",\n      \"applies_to\": [],\n      \"relevant_slots\": [\n        \"exceptions_related\"\n      ]\n    },\n    {\n      \"evidence_id\": \"(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c4\",\n      \"applies_to\": [\n        {\n          \"field_id\": \"gks_stage\",\n          \"value\": \"학위과정\"\n        }\n      ],\n      \"relevant_slots\": [\n        \"exceptions_related\"\n      ]\n    },\n    {\n      \"evidence_id\": \"(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c3\",\n      \"applies_to\": [],\n      \"relevant_slots\": [\n        \"exceptions_related\"\n      ]\n    },\n    {\n      \"evidence_id\": \"(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c2\",\n      \"applies_to\": [],\n      \"relevant_slots\": []\n    },\n    {\n      \"evidence_id\": \"(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c1\",\n      \"applies_to\": [],\n      \"relevant_slots\": []\n    },\n    {\n      \"evidence_id\": \"(KO)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c1\",\n      \"applies_to\": [],\n      \"relevant_slots\": []\n    }\n  ],\n  \"slot_verdicts\": [\n    {\n      \"slot_id\": \"applicable_scope\",\n      \"status\": \"partial\",\n      \"evidence_refs\": [\n        {\n          \"evidence_id\": \"(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c3\",\n          \"quote\": \"A GKS recipient in the Korean language program shall not engage in part-time employment until completing at least six (6) months of the program.\"\n        },\n        {\n          \"evidence_id\": \"(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c0\",\n          \"quote\": \"A GKS recipient in a degree program may engage in part-time employment only where the president of the university grants approval\"\n        }\n      ],\n      \"value\": \"한국어연수와 학위과정에 따라 규정이 다름\",\n      \"missing_detail\": \"학위과정 내 세부 구분 필요\",\n      \"activation_state\": null,\n      \"reason\": \"한국어연수와 학위과정에 따라 아르바이트 허용 여부가 다름\"\n    },\n    {\n      \"slot_id\": \"conditions_limits\",\n      \"status\": \"partial\",\n      \"evidence_refs\": [\n        {\n          \"evidence_id\": \"(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c3\",\n          \"quote\": \"A GKS recipient must prioritize studying their major program.\"\n        },\n        {\n          \"evidence_id\": \"(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c0\",\n          \"quote\": \"In making such determination, the president of the university shall comprehensively consider academic achievement, attendance records, and the opinion of the academic advisor.\"\n        }\n      ],\n      \"value\": \"학위과정은 총장 승인 필요, 한국어연수는 6개월 후 방학 중 가능\",\n      \"missing_detail\": \"학위과정 내 세부 조건 필요\",\n      \"activation_state\": \"triggered\",\n      \"reason\": \"학위과정과 한국어연수에 따라 조건이 다름\"\n    },\n    {\n      \"slot_id\": \"exceptions_related\",\n      \"status\": \"partial\",\n      \"evidence_refs\": [\n        {\n          \"evidence_id\": \"(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c2\",\n          \"quote\": \"However, an exception may be granted if all of the following conditions are met\"\n        },\n        {\n          \"evidence_id\": \"(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c4\",\n          \"quote\": \"The exception under Subparagraph 4 shall not apply to GKS recipients who have received two (2) academic warnings.\"\n        }\n      ],\n      \"value\": \"학사 경고 1회 시 예외 가능, 2회 시 불가\",\n      \"missing_detail\": \"예외 조건의 세부 사항 필요\",\n      \"activation_state\": null,\n      \"reason\": \"학사 경고 횟수에 따른 예외 규정이 있음\"\n    },\n    {\n      \"slot_id\": \"approval_reporting\",\n      \"status\": \"partial\",\n      \"evidence_refs\": [\n        {\n          \"evidence_id\": \"(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c4\",\n          \"quote\": \"Such employment shall require prior approval from the president of the Korean language institution\"\n        },\n        {\n          \"evidence_id\": \"(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c0\",\n          \"quote\": \"A GKS recipient in a degree program may engage in part-time employment only where the president of the university grants approval\"\n        }\n      ],\n      \"value\": \"한국어연수와 학위과정 모두 총장 승인 필요\",\n      \"missing_detail\": \"승인 절차의 세부 사항 필요\",\n      \"activation_state\": \"triggered\",\n      \"reason\": \"총장 승인 절차가 필요함\"\n    }\n  ],\n  \"user_field_needs\": [\n    {\n      \"field_id\": \"gks_stage\",\n      \"evidence_ids\": [\n        \"(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c3\",\n        \"(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c0\"\n      ],\n      \"branches\": [\n        \"학위과정: 총장 승인 시 가능\",\n        \"한국어연수: 6개월 이후 방학 중에만\"\n      ],\n      \"reason\": \"단계별로 규정이 다름\"\n    }\n  ]\n}",
+              "{\n  \"slot_verdicts\": [\n    {\n      \"slot_id\": \"conditions_limits\",\n      \"status\": \"partial\",\n      \"evidence_refs\": [\n        {\n          \"evidence_id\": \"(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c3\",\n          \"quote\": \"A GKS recipient must prioritize studying their major program.\"\n        },\n        {\n          \"evidence_id\": \"(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c0\",\n          \"quote\": \"In making such determination, the president of the university shall comprehensively consider academic achievement, attendance records, and the opinion of the academic advisor.\"\n        },\n        {\n          \"evidence_id\": \"(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c4\",\n          \"quote\": \"Such employment shall require prior approval from the president of the Korean language institution and prior authorization from the Ministry of Justice.\"\n        }\n      ],\n      \"value\": \"학위과정은 총장 승인 필요, 한국어연수는 6개월 후 방학 중 가능\",\n      \"missing_detail\": \"학위과정 내 세부 조건 필요\",\n      \"activation_state\": \"triggered\",\n      \"reason\": \"학위과정과 한국어연수에 따라 조건이 다름\"\n    },\n    {\n      \"slot_id\": \"exceptions_related\",\n      \"status\": \"partial\",\n      \"evidence_refs\": [\n        {\n          \"evidence_id\": \"(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c2\",\n          \"quote\": \"However, an exception may be granted if all of the following conditions are met\"\n        },\n        {\n          \"evidence_id\": \"(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c4\",\n          \"quote\": \"The exception under Subparagraph 4 shall not apply to GKS recipients who have received two (2) academic warnings.\"\n        },\n        {\n          \"evidence_id\": \"(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c3\",\n          \"quote\": \"However, an exception may be granted if all of the following conditions are met\"\n        }\n      ],\n      \"value\": \"학사 경고 1회 시 예외 가능, 2회 시 불가\",\n      \"missing_detail\": \"예외 조건의 세부 사항 필요\",\n      \"activation_state\": null,\n      \"reason\": \"학사 경고 횟수에 따른 예외 규정이 있음\"\n    }\n  ]\n}"
+            ],
+            "checklist_version": "v1-2026-09-28"
+          },
+          {
+            "analysis": {
+              "intent_summary": "GKS 장학생의 아르바이트 허용 여부에 대한 질문",
+              "answer_scope": "general",
+              "primary_type": "T5",
+              "additional_types": [],
+              "type_reason": "GKS 장학생의 아르바이트 가능 여부를 묻는 질문이므로 T5로 분류",
+              "conditions": [
+                {
+                  "field_id": "gks_status",
+                  "value": "예",
+                  "subject": "question_target",
+                  "status": "confirmed",
+                  "source_message_id": "m1",
+                  "quote": "GKS 장학생은"
+                }
+              ],
+              "document_slots": [
+                {
+                  "slot_id": "rule",
+                  "active": true,
+                  "requirement": "required",
+                  "activation_state": null,
+                  "activation_reason": "허용 여부의 기본 규정 필요",
+                  "status": "supported",
+                  "evidence_refs": [
+                    {
+                      "evidence_id": "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c3",
+                      "quote": "A GKS recipient must meet the part-time employment requirements"
+                    },
+                    {
+                      "evidence_id": "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c0",
+                      "quote": "A GKS recipient in a degree program may engage in part-time employment"
+                    }
+                  ],
+                  "value": "GKS 장학생은 조건부로 아르바이트 가능",
+                  "missing_detail": ""
+                },
+                {
+                  "slot_id": "applicable_scope",
+                  "active": true,
+                  "requirement": "required",
+                  "activation_state": null,
+                  "activation_reason": "(서버 보완) 분석 결과에 없어 기본값으로 추가",
+                  "status": "partial",
+                  "evidence_refs": [
+                    {
+                      "evidence_id": "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c3",
+                      "quote": "A GKS recipient in the Korean language program shall not engage in part-time employment until completing at least six (6) months of the program."
+                    },
+                    {
+                      "evidence_id": "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c0",
+                      "quote": "A GKS recipient in a degree program may engage in part-time employment only where the president of the university grants approval"
+                    }
+                  ],
+                  "value": "한국어연수와 학위과정에 따라 다름",
+                  "missing_detail": "학위과정 내 세부 구분 필요"
+                },
+                {
+                  "slot_id": "conditions_limits",
+                  "active": true,
+                  "requirement": "conditional",
+                  "activation_state": "triggered",
+                  "activation_reason": "(서버 보완) 분석 결과에 없어 기본값으로 추가",
+                  "status": "partial",
+                  "evidence_refs": [
+                    {
+                      "evidence_id": "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c3",
+                      "quote": "Part-time employment shall be permitted only during vacation periods."
+                    },
+                    {
+                      "evidence_id": "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c0",
+                      "quote": "In making such determination, the president of the university shall comprehensively consider academic achievement, attendance records, and the opinion of the academic advisor."
+                    },
+                    {
+                      "evidence_id": "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c4",
+                      "quote": "Such employment shall require prior approval from the president of the Korean language institution and prior authorization from the Ministry of Justice."
+                    }
+                  ],
+                  "value": "한국어연수는 6개월 후 방학 중, 학위과정은 총장 승인 시 가능",
+                  "missing_detail": "학위과정 내 세부 조건 필요"
+                },
+                {
+                  "slot_id": "exceptions_related",
+                  "active": true,
+                  "requirement": "required",
+                  "activation_state": null,
+                  "activation_reason": "(서버 보완) 분석 결과에 없어 기본값으로 추가",
+                  "status": "partial",
+                  "evidence_refs": [
+                    {
+                      "evidence_id": "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c2",
+                      "quote": "However, an exception may be granted if all of the following conditions are met:"
+                    },
+                    {
+                      "evidence_id": "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c4",
+                      "quote": "The exception under Subparagraph 4 shall not apply to GKS recipients who have received two (2) academic warnings."
+                    },
+                    {
+                      "evidence_id": "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c3",
+                      "quote": "However, an exception may be granted if all of the following conditions are met:"
+                    }
+                  ],
+                  "value": "학사 경고 1회 시 예외 가능, 2회 시 불가",
+                  "missing_detail": "예외 조건의 세부 사항 필요"
+                },
+                {
+                  "slot_id": "approval_reporting",
+                  "active": true,
+                  "requirement": "conditional",
+                  "activation_state": "triggered",
+                  "activation_reason": "승인이 허용의 전제인지 문서 확인 필요",
+                  "status": "partial",
+                  "evidence_refs": [
+                    {
+                      "evidence_id": "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c4",
+                      "quote": "Such employment shall require prior approval from the president of the Korean language institution and prior authorization from the Ministry of Justice."
+                    },
+                    {
+                      "evidence_id": "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c0",
+                      "quote": "A GKS recipient in a degree program may engage in part-time employment only where the president of the university grants approval"
+                    }
+                  ],
+                  "value": "한국어연수는 교육원장 승인 필요, 학위과정은 총장 승인 필요",
+                  "missing_detail": "승인 절차의 세부 사항 필요"
+                }
+              ],
+              "user_slots": [
+                {
+                  "field_id": "gks_stage",
+                  "status": "unknown",
+                  "active": true,
+                  "reason": "단계별로 규정이 다름 | 문서상 GKS 단계에 따라 규정이 다름 (청크 메모)",
+                  "required_by_evidence": [
+                    "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c3",
+                    "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c0",
+                    "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c4",
+                    "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c4"
+                  ],
+                  "branches": [
+                    {
+                      "value": "학위과정",
+                      "summary": "총장 승인 시 가능",
+                      "evidence_ids": [
+                        "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c3",
+                        "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c0",
+                        "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c4"
+                      ],
+                      "source": "notes"
+                    },
+                    {
+                      "value": "한국어연수",
+                      "summary": "6개월 이후 방학 중에만",
+                      "evidence_ids": [
+                        "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c3",
+                        "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c0",
+                        "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c4"
+                      ],
+                      "source": "notes"
+                    }
+                  ]
+                }
+              ],
+              "first_search": {
+                "query_ko": "GKS 장학생 아르바이트 허용 기준",
+                "target_slot_ids": [
+                  "rule",
+                  "applicable_scope"
+                ],
+                "reason": "허용 원칙과 적용 범위부터 확인"
+              },
+              "next_action": "search",
+              "next_action_reason": "일반 규정으로 먼저 안내 가능",
+              "clarification_question": null
+            },
+            "decision": {
+              "next_action": "partial_answer",
+              "reason": "미해결 칸 ['applicable_scope', 'conditions_limits', 'exceptions_related', 'approval_reporting'], 더 검색할 수 없음 (applicable_scope: 칸별 상한; exceptions_related: 원문 확장 한도(3회) 소진; conditions_limits: 원문 확장 한도(3회) 소진; approval_reporting: 원문 확장 한도(3회) 소진)",
+              "unresolved_slot_ids": [
+                "applicable_scope",
+                "conditions_limits",
+                "exceptions_related",
+                "approval_reporting"
+              ],
+              "clarify_field_ids": [],
+              "condition_field_ids": [
+                "gks_stage"
+              ],
+              "condition_branches": {
+                "gks_stage": [
+                  "학위과정: 총장 승인 시 가능",
+                  "한국어연수: 6개월 이후 방학 중에만"
+                ]
+              },
+              "expand_anchors": {}
+            },
+            "judged_slot_ids": [
+              "applicable_scope",
+              "conditions_limits",
+              "exceptions_related",
+              "approval_reporting"
+            ],
+            "shown_chunk_ids": [
+              "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c3",
+              "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c0",
+              "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c4",
+              "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c2",
+              "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c4",
+              "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c3",
+              "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c2",
+              "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c1",
+              "(KO)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c1"
+            ],
+            "llm_called": true,
+            "chunk_notes": [
+              {
+                "evidence_id": "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c3",
+                "applies_to": [
+                  {
+                    "field_id": "gks_stage",
+                    "value": "한국어연수"
+                  },
+                  {
+                    "field_id": "gks_status",
+                    "value": "GKS 장학생"
+                  }
+                ],
+                "relevant_slots": [
+                  "conditions_limits",
+                  "applicable_scope"
+                ]
+              },
+              {
+                "evidence_id": "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c0",
+                "applies_to": [
+                  {
+                    "field_id": "gks_stage",
+                    "value": "학위과정"
+                  },
+                  {
+                    "field_id": "gks_status",
+                    "value": "GKS 장학생"
+                  }
+                ],
+                "relevant_slots": [
+                  "conditions_limits",
+                  "approval_reporting",
+                  "applicable_scope"
+                ]
+              },
+              {
+                "evidence_id": "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c4",
+                "applies_to": [
+                  {
+                    "field_id": "gks_stage",
+                    "value": "한국어연수"
+                  },
+                  {
+                    "field_id": "gks_status",
+                    "value": "GKS 장학생"
+                  }
+                ],
+                "relevant_slots": [
+                  "conditions_limits",
+                  "approval_reporting"
+                ]
+              },
+              {
+                "evidence_id": "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c2",
+                "applies_to": [
+                  {
+                    "field_id": "gks_status",
+                    "value": "GKS 장학생"
+                  }
+                ],
+                "relevant_slots": [
+                  "exceptions_related"
+                ]
+              },
+              {
+                "evidence_id": "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c4",
+                "applies_to": [
+                  {
+                    "field_id": "gks_stage",
+                    "value": "학위과정"
+                  },
+                  {
+                    "field_id": "gks_status",
+                    "value": "GKS 장학생"
+                  }
+                ],
+                "relevant_slots": [
+                  "exceptions_related"
+                ]
+              },
+              {
+                "evidence_id": "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c3",
+                "applies_to": [
+                  {
+                    "field_id": "gks_status",
+                    "value": "GKS 장학생"
+                  }
+                ],
+                "relevant_slots": [
+                  "exceptions_related"
+                ]
+              },
+              {
+                "evidence_id": "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c2",
+                "applies_to": [
+                  {
+                    "field_id": "gks_status",
+                    "value": "GKS 장학생"
+                  }
+                ],
+                "relevant_slots": []
+              },
+              {
+                "evidence_id": "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c1",
+                "applies_to": [
+                  {
+                    "field_id": "gks_status",
+                    "value": "GKS 장학생"
+                  }
+                ],
+                "relevant_slots": []
+              },
+              {
+                "evidence_id": "(KO)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c1",
+                "applies_to": [
+                  {
+                    "field_id": "gks_status",
+                    "value": "GKS 장학생"
+                  }
+                ],
+                "relevant_slots": []
+              }
+            ],
+            "recheck_slot_ids": [
+              "conditions_limits",
+              "exceptions_related"
+            ],
+            "warnings": [
+              "[재확인] conditions_limits: partial → partial, 근거 +1",
+              "[재확인] exceptions_related: partial → partial, 근거 +1",
+              "[확인] 질문이 이미 대상을 가리킴 → 갈래·대상 한정에서 제외: ['gks_status']",
+              "[갈래] gks_stage: 한국어연수(2) / 학위과정(2)"
+            ],
+            "error": null,
+            "model": "gpt-4o",
+            "latency_ms": 17834,
+            "prompt_tokens": 10664,
+            "completion_tokens": 2488,
+            "attempts": 2,
+            "raw_output": "{\n  \"slot_verdicts\": [\n    {\n      \"slot_id\": \"conditions_limits\",\n      \"status\": \"partial\",\n      \"evidence_refs\": [\n        {\"evidence_id\": \"(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c3\", \"quote\": \"Part-time employment shall be permitted only during vacation periods.\"},\n        {\"evidence_id\": \"(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c0\", \"quote\": \"In making such determination, the president of the university shall comprehensively consider academic achievement, attendance records, and the opinion of the academic advisor.\"},\n        {\"evidence_id\": \"(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c4\", \"quote\": \"Such employment shall require prior approval from the president of the Korean language institution and prior authorization from the Ministry of Justice.\"}\n      ],\n      \"value\": \"한국어연수는 6개월 후 방학 중, 학위과정은 총장 승인 시 가능\",\n      \"missing_detail\": \"학위과정 내 세부 조건 필요\",\n      \"activation_state\": \"triggered\",\n      \"reason\": \"청크 (EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c4는 한국어연수 과정의 승인 조건을 추가로 제공함\"\n    },\n    {\n      \"slot_id\": \"exceptions_related\",\n      \"status\": \"partial\",\n      \"evidence_refs\": [\n        {\"evidence_id\": \"(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c2\", \"quote\": \"However, an exception may be granted if all of the following conditions are met:\"},\n        {\"evidence_id\": \"(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c4\", \"quote\": \"The exception under Subparagraph 4 shall not apply to GKS recipients who have received two (2) academic warnings.\"},\n        {\"evidence_id\": \"(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c3\", \"quote\": \"However, an exception may be granted if all of the following conditions are met:\"}\n      ],\n      \"value\": \"학사 경고 1회 시 예외 가능, 2회 시 불가\",\n      \"missing_detail\": \"예외 조건의 세부 사항 필요\",\n      \"reason\": \"청크 (EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c3는 예외 조건의 세부 사항을 추가로 제공함\"\n    }\n  ]\n}",
+            "raw_outputs": [
+              "{\n  \"chunk_notes\": [\n    {\n      \"evidence_id\": \"(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c3\",\n      \"applies_to\": [{\"field_id\": \"gks_stage\", \"value\": \"한국어연수\"}],\n      \"relevant_slots\": [\"conditions_limits\", \"applicable_scope\"]\n    },\n    {\n      \"evidence_id\": \"(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c0\",\n      \"applies_to\": [{\"field_id\": \"gks_stage\", \"value\": \"학위과정\"}],\n      \"relevant_slots\": [\"conditions_limits\", \"approval_reporting\", \"applicable_scope\"]\n    },\n    {\n      \"evidence_id\": \"(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c4\",\n      \"applies_to\": [{\"field_id\": \"gks_stage\", \"value\": \"한국어연수\"}],\n      \"relevant_slots\": [\"conditions_limits\", \"approval_reporting\"]\n    },\n    {\n      \"evidence_id\": \"(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c2\",\n      \"applies_to\": [],\n      \"relevant_slots\": [\"exceptions_related\"]\n    },\n    {\n      \"evidence_id\": \"(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c4\",\n      \"applies_to\": [{\"field_id\": \"gks_stage\", \"value\": \"학위과정\"}],\n      \"relevant_slots\": [\"exceptions_related\"]\n    },\n    {\n      \"evidence_id\": \"(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c3\",\n      \"applies_to\": [],\n      \"relevant_slots\": [\"exceptions_related\"]\n    },\n    {\n      \"evidence_id\": \"(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c2\",\n      \"applies_to\": [],\n      \"relevant_slots\": []\n    },\n    {\n      \"evidence_id\": \"(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c1\",\n      \"applies_to\": [],\n      \"relevant_slots\": []\n    },\n    {\n      \"evidence_id\": \"(KO)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c1\",\n      \"applies_to\": [],\n      \"relevant_slots\": []\n    }\n  ],\n  \"slot_verdicts\": [\n    {\n      \"slot_id\": \"applicable_scope\",\n      \"status\": \"partial\",\n      \"evidence_refs\": [\n        {\"evidence_id\": \"(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c3\", \"quote\": \"A GKS recipient in the Korean language program shall not engage in part-time employment until completing at least six (6) months of the program.\"},\n        {\"evidence_id\": \"(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c0\", \"quote\": \"A GKS recipient in a degree program may engage in part-time employment only where the president of the university grants approval\"}\n      ],\n      \"value\": \"한국어연수와 학위과정에 따라 다름\",\n      \"missing_detail\": \"학위과정 내 세부 구분 필요\"\n    },\n    {\n      \"slot_id\": \"conditions_limits\",\n      \"status\": \"partial\",\n      \"evidence_refs\": [\n        {\"evidence_id\": \"(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c3\", \"quote\": \"Part-time employment shall be permitted only during vacation periods.\"},\n        {\"evidence_id\": \"(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c0\", \"quote\": \"In making such determination, the president of the university shall comprehensively consider academic achievement, attendance records, and the opinion of the academic advisor.\"}\n      ],\n      \"value\": \"한국어연수는 6개월 후 방학 중, 학위과정은 총장 승인 시 가능\",\n      \"missing_detail\": \"학위과정 내 세부 조건 필요\",\n      \"activation_state\": \"triggered\"\n    },\n    {\n      \"slot_id\": \"exceptions_related\",\n      \"status\": \"partial\",\n      \"evidence_refs\": [\n        {\"evidence_id\": \"(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c2\", \"quote\": \"However, an exception may be granted if all of the following conditions are met:\"},\n        {\"evidence_id\": \"(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c4\", \"quote\": \"The exception under Subparagraph 4 shall not apply to GKS recipients who have received two (2) academic warnings.\"}\n      ],\n      \"value\": \"학사 경고 1회 시 예외 가능, 2회 시 불가\",\n      \"missing_detail\": \"예외 조건의 세부 사항 필요\"\n    },\n    {\n      \"slot_id\": \"approval_reporting\",\n      \"status\": \"partial\",\n      \"evidence_refs\": [\n        {\"evidence_id\": \"(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c4\", \"quote\": \"Such employment shall require prior approval from the president of the Korean language institution and prior authorization from the Ministry of Justice.\"},\n        {\"evidence_id\": \"(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c0\", \"quote\": \"A GKS recipient in a degree program may engage in part-time employment only where the president of the university grants approval\"}\n      ],\n      \"value\": \"한국어연수는 교육원장 승인 필요, 학위과정은 총장 승인 필요\",\n      \"missing_detail\": \"승인 절차의 세부 사항 필요\",\n      \"activation_state\": \"triggered\"\n    }\n  ],\n  \"user_field_needs\": [\n    {\n      \"field_id\": \"gks_stage\",\n      \"evidence_ids\": [\n        \"(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c3\",\n        \"(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c0\"\n      ],\n      \"branches\": [\n        \"학위과정: 총장 승인 시 가능\",\n        \"한국어연수: 6개월 이후 방학 중에만\"\n      ],\n      \"reason\": \"단계별로 규정이 다름\"\n    }\n  ]\n}",
+              "{\n  \"slot_verdicts\": [\n    {\n      \"slot_id\": \"conditions_limits\",\n      \"status\": \"partial\",\n      \"evidence_refs\": [\n        {\"evidence_id\": \"(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c3\", \"quote\": \"Part-time employment shall be permitted only during vacation periods.\"},\n        {\"evidence_id\": \"(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c0\", \"quote\": \"In making such determination, the president of the university shall comprehensively consider academic achievement, attendance records, and the opinion of the academic advisor.\"},\n        {\"evidence_id\": \"(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c4\", \"quote\": \"Such employment shall require prior approval from the president of the Korean language institution and prior authorization from the Ministry of Justice.\"}\n      ],\n      \"value\": \"한국어연수는 6개월 후 방학 중, 학위과정은 총장 승인 시 가능\",\n      \"missing_detail\": \"학위과정 내 세부 조건 필요\",\n      \"activation_state\": \"triggered\",\n      \"reason\": \"청크 (EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c4는 한국어연수 과정의 승인 조건을 추가로 제공함\"\n    },\n    {\n      \"slot_id\": \"exceptions_related\",\n      \"status\": \"partial\",\n      \"evidence_refs\": [\n        {\"evidence_id\": \"(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c2\", \"quote\": \"However, an exception may be granted if all of the following conditions are met:\"},\n        {\"evidence_id\": \"(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c4\", \"quote\": \"The exception under Subparagraph 4 shall not apply to GKS recipients who have received two (2) academic warnings.\"},\n        {\"evidence_id\": \"(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c3\", \"quote\": \"However, an exception may be granted if all of the following conditions are met:\"}\n      ],\n      \"value\": \"학사 경고 1회 시 예외 가능, 2회 시 불가\",\n      \"missing_detail\": \"예외 조건의 세부 사항 필요\",\n      \"reason\": \"청크 (EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c3는 예외 조건의 세부 사항을 추가로 제공함\"\n    }\n  ]\n}"
+            ],
+            "checklist_version": "v1-2026-09-28"
+          }
+        ],
+        "answer_run": {
+          "mode": "partial_answer",
+          "answer": "GKS 장학생은 조건부로 아르바이트가 가능합니다. 한국어연수 과정의 경우 6개월 후 방학 중에만 아르바이트가 허용되며, 학위과정의 경우 총장 승인이 필요합니다[1][2][3].",
+          "sources": [
+            {
+              "number": 1,
+              "evidence_id": "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c3",
+              "source": "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf",
+              "page": 10
+            },
+            {
+              "number": 2,
+              "evidence_id": "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c0",
+              "source": "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf",
+              "page": 11
+            },
+            {
+              "number": 3,
+              "evidence_id": "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c4",
+              "source": "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf",
+              "page": 10
+            }
+          ],
+          "shown_evidence_ids": [
+            "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c3",
+            "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c0",
+            "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c4",
+            "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c2",
+            "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c4",
+            "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c3"
+          ],
+          "warnings": [],
+          "error": null,
+          "model": "gpt-4o-mini",
+          "latency_ms": 1089,
+          "prompt_tokens": 1621,
+          "completion_tokens": 65,
+          "attempts": 1,
+          "raw_output": "{\"answer\": \"GKS 장학생은 조건부로 아르바이트가 가능합니다. 한국어연수 과정의 경우 6개월 후 방학 중에만 아르바이트가 허용되며, 학위과정의 경우 총장 승인이 필요합니다[1][2][3].\"}"
+        },
+        "analysis": {
+          "intent_summary": "GKS 장학생의 아르바이트 허용 여부에 대한 질문",
+          "answer_scope": "general",
+          "primary_type": "T5",
+          "additional_types": [],
+          "type_reason": "GKS 장학생의 아르바이트 가능 여부를 묻는 질문이므로 T5로 분류",
+          "conditions": [
+            {
+              "field_id": "gks_status",
+              "value": "예",
+              "subject": "question_target",
+              "status": "confirmed",
+              "source_message_id": "m1",
+              "quote": "GKS 장학생은"
+            }
+          ],
+          "document_slots": [
+            {
+              "slot_id": "rule",
+              "active": true,
+              "requirement": "required",
+              "activation_state": null,
+              "activation_reason": "허용 여부의 기본 규정 필요",
+              "status": "supported",
+              "evidence_refs": [
+                {
+                  "evidence_id": "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c3",
+                  "quote": "A GKS recipient must meet the part-time employment requirements"
+                },
+                {
+                  "evidence_id": "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c0",
+                  "quote": "A GKS recipient in a degree program may engage in part-time employment"
+                }
+              ],
+              "value": "GKS 장학생은 조건부로 아르바이트 가능",
+              "missing_detail": ""
+            },
+            {
+              "slot_id": "applicable_scope",
+              "active": true,
+              "requirement": "required",
+              "activation_state": null,
+              "activation_reason": "(서버 보완) 분석 결과에 없어 기본값으로 추가",
+              "status": "partial",
+              "evidence_refs": [
+                {
+                  "evidence_id": "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c3",
+                  "quote": "A GKS recipient in the Korean language program shall not engage in part-time employment until completing at least six (6) months of the program."
+                },
+                {
+                  "evidence_id": "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c0",
+                  "quote": "A GKS recipient in a degree program may engage in part-time employment only where the president of the university grants approval"
+                }
+              ],
+              "value": "한국어연수와 학위과정에 따라 다름",
+              "missing_detail": "학위과정 내 세부 구분 필요"
+            },
+            {
+              "slot_id": "conditions_limits",
+              "active": true,
+              "requirement": "conditional",
+              "activation_state": "triggered",
+              "activation_reason": "(서버 보완) 분석 결과에 없어 기본값으로 추가",
+              "status": "partial",
+              "evidence_refs": [
+                {
+                  "evidence_id": "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c3",
+                  "quote": "Part-time employment shall be permitted only during vacation periods."
+                },
+                {
+                  "evidence_id": "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c0",
+                  "quote": "In making such determination, the president of the university shall comprehensively consider academic achievement, attendance records, and the opinion of the academic advisor."
+                },
+                {
+                  "evidence_id": "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c4",
+                  "quote": "Such employment shall require prior approval from the president of the Korean language institution and prior authorization from the Ministry of Justice."
+                }
+              ],
+              "value": "한국어연수는 6개월 후 방학 중, 학위과정은 총장 승인 시 가능",
+              "missing_detail": "학위과정 내 세부 조건 필요"
+            },
+            {
+              "slot_id": "exceptions_related",
+              "active": true,
+              "requirement": "required",
+              "activation_state": null,
+              "activation_reason": "(서버 보완) 분석 결과에 없어 기본값으로 추가",
+              "status": "partial",
+              "evidence_refs": [
+                {
+                  "evidence_id": "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c2",
+                  "quote": "However, an exception may be granted if all of the following conditions are met:"
+                },
+                {
+                  "evidence_id": "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c4",
+                  "quote": "The exception under Subparagraph 4 shall not apply to GKS recipients who have received two (2) academic warnings."
+                },
+                {
+                  "evidence_id": "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c3",
+                  "quote": "However, an exception may be granted if all of the following conditions are met:"
+                }
+              ],
+              "value": "학사 경고 1회 시 예외 가능, 2회 시 불가",
+              "missing_detail": "예외 조건의 세부 사항 필요"
+            },
+            {
+              "slot_id": "approval_reporting",
+              "active": true,
+              "requirement": "conditional",
+              "activation_state": "triggered",
+              "activation_reason": "승인이 허용의 전제인지 문서 확인 필요",
+              "status": "partial",
+              "evidence_refs": [
+                {
+                  "evidence_id": "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c4",
+                  "quote": "Such employment shall require prior approval from the president of the Korean language institution and prior authorization from the Ministry of Justice."
+                },
+                {
+                  "evidence_id": "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c0",
+                  "quote": "A GKS recipient in a degree program may engage in part-time employment only where the president of the university grants approval"
+                }
+              ],
+              "value": "한국어연수는 교육원장 승인 필요, 학위과정은 총장 승인 필요",
+              "missing_detail": "승인 절차의 세부 사항 필요"
+            }
+          ],
+          "user_slots": [
+            {
+              "field_id": "gks_stage",
+              "status": "unknown",
+              "active": true,
+              "reason": "단계별로 규정이 다름 | 문서상 GKS 단계에 따라 규정이 다름 (청크 메모)",
+              "required_by_evidence": [
+                "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c3",
+                "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c0",
+                "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c4",
+                "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c4"
+              ],
+              "branches": [
+                {
+                  "value": "학위과정",
+                  "summary": "총장 승인 시 가능",
+                  "evidence_ids": [
+                    "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c3",
+                    "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c0",
+                    "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c4"
+                  ],
+                  "source": "notes"
+                },
+                {
+                  "value": "한국어연수",
+                  "summary": "6개월 이후 방학 중에만",
+                  "evidence_ids": [
+                    "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c3",
+                    "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c0",
+                    "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c4"
+                  ],
+                  "source": "notes"
+                }
+              ]
+            }
+          ],
+          "first_search": {
+            "query_ko": "GKS 장학생 아르바이트 허용 기준",
+            "target_slot_ids": [
+              "rule",
+              "applicable_scope"
+            ],
+            "reason": "허용 원칙과 적용 범위부터 확인"
+          },
+          "next_action": "search",
+          "next_action_reason": "일반 규정으로 먼저 안내 가능",
+          "clarification_question": null
+        },
+        "pool": {
+          "chunks": {
+            "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c3": {
+              "evidence_id": "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c3",
+              "source": "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf",
+              "page": 10,
+              "chunk_index": 3,
+              "lang": "en",
+              "text": "A GKS recipient must meet the part-time employment requirements set by the Ministry of Justice and other relevant authorities and comply with the following criteria:  \n 1. A GKS recipient must prioritize studying their major program.  \n 2. A GKS recipient in the Korean language program shall not engage in part-time employment until completing at least six (6) months of the program.  Part-time employment shall be permitted only during vacation periods. ",
+              "score": 0.9897429347038269,
+              "tags": [
+                {
+                  "target_slot_id": "rule",
+                  "search_type": "new",
+                  "query_ko": "GKS 장학생 아르바이트 허용 기준",
+                  "round_no": 1
+                }
+              ]
+            },
+            "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c0": {
+              "evidence_id": "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c0",
+              "source": "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf",
+              "page": 11,
+              "chunk_index": 0,
+              "lang": "en",
+              "text": "3. A GKS recipient in a degree program may engage in part-time employment only where the president of the university grants approval upon determining that such employment does not significantly interfere with academic studies.  In making such determination, the president of the university shall comprehensively consider academic achievement, attendance records, and the opinion of the academic advisor.  \n",
+              "score": 0.9567199945449829,
+              "tags": [
+                {
+                  "target_slot_id": "rule",
+                  "search_type": "new",
+                  "query_ko": "GKS 장학생 아르바이트 허용 기준",
+                  "round_no": 1
+                }
+              ]
+            },
+            "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c2": {
+              "evidence_id": "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c2",
+              "source": "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf",
+              "page": 11,
+              "chunk_index": 2,
+              "lang": "en",
+              "text": "- C. Field training as part of a practical training semester program;  \n - D. Internship activities;  \n - E. Other activities permitted within the scope of employment authorization for international students as determined by the Ministry of Justice and other relevant authorities.  \n 4. Activities under Subparagraph 3(E) shall, in principle, not be permitted for GKS recipients who have received an academic warning under Article 18(2).  However, an exception may be granted if all of the following conditions are met:  \n - A. The recipient has received only one (1) academic warning;  \n",
+              "score": 0.8616325259208679,
+              "tags": [
+                {
+                  "target_slot_id": "rule",
+                  "search_type": "new",
+                  "query_ko": "GKS 장학생 아르바이트 허용 기준",
+                  "round_no": 1
+                }
+              ]
+            },
+            "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c4": {
+              "evidence_id": "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c4",
+              "source": "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf",
+              "page": 11,
+              "chunk_index": 4,
+              "lang": "en",
+              "text": "5. The exception under Subparagraph 4 shall not apply to GKS recipients who have received two (2) academic warnings.  \n - ③ A GKS recipient in a degree program may engage in full-time employment if the recipient has satisfied the graduation requirements established by the university or if the recipient may maintain student status at the university after commencing employment.  \n - ④ A GKS recipient who engages in employment pursuant to Paragraph 3 and continues academic studies while maintaining student status at the university may retain GKS recipient status. ",
+              "score": 0.8463930487632751,
+              "tags": [
+                {
+                  "target_slot_id": "rule",
+                  "search_type": "new",
+                  "query_ko": "GKS 장학생 아르바이트 허용 기준",
+                  "round_no": 1
+                }
+              ]
+            },
+            "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c2": {
+              "evidence_id": "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c2",
+              "source": "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf",
+              "page": 10,
+              "chunk_index": 2,
+              "lang": "en",
+              "text": "- **Article 24 (Management and Inspection of GKS recipient)** ① The NIIED president may conduct frequent or periodic inspections of the management status of GKS recipients at the Institution, and the Institution must actively cooperate by submitting relevant management documents and related materials.  \n - ② The president of the institution must manage part-time employment of GKS recipients to ensure sound academic progress and meaningful study in Korea. ",
+              "score": 0.47138699889183044,
+              "tags": [
+                {
+                  "target_slot_id": "rule",
+                  "search_type": "new",
+                  "query_ko": "GKS 장학생 아르바이트 허용 기준",
+                  "round_no": 1
+                },
+                {
+                  "target_slot_id": "rule",
+                  "search_type": "expand_context",
+                  "query_ko": "GKS 장학생 아르바이트 허용 기준",
+                  "round_no": 2
+                },
+                {
+                  "target_slot_id": "applicable_scope",
+                  "search_type": "expand_context",
+                  "query_ko": "GKS 장학생 아르바이트 적용 범위",
+                  "round_no": 3
+                },
+                {
+                  "target_slot_id": "applicable_scope",
+                  "search_type": "expand_context",
+                  "query_ko": "GKS 장학생 아르바이트 관련 적용 범위",
+                  "round_no": 4
+                }
+              ]
+            },
+            "(KO)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c1": {
+              "evidence_id": "(KO)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c1",
+              "source": "(KO)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf",
+              "page": 10,
+              "chunk_index": 1,
+              "lang": "ko",
+              "text": "- ④제3항에 따라 취업한 장학생이 학업을 지속하고 수학대학의 학적을 유지하는 경우에는 장학생 자격을 유지할 수 있으며, 장학금 지급 여부는 학업 이행 여부, 학업 성취도 및 대학의 의견 등을 종합적으로 고려하여 결정한다. - ⑤교육원장은 정부초청 외국인 장학생(GKS) 사업의 성과 분석 및 동문 네트워크 구축을 위하여 관련 법령이 허용하는 범위 내에서 졸업생(동문)의 진로, 취업, 거주 국가 등 현황을 조사할 수 있다. - ⑥교육원장은 제5항에 따른 조사 수행을 위하여 필요한 경우, 관련 법령에 따라 수학대 학장에게 졸업생(동문) 조사에 필요한 정보 및 현황 자료 등을 요 청할 수 있다. 이 경 우 수학대학장은 특별한 사정이 없는 한 이에 협조하여야 한다. - 제25조(장학생 관리실적 평가) 교육원장은 수학기관에 대하여 장학생 관리실적을 평가하고, 그 결과를 수학대학 선정 및 장학생 인원 배정 등에 반영할 수 있다. **==> picture [53 x 12] intentionally omitted <==**  \n이 지침은 2019. 6. 20. 부터 시행한다 . - 이 지침은 2020. 6. 22. 부터 시행하며 , 장학 기간 중인 장학생 전체에 적용된다 .",
+              "score": 0.4259922504425049,
+              "tags": [
+                {
+                  "target_slot_id": "rule",
+                  "search_type": "new",
+                  "query_ko": "GKS 장학생 아르바이트 허용 기준",
+                  "round_no": 1
+                }
+              ]
+            },
+            "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c3": {
+              "evidence_id": "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c3",
+              "source": "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf",
+              "page": 11,
+              "chunk_index": 3,
+              "lang": "en",
+              "text": "However, an exception may be granted if all of the following conditions are met:  \n - A. The recipient has received only one (1) academic warning;  \n - B. The recipient’s grades for the immediately preceding semester shall be at least 80/100 for associate and undergraduate programs, or at least 85/100 for master’s and doctoral programs;  \n - C. The president of the university recognizes the recipient’s ability to continue academic studies.  \n 5. The exception under Subparagraph 4 shall not apply to GKS recipients who have received two (2) academic warnings.  \n",
+              "score": 0.3887993395328522,
+              "tags": [
+                {
+                  "target_slot_id": "rule",
+                  "search_type": "new",
+                  "query_ko": "GKS 장학생 아르바이트 허용 기준",
+                  "round_no": 1
+                }
+              ]
+            },
+            "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c4": {
+              "evidence_id": "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c4",
+              "source": "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf",
+              "page": 10,
+              "chunk_index": 4,
+              "lang": "en",
+              "text": "Part-time employment shall be permitted only during vacation periods.  Such employment shall require prior approval from the president of the Korean language institution and prior authorization from the Ministry of Justice.  Notwithstanding the foregoing, a recipient who has obtained the TOPIK level recognized by the president of the institution as necessary for advancement to a degree program may engage in part-time employment during the semester.  In such case, part-time employment shall not exceed twenty (20) hours per week.",
+              "score": null,
+              "tags": [
+                {
+                  "target_slot_id": "rule",
+                  "search_type": "expand_context",
+                  "query_ko": "GKS 장학생 아르바이트 허용 기준",
+                  "round_no": 2
+                },
+                {
+                  "target_slot_id": "applicable_scope",
+                  "search_type": "expand_context",
+                  "query_ko": "GKS 장학생 아르바이트 적용 범위",
+                  "round_no": 3
+                },
+                {
+                  "target_slot_id": "applicable_scope",
+                  "search_type": "expand_context",
+                  "query_ko": "GKS 장학생 아르바이트 관련 적용 범위",
+                  "round_no": 4
+                }
+              ]
+            },
+            "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c1": {
+              "evidence_id": "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c1",
+              "source": "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf",
+              "page": 11,
+              "chunk_index": 1,
+              "lang": "en",
+              "text": "- The scope and standards of part-time employment shall comply with the authorization criteria for part-time employment of international students established by the Ministry of Justice and other relevant authorities.  \n - A. On-campus part-time jobs paid by the university;  \n - B. Research or academic activities related to the recipient’s field of study;  \n - C. Field training as part of a practical training semester program;  \n - D. Internship activities;  \n",
+              "score": null,
+              "tags": [
+                {
+                  "target_slot_id": "applicable_scope",
+                  "search_type": "expand_context",
+                  "query_ko": "GKS 장학생 아르바이트 적용 범위",
+                  "round_no": 3
+                },
+                {
+                  "target_slot_id": "applicable_scope",
+                  "search_type": "expand_context",
+                  "query_ko": "GKS 장학생 아르바이트 관련 적용 범위",
+                  "round_no": 4
+                }
+              ]
+            }
+          }
+        },
+        "budget": {
+          "total_calls": 4,
+          "expand_calls": 3,
+          "subqueries": 1
+        },
+        "decision": {
+          "next_action": "partial_answer",
+          "reason": "미해결 칸 ['applicable_scope', 'conditions_limits', 'exceptions_related', 'approval_reporting'], 더 검색할 수 없음 (applicable_scope: 칸별 상한; exceptions_related: 원문 확장 한도(3회) 소진; conditions_limits: 원문 확장 한도(3회) 소진; approval_reporting: 원문 확장 한도(3회) 소진)",
+          "unresolved_slot_ids": [
+            "applicable_scope",
+            "conditions_limits",
+            "exceptions_related",
+            "approval_reporting"
+          ],
+          "clarify_field_ids": [],
+          "condition_field_ids": [
+            "gks_stage"
+          ],
+          "condition_branches": {
+            "gks_stage": [
+              "학위과정: 총장 승인 시 가능",
+              "한국어연수: 6개월 이후 방학 중에만"
+            ]
+          },
+          "expand_anchors": {}
+        },
+        "rounds": 3,
+        "stopped": "decided: partial_answer",
+        "warnings": [],
+        "latency_ms": 101195,
+        "checklist_version": "v1-2026-09-28"
+      }
+    }
+  ]
+}

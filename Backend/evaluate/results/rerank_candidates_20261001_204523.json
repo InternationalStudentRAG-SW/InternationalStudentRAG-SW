@@ -1,0 +1,126 @@
+{
+  "input": "evaluate\\results\\pipeline_20260930_221219.json",
+  "limits": [
+    35,
+    40,
+    0
+  ],
+  "summary": [
+    {
+      "limit": 35,
+      "queries": 1,
+      "mean_rerank_ms": 14386.8,
+      "total_rerank_ms": 14386.8,
+      "mean_rerank_pairs": 35,
+      "baseline_recall": 0.7143,
+      "exact_topk_matches": 0
+    },
+    {
+      "limit": 40,
+      "queries": 1,
+      "mean_rerank_ms": 15560.5,
+      "total_rerank_ms": 15560.5,
+      "mean_rerank_pairs": 40,
+      "baseline_recall": 0.8571,
+      "exact_topk_matches": 0
+    },
+    {
+      "limit": 0,
+      "queries": 1,
+      "mean_rerank_ms": 17112.0,
+      "total_rerank_ms": 17112.0,
+      "mean_rerank_pairs": 46,
+      "baseline_recall": 1.0,
+      "exact_topk_matches": 1
+    }
+  ],
+  "rows": [
+    {
+      "label": "D9",
+      "query": "학생 비자 신청 서류",
+      "limit": 35,
+      "baseline_chunk_ids": [
+        "English_2026-2027+Korean+Language+Course.pdf#p4#c1",
+        "Study in KOREA! 한국 유학 가이드.pdf#p17#c2",
+        "Study in KOREA! 한국 유학 가이드.pdf#p11#c5",
+        "English_2026-2027+Korean+Language+Course.pdf#p3#c13",
+        "Study in KOREA! 한국 유학 가이드.pdf#p5#c5",
+        "English_2026-2027+Korean+Language+Course.pdf#p3#c7",
+        "Study in KOREA! 한국 유학 가이드.pdf#p12#c5"
+      ],
+      "result_chunk_ids": [
+        "Study in KOREA! 한국 유학 가이드.pdf#p17#c2",
+        "Study in KOREA! 한국 유학 가이드.pdf#p11#c5",
+        "Study in KOREA! 한국 유학 가이드.pdf#p5#c5",
+        "English_2026-2027+Korean+Language+Course.pdf#p3#c7",
+        "Study in KOREA! 한국 유학 가이드.pdf#p12#c5",
+        "Study in KOREA! 한국 유학 가이드.pdf#p17#c7",
+        "Study in KOREA! 한국 유학 가이드.pdf#p14#c5"
+      ],
+      "baseline_count": 7,
+      "baseline_hits": 5,
+      "merged_candidates": 46,
+      "rerank_pairs": 35,
+      "rerank_ms": 14386.8,
+      "reranker_device": "cpu"
+    },
+    {
+      "label": "D9",
+      "query": "학생 비자 신청 서류",
+      "limit": 40,
+      "baseline_chunk_ids": [
+        "English_2026-2027+Korean+Language+Course.pdf#p4#c1",
+        "Study in KOREA! 한국 유학 가이드.pdf#p17#c2",
+        "Study in KOREA! 한국 유학 가이드.pdf#p11#c5",
+        "English_2026-2027+Korean+Language+Course.pdf#p3#c13",
+        "Study in KOREA! 한국 유학 가이드.pdf#p5#c5",
+        "English_2026-2027+Korean+Language+Course.pdf#p3#c7",
+        "Study in KOREA! 한국 유학 가이드.pdf#p12#c5"
+      ],
+      "result_chunk_ids": [
+        "English_2026-2027+Korean+Language+Course.pdf#p4#c1",
+        "Study in KOREA! 한국 유학 가이드.pdf#p17#c2",
+        "Study in KOREA! 한국 유학 가이드.pdf#p11#c5",
+        "Study in KOREA! 한국 유학 가이드.pdf#p5#c5",
+        "English_2026-2027+Korean+Language+Course.pdf#p3#c7",
+        "Study in KOREA! 한국 유학 가이드.pdf#p12#c5",
+        "Study in KOREA! 한국 유학 가이드.pdf#p17#c7"
+      ],
+      "baseline_count": 7,
+      "baseline_hits": 6,
+      "merged_candidates": 46,
+      "rerank_pairs": 40,
+      "rerank_ms": 15560.5,
+      "reranker_device": "cpu"
+    },
+    {
+      "label": "D9",
+      "query": "학생 비자 신청 서류",
+      "limit": 0,
+      "baseline_chunk_ids": [
+        "English_2026-2027+Korean+Language+Course.pdf#p4#c1",
+        "Study in KOREA! 한국 유학 가이드.pdf#p17#c2",
+        "Study in KOREA! 한국 유학 가이드.pdf#p11#c5",
+        "English_2026-2027+Korean+Language+Course.pdf#p3#c13",
+        "Study in KOREA! 한국 유학 가이드.pdf#p5#c5",
+        "English_2026-2027+Korean+Language+Course.pdf#p3#c7",
+        "Study in KOREA! 한국 유학 가이드.pdf#p12#c5"
+      ],
+      "result_chunk_ids": [
+        "English_2026-2027+Korean+Language+Course.pdf#p4#c1",
+        "Study in KOREA! 한국 유학 가이드.pdf#p17#c2",
+        "Study in KOREA! 한국 유학 가이드.pdf#p11#c5",
+        "English_2026-2027+Korean+Language+Course.pdf#p3#c13",
+        "Study in KOREA! 한국 유학 가이드.pdf#p5#c5",
+        "English_2026-2027+Korean+Language+Course.pdf#p3#c7",
+        "Study in KOREA! 한국 유학 가이드.pdf#p12#c5"
+      ],
+      "baseline_count": 7,
+      "baseline_hits": 7,
+      "merged_candidates": 46,
+      "rerank_pairs": 46,
+      "rerank_ms": 17112.0,
+      "reranker_device": "cpu"
+    }
+  ]
+}

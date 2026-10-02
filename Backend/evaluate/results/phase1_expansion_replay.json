@@ -1,0 +1,141 @@
+{
+  "scope": "fixed-state expansion planning only; retrieval equivalence covered by offline tests",
+  "rows": [
+    {
+      "id": "D2",
+      "round": 2,
+      "target": "requested_value",
+      "same_target_and_operation": true,
+      "after_sdk_calls": 0,
+      "before_sdk_calls": 1,
+      "before_recorded_tokens": 526,
+      "before_planning_ms": 1491
+    },
+    {
+      "id": "D3",
+      "round": 2,
+      "target": "applicable_scope",
+      "same_target_and_operation": true,
+      "after_sdk_calls": 0,
+      "before_sdk_calls": 1,
+      "before_recorded_tokens": 529,
+      "before_planning_ms": 1148
+    },
+    {
+      "id": "D3",
+      "round": 3,
+      "target": "applicable_scope",
+      "same_target_and_operation": true,
+      "after_sdk_calls": 0,
+      "before_sdk_calls": 1,
+      "before_recorded_tokens": 543,
+      "before_planning_ms": 879
+    },
+    {
+      "id": "D4",
+      "round": 3,
+      "target": "conditional_documents",
+      "same_target_and_operation": true,
+      "after_sdk_calls": 0,
+      "before_sdk_calls": 1,
+      "before_recorded_tokens": 521,
+      "before_planning_ms": 1131
+    },
+    {
+      "id": "D5",
+      "round": 2,
+      "target": "step_sequence",
+      "same_target_and_operation": true,
+      "after_sdk_calls": 0,
+      "before_sdk_calls": 1,
+      "before_recorded_tokens": 504,
+      "before_planning_ms": 864
+    },
+    {
+      "id": "D5",
+      "round": 3,
+      "target": "application_channel",
+      "same_target_and_operation": true,
+      "after_sdk_calls": 0,
+      "before_sdk_calls": 1,
+      "before_recorded_tokens": 491,
+      "before_planning_ms": 974
+    },
+    {
+      "id": "D6",
+      "round": 2,
+      "target": "rule",
+      "same_target_and_operation": true,
+      "after_sdk_calls": 0,
+      "before_sdk_calls": 1,
+      "before_recorded_tokens": 520,
+      "before_planning_ms": 850
+    },
+    {
+      "id": "D6",
+      "round": 3,
+      "target": "applicable_scope",
+      "same_target_and_operation": true,
+      "after_sdk_calls": 0,
+      "before_sdk_calls": 1,
+      "before_recorded_tokens": 567,
+      "before_planning_ms": 2852
+    },
+    {
+      "id": "D7",
+      "round": 3,
+      "target": "applicable_scope",
+      "same_target_and_operation": true,
+      "after_sdk_calls": 0,
+      "before_sdk_calls": 1,
+      "before_recorded_tokens": 547,
+      "before_planning_ms": 1053
+    },
+    {
+      "id": "D8",
+      "round": 2,
+      "target": "rule",
+      "same_target_and_operation": true,
+      "after_sdk_calls": 0,
+      "before_sdk_calls": 1,
+      "before_recorded_tokens": 531,
+      "before_planning_ms": 912
+    },
+    {
+      "id": "D8",
+      "round": 3,
+      "target": "applicable_scope",
+      "same_target_and_operation": true,
+      "after_sdk_calls": 0,
+      "before_sdk_calls": 1,
+      "before_recorded_tokens": 587,
+      "before_planning_ms": 1452
+    },
+    {
+      "id": "D9",
+      "round": 2,
+      "target": "requested_documents",
+      "same_target_and_operation": true,
+      "after_sdk_calls": 0,
+      "before_sdk_calls": 1,
+      "before_recorded_tokens": 526,
+      "before_planning_ms": 1196
+    },
+    {
+      "id": "D9",
+      "round": 3,
+      "target": "conditional_documents",
+      "same_target_and_operation": true,
+      "after_sdk_calls": 0,
+      "before_sdk_calls": 1,
+      "before_recorded_tokens": 525,
+      "before_planning_ms": 1086
+    }
+  ],
+  "replayed": 13,
+  "skipped": 0,
+  "removed_sdk_calls": 13,
+  "removed_recorded_tokens": 6917,
+  "baseline_planning_ms": 15888,
+  "baseline": "pipeline_20260930_221219.json"
+}

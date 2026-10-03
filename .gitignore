@@ -22,6 +22,7 @@ eggs/
 .eggs/
 lib/
 lib64/
+!Frontend/src/lib/
 parts/
 sdist/
 var/
@@ -51,3 +52,5 @@ logs/
 .LSOverride
 
 
+# 색인 다시 할 때 check_spacing이 자동으로 만드는 ChromaDB 백업
+DATA/chroma_db_backup_*/

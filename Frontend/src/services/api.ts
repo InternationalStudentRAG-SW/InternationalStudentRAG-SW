@@ -45,8 +45,11 @@ export async function sendMessageStream(
   if (history && history.length > 0) body.history = history
 
   const controller = new AbortController()
-  // 60초 안에 응답이 완전히 끝나지 않으면 연결 강제 종료
-  const timeoutId = setTimeout(() => controller.abort(), 60_000)
+  // 60초 동안 서버에서 아무 이벤트도 오지 않으면 연결 강제 종료
+  // (복합 질문은 에이전트가 1~2분 걸리지만, 서버가 처리 중에는 10초마다 ping을 보내므로 전체 시간으로 자르지 않는다.
+  //  이 타이머는 서버가 죽거나 연결이 끊겼을 때 무한 대기를 막는 용도다)
+  const IDLE_TIMEOUT_MS = 60_000
+  let timeoutId = setTimeout(() => controller.abort(), IDLE_TIMEOUT_MS)
 
   try {
     const response = await fetch(`${BASE_URL}/chat/stream`, {
@@ -78,6 +81,8 @@ export async function sendMessageStream(
     while (true) {
       const { done, value } = await reader.read()
       if (done) break
+      clearTimeout(timeoutId)
+      timeoutId = setTimeout(() => controller.abort(), IDLE_TIMEOUT_MS)
 
       buffer += decoder.decode(value, { stream: true })
       const lines = buffer.split('\n\n')

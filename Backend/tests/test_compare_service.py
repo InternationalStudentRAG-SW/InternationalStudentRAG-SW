@@ -97,3 +97,51 @@ def test_questions_have_ids_and_facts():
 
 def test_judge_prompt_forbids_outside_knowledge():
     assert "일반 지식" in cs.JUDGE_SYSTEM and "금지가 풀린다고 쓴 경우만 wrong" in cs.JUDGE_SYSTEM
+
+LANG_Q = {"facts": ["한국어 트랙: TOPIK 2급 이상",
+                    "영어 트랙: IELTS 5.5, TOEFL iBT 3.5, New TEPS 202 중 하나 이상",
+                    "영어가 모국어인 국가에서 고교를 마치면 면제"]}
+
+
+def test_outside_knowledge_wrong_is_corrected_to_partial():
+    ans = "영어 트랙의 어학 기준은 IELTS 5.5, TOEFL iBT 3.5 이상입니다[8]."
+    data = {"facts": [{"no": 1, "status": "included"},
+                      {"no": 2, "status": "wrong", "reason": "TOEFL iBT 3.5로 잘못 언급됨. 실제로는 TOEFL iBT 61."},
+                      {"no": 3, "status": "included"}],
+            "contradictions": ["영어 트랙의 어학 기준은 IELTS 5.5, TOEFL iBT 3.5 이상입니다"]}
+    s = cs.score_judgement(LANG_Q, data, ans)
+    assert s["per_fact"][1]["status"] == "partial"   # TEPS 202 빠짐
+    assert s["wrong"] == 0 and s["contradictions"] == []
+    assert s["adjusted"][0]["outside_numbers"] == ["61"]
+    assert abs(s["coverage"] - 2.5 / 3) < 1e-9
+
+
+def test_outside_knowledge_all_numbers_present_is_included():
+    ans = "IELTS 5.5, TOEFL iBT 3.5, New TEPS 202 중 하나면 됩니다."
+    data = {"facts": [{"no": 2, "status": "wrong", "reason": "실제로는 TOEFL 61"}], "contradictions": []}
+    s = cs.score_judgement(LANG_Q, data, ans)
+    assert s["per_fact"][1]["status"] == "included"
+
+
+def test_real_wrong_value_is_not_corrected():
+    q = {"facts": ["학사경고 3회면 제적"]}
+    ans = "학사경고 2회면 제적됩니다[1]."
+    data = {"facts": [{"no": 1, "status": "wrong", "reason": "3회를 2회로 씀"}],
+            "contradictions": ["학사경고 2회면 제적됩니다"]}
+    s = cs.score_judgement(q, data, ans)
+    assert s["per_fact"][0]["status"] == "wrong" and s["wrong"] == 1 and s["adjusted"] == []
+
+
+def test_wrong_without_numbers_is_not_corrected():
+    q = {"facts": ["첫 학기에는 시간제 취업 불가"]}
+    ans = "첫 학기에도 조건부로 가능합니다."
+    data = {"facts": [{"no": 1, "status": "wrong", "reason": "불가를 가능으로"}], "contradictions": [ans]}
+    s = cs.score_judgement(q, data, ans)
+    assert s["per_fact"][0]["status"] == "wrong"
+
+
+def test_outside_number_but_contradiction_has_other_value_is_not_corrected():
+    ans = "TOEFL iBT 72 이상입니다."
+    data = {"facts": [{"no": 2, "status": "wrong", "reason": "실제로는 61"}], "contradictions": [ans]}
+    s = cs.score_judgement(LANG_Q, data, ans)
+    assert s["per_fact"][1]["status"] == "wrong"

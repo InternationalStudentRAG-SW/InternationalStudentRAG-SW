@@ -16,6 +16,9 @@
                      (포함 1점, 일부만 0.5점, 누락·틀림 0점)
   틀린 내용 수     : 핵심 사실과 어긋나는 내용 (값이 다르거나, 금지를 허용으로 쓰는 등)
   심판은 LLM(기본 gpt-4o) 1회. 답변마다 따로 채점하고, 어느 방식의 답인지 알려주지 않는다.
+  채점 보정(코드, LLM 호출 없음): 심판이 '틀림'이라 했는데 그 문장의 숫자가 정답 사실에 모두 있고,
+    심판 이유에 정답 사실에 없는 숫자(바깥 지식, 예: "실제로는 TOEFL 61")가 있으면 '틀림'을 취소한다.
+    답변에 그 사실의 숫자가 다 있으면 included, 일부만 있으면 partial. 보정 내역은 결과의 adjusted에 남긴다.
 
 결과: evaluate/results/service_compare_<시각>.json + .md (질문별 답변 나란히, 요약 표)
 """
@@ -24,6 +27,7 @@ from __future__ import annotations
 import argparse
 import asyncio
 import json
+import re
 import time
 from datetime import datetime
 from pathlib import Path
@@ -139,10 +143,61 @@ def judge_answer(q: Dict, answer: str, client, model: str = DEFAULT_JUDGE_MODEL)
         model=model, temperature=0, response_format={"type": "json_object"},
         messages=[{"role": "system", "content": JUDGE_SYSTEM}, {"role": "user", "content": user}])
     data = json.loads(resp.choices[0].message.content or "{}")
-    return score_judgement(q, data)
+    return score_judgement(q, data, answer)
 
 
-def score_judgement(q: Dict, data: Dict) -> Dict:
+_MARK_RE = re.compile(r"\[\d+\]")
+
+
+def _numbers(text: str) -> set:
+    """문장 속 숫자 집합. [번호] 표시와 천 단위 쉼표는 지운다."""
+    t = _MARK_RE.sub(" ", text or "")
+    t = re.sub(r"(?<=\d),(?=\d{3}\b)", "", t)
+    return set(re.findall(r"\d+(?:\.\d+)?", t))
+
+
+def correct_outside_knowledge(q: Dict, per_fact: List[Dict], contradictions: List[str],
+                              answer: str) -> Tuple[List[Dict], List[str], List[Dict]]:
+    """
+    심판이 바깥 지식으로 '틀림'을 준 경우를 되돌린다 (2026-10-03, TOEFL iBT 3.5 → "실제로는 61" 오채점).
+    조건(모두 만족):
+      1. 심판 이유에 정답 사실에도 답변에도 없는 숫자가 있다 → 심판이 바깥 값을 끌어왔다
+      2. 어긋난다고 옮긴 문장(contradictions)의 숫자가 그 사실의 숫자에 모두 있다
+         (옮긴 문장이 없으면 답변 숫자 중 그 사실의 숫자가 하나 이상 있어야 함)
+    숫자가 없는 판단('불가'를 '가능'으로 등)이나 값이 실제로 다른 경우는 건드리지 않는다.
+    """
+    ans_nums = _numbers(answer)
+    adjusted: List[Dict] = []
+    kept_contra = list(contradictions)
+    out = []
+    for i, f in enumerate(per_fact):
+        fact = q["facts"][i]
+        fact_nums = _numbers(fact)
+        if f["status"] != "wrong" or not fact_nums:
+            out.append(f)
+            continue
+        outside = _numbers(f.get("reason", "")) - fact_nums - ans_nums
+        if not outside:
+            out.append(f)
+            continue
+        related = [c for c in kept_contra if _numbers(c) & fact_nums]
+        if related:
+            if not all(_numbers(c) and _numbers(c) <= fact_nums for c in related):
+                out.append(f)
+                continue
+        elif not (ans_nums & fact_nums):
+            out.append(f)
+            continue
+        status = "included" if fact_nums <= ans_nums else "partial"
+        kept_contra = [c for c in kept_contra if c not in related]
+        out.append({"status": status,
+                    "reason": f"[채점 보정] 답의 숫자가 정답 사실과 같음 (심판 원래 판단: {f.get('reason', '')})"})
+        adjusted.append({"fact_no": i + 1, "from": "wrong", "to": status,
+                         "outside_numbers": sorted(outside), "removed_contradictions": related})
+    return out, kept_contra, adjusted
+
+
+def score_judgement(q: Dict, data: Dict, answer: str = "") -> Dict:
     """심판 출력 → 지표. 심판이 빠뜨린 사실은 missing으로 본다."""
     by_no = {}
     for f in data.get("facts") or []:
@@ -154,12 +209,16 @@ def score_judgement(q: Dict, data: Dict) -> Dict:
         by_no[n] = {"status": st if st in POINTS else "missing", "reason": str(f.get("reason", ""))}
     per_fact = [by_no.get(i, {"status": "missing", "reason": "(심판 누락)"}) for i in range(1, len(q["facts"]) + 1)]
     contradictions = [str(c) for c in (data.get("contradictions") or []) if str(c).strip()]
+    adjusted: List[Dict] = []
+    if answer:
+        per_fact, contradictions, adjusted = correct_outside_knowledge(q, per_fact, contradictions, answer)
     n_wrong = sum(1 for f in per_fact if f["status"] == "wrong")
     return {
         "coverage": sum(POINTS[f["status"]] for f in per_fact) / len(per_fact),
         "wrong": max(n_wrong, len(contradictions)),
         "per_fact": per_fact,
         "contradictions": contradictions,
+        "adjusted": adjusted,
     }
 
 

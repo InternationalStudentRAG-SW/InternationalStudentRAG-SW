@@ -93,3 +93,7 @@ def test_compare_end_to_end_with_fakes():
 def test_questions_have_ids_and_facts():
     ids = [q["id"] for q in cs.QUESTIONS]
     assert ids == ["Q7", "LANG", "GKSW", "E2", "E3"] and all(q["facts"] for q in cs.QUESTIONS)
+
+
+def test_judge_prompt_forbids_outside_knowledge():
+    assert "일반 지식" in cs.JUDGE_SYSTEM and "금지가 풀린다고 쓴 경우만 wrong" in cs.JUDGE_SYSTEM

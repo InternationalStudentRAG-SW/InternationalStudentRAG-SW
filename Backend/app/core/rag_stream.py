@@ -120,7 +120,7 @@ _STATUS_LABELS = {
         "search_one":       "[{name}] 검색 완료",
         "search_many":      "[{name}] 외 {n}건 검색 완료",
         "generating":       "답변을 작성하는 중",
-        "meta":             "출처와 추천 질문을 정리하는 중",
+        "meta":             "출처를 정리하는 중",
     },
     "en": {
         "analyzing":        "Understanding your question",
@@ -129,7 +129,7 @@ _STATUS_LABELS = {
         "search_one":       "[{name}] found",
         "search_many":      "[{name}] and {n} more found",
         "generating":       "Writing your answer",
-        "meta":             "Preparing sources and suggestions",
+        "meta":             "Preparing sources",
     },
     "zh": {
         "analyzing":        "正在理解您的问题",
@@ -138,7 +138,7 @@ _STATUS_LABELS = {
         "search_one":       "已找到 [{name}]",
         "search_many":      "已找到 [{name}] 等 {n} 份文档",
         "generating":       "正在撰写答案",
-        "meta":             "正在整理来源和推荐问题",
+        "meta":             "正在整理来源",
     },
     "es": {
         "analyzing":        "Entendiendo tu pregunta",
@@ -147,7 +147,7 @@ _STATUS_LABELS = {
         "search_one":       "[{name}] encontrado",
         "search_many":      "[{name}] y {n} más encontrados",
         "generating":       "Escribiendo tu respuesta",
-        "meta":             "Preparando fuentes y sugerencias",
+        "meta":             "Preparando fuentes",
     },
     "vi": {
         "analyzing":        "Đang phân tích câu hỏi",
@@ -156,7 +156,7 @@ _STATUS_LABELS = {
         "search_one":       "Đã tìm thấy [{name}]",
         "search_many":      "Đã tìm thấy [{name}] và {n} tài liệu khác",
         "generating":       "Đang soạn câu trả lời",
-        "meta":             "Đang chuẩn bị nguồn và gợi ý",
+        "meta":             "Đang chuẩn bị nguồn",
     },
 }
 

@@ -31,6 +31,9 @@ class Settings(BaseSettings):
     chunk_overlap: int = 150
     # PDF에서 공백 없이 붙어 나온 한국어 줄만 띄어쓰기 복원 (환경변수 PDF_SPACING_FIX, app/core/spacing.py)
     pdf_spacing_fix: bool = True
+    # 후속(추천) 질문 생성 (환경변수 SUGGESTIONS_ENABLED). 2026-10-03 팀에서 쓰지 않기로 해 기본값을 끔.
+    # 코드는 남겨 두었고 true로 바꾸면 기존 검색·에이전트 경로 모두 다시 생성한다.
+    suggestions_enabled: bool = False
 
     # RAG Retrieval
     top_k_results: int = 10 # LLM에게 최종적으로 넘길 chunk 수

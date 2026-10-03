@@ -32,6 +32,10 @@ _async_client = AsyncOpenAI(api_key=settings.openai_api_key)
 SOURCE_MIN_SCORE = 0.7  # done 이벤트에 보낼 출처의 최소 점수
 
 
+async def _no_suggestions() -> List[str]:
+    return []
+
+
 def _sse(payload: Dict) -> str:
     return f"data: {json.dumps(payload, ensure_ascii=False)}\n\n"
 
@@ -207,10 +211,13 @@ async def run_rag_stream(
     yield _sse({"type": "status", "content": labels["generating"]})
     await asyncio.sleep(0)
 
-    # 3. 후속 질문을 미리 시작하고 답변을 스트리밍
-    suggestion_task = asyncio.create_task(generate_suggestions_async(
-        question=question, suggestion_context=context, lang_instruction=lang_inst, lang=language,
-    ))
+    # 3. 후속 질문을 미리 시작하고 답변을 스트리밍 (SUGGESTIONS_ENABLED가 꺼져 있으면 만들지 않음)
+    if getattr(settings, "suggestions_enabled", False):
+        suggestion_task = asyncio.create_task(generate_suggestions_async(
+            question=question, suggestion_context=context, lang_instruction=lang_inst, lang=language,
+        ))
+    else:
+        suggestion_task = asyncio.create_task(_no_suggestions())
     full_answer = ""
     try:
         async for token in stream_answer(

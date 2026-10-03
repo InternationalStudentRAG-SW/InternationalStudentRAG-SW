@@ -177,9 +177,15 @@ async def run_agent_stream(
     suggestions: List[str] = []
     if sources:
         yield _sse({"type": "meta", "content": labels["meta"]})
-        suggestions = await _suggest(question, answer, language, suggest_fn)
+        if getattr(_settings(), "suggestions_enabled", False):
+            suggestions = await _suggest(question, answer, language, suggest_fn)
     yield _sse({"type": "done", "sources": sources, "suggestions": suggestions})
     await save_log(sources, suggestions)
+
+
+def _settings():
+    from app.config import settings
+    return settings
 
 
 async def _suggest(question: str, answer: str, language: str, suggest_fn) -> List[str]:

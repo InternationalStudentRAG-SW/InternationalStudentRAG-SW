@@ -246,7 +246,7 @@ def test_no_escalation_for_agent_route_or_non_search():
 
 # ── 기본 RAG 스트리밍 (하이브리드+리랭커) ─────────────────────────────────
 
-def _load_rag_stream(monkeypatch, sources, answer_tokens):
+def _load_rag_stream(monkeypatch, sources, answer_tokens, suggestions_enabled=True):
     calls = {}
 
     class FakeRetriever:
@@ -272,7 +272,7 @@ def _load_rag_stream(monkeypatch, sources, answer_tokens):
     fake_openai.AsyncOpenAI = lambda **kw: SimpleNamespace(
         chat=SimpleNamespace(completions=SimpleNamespace(create=fake_create)))
     fake_config = types.ModuleType("app.config")
-    fake_config.settings = SimpleNamespace(openai_api_key="x")
+    fake_config.settings = SimpleNamespace(openai_api_key="x", suggestions_enabled=suggestions_enabled)
     fake_retriever = types.ModuleType("app.core.retriever")
     fake_retriever.retriever = FakeRetriever()
     fake_llm = types.ModuleType("app.core.llm")
@@ -326,8 +326,8 @@ def test_condition_outside_checklist_still_routes_to_agent():
 
 # ── 에이전트 SSE 어댑터 (app/core/agent_stream.py) ─────────────────────────────
 
-def _load_agent_stream(monkeypatch):
-    rag, _ = _load_rag_stream(monkeypatch, [], [])
+def _load_agent_stream(monkeypatch, suggestions_enabled=True):
+    rag, _ = _load_rag_stream(monkeypatch, [], [], suggestions_enabled=suggestions_enabled)
     monkeypatch.setitem(sys.modules, "app.core.rag_stream", rag)
     monkeypatch.delitem(sys.modules, "app.core.agent_stream", raising=False)
     mod = importlib.import_module("app.core.agent_stream")
@@ -645,3 +645,38 @@ def test_router_prompt_and_answer_rule_for_shared_phrase():
     from app.core.single_agent import router, answerer
     assert "그 구절 전체를 각 요구의 quote로" in router.SYSTEM_PROMPT_TEMPLATE
     assert "목록에 빠진 부분이 있어도" in answerer.SYSTEM_PROMPT
+
+
+# ── 후속 질문 생성 끄기 (SUGGESTIONS_ENABLED=false, 2026-10-03 기본값) ─────────────────
+
+def test_rag_stream_skips_suggestions_when_disabled(monkeypatch):
+    mod, calls = _load_rag_stream(monkeypatch, [{"source": "a.pdf", "chunk_index": 3, "similarity_score": 0.9}],
+                                  ["답변"], suggestions_enabled=False)
+    called = []
+
+    async def should_not_run(**kw):
+        called.append(1)
+        return ["후속 질문"]
+
+    monkeypatch.setattr(mod, "generate_suggestions_async", should_not_run)
+    events = _collect(mod.run_rag_stream("질문", "ko"))
+    assert events[-1]["type"] == "done" and events[-1]["suggestions"] == [] and called == []
+    assert events[-1]["sources"]
+
+
+def test_agent_stream_skips_suggestions_when_disabled(monkeypatch):
+    mod = _load_agent_stream(monkeypatch, suggestions_enabled=False)
+    called = []
+
+    async def suggest(q, a, lang):
+        called.append(1)
+        return ["다음 질문"]
+
+    pipeline = lambda q, h, on_event=None: _fake_run("answer", "1년까지 가능합니다. [1]", ["E.pdf"])
+    events = _collect(mod.run_agent_stream("휴학?", "ko", ko_query="휴학?", pipeline_fn=pipeline, suggest_fn=suggest))
+    assert events[-1]["suggestions"] == [] and events[-1]["sources"] and called == []
+
+
+def test_config_default_disables_suggestions():
+    from app.config import Settings
+    assert Settings.model_fields["suggestions_enabled"].default is False

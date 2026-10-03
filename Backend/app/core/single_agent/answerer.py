@@ -77,7 +77,8 @@ SYSTEM_PROMPT = """당신은 동아대학교 유학생 챗봇의 '답변 작성'
     (예: '부득이한 사유가 있으면 가능')으로 그 금지가 풀린다고 쓰지 않습니다. 금지를 먼저 쓰고, 다른 규정은 적용되는 상황을 밝혀 따로 씁니다.
 11. 횟수·기간·점수·비율은 근거에 적힌 조건과 함께 그대로 씁니다. 조건의 일부를 빼지 않습니다
     (예: '연속 3일 이상 또는 월 누계 5일 이상'을 '3일 이상'으로 줄이지 않음).
-12. '사용자가 물은 것'이 있으면 그 요구마다 답합니다. '문서에서 확인한 내용(칸별)'은 참고용 요약이고, 답은 근거 목록의
+12. 확인하지 못했다고 쓰는 문장에는 [번호]를 붙이지 않습니다 (근거가 없다는 뜻이므로).
+    '사용자가 물은 것'이 있으면 그 요구마다 답합니다. '문서에서 확인한 내용(칸별)'은 참고용 요약이고, 답은 근거 목록의
     원문(영어 원문 포함)에서 직접 찾아 씁니다. 요약에 없더라도 원문에 있으면 씁니다.
     요구 목록은 참고용입니다. 사용자 질문에서 목록에 빠진 부분이 있어도 근거가 있으면 답합니다.
 13. 물은 항목의 근거 원문에 함께 적힌 조건·비고·예외·예시도 같이 씁니다
@@ -328,16 +329,49 @@ def next_chunks(ids: List[str], pool: EvidencePool, n: int) -> List[str]:
     return out
 
 
+def prev_chunks(ids: List[str], pool: EvidencePool, n: int) -> List[str]:
+    """근거 조각마다 같은 문서·같은 페이지에서 바로 앞 조각(풀에 있는 것만) 최대 n개. 가까운 것부터."""
+    out: List[str] = []
+    for eid in ids:
+        pos = parse_evidence_id(eid)
+        if pos is None:
+            continue
+        src, page, idx = pos
+        for k in range(1, n + 1):
+            if idx - k < 0:
+                break
+            cid = make_evidence_id(src, page, idx - k)
+            if cid not in pool:
+                break                      # 바로 앞 조각이 없으면 더 앞은 건너뛰지 않는다
+            if cid not in ids and cid not in out:
+                out.append(cid)
+    return out
+
+
+def neighbor_chunks(ids: List[str], pool: EvidencePool) -> List[str]:
+    """이어지는 조각과 앞 조각을 가까운 순서로: 모든 근거의 바로 뒤 → 바로 앞 → 두 칸 뒤 …"""
+    out: List[str] = []
+    for dist in range(1, max(cfg.ANSWER_NEXT_CHUNKS, cfg.ANSWER_PREV_CHUNKS) + 1):
+        for eid in ids:
+            nxt = next_chunks([eid], pool, cfg.ANSWER_NEXT_CHUNKS)[dist - 1: dist] if dist <= cfg.ANSWER_NEXT_CHUNKS else []
+            prv = prev_chunks([eid], pool, cfg.ANSWER_PREV_CHUNKS)[dist - 1: dist] if dist <= cfg.ANSWER_PREV_CHUNKS else []
+            for cid in nxt + prv:
+                if cid not in ids and cid not in out:
+                    out.append(cid)
+    return out
+
+
 def _with_extra(ids: List[str], extra: Optional[List[str]], pool: EvidencePool, w: List[str]) -> List[str]:
-    """추가 근거(요구별 상위·이어지는 조각)를 근거 목록 뒤에 붙인다. 상한을 넘으면 칸 근거 뒤쪽을 덜어 자리를 만든다."""
-    extra = list(extra or []) + [e for e in next_chunks(ids, pool, cfg.ANSWER_NEXT_CHUNKS) if e not in (extra or [])]
-    add = [e for e in extra if e in pool and e not in ids]
+    """
+    추가 근거(요구별 상위·이어지는·앞 조각)를 근거 목록 뒤에 붙인다. 칸 근거는 그대로 두고
+    추가분만 ANSWER_MAX_EXTRA개까지 (가까운 조각부터).
+    """
+    extra = list(extra or []) + [e for e in neighbor_chunks(ids, pool) if e not in (extra or [])]
+    add = [e for e in extra if e in pool and e not in ids][: cfg.ANSWER_MAX_EXTRA]
     if not add:
         return ids
-    add = add[: cfg.ANSWER_MAX_EVIDENCE]
-    keep = ids[: max(cfg.ANSWER_MAX_EVIDENCE - len(add), 0)]
-    w.append(f"[보완] 추가 근거 {len(add)}개를 ⑤에 보여줌 (요구별 검색 상위·이어지는 조각)")
-    return keep + add
+    w.append(f"[보완] 추가 근거 {len(add)}개를 ⑤에 보여줌 (요구별 검색 상위·앞뒤 조각)")
+    return ids + add
 
 
 _CAVEAT_RE = re.compile(r"(다만|단,|단서|연장|예외|제출하여야|제출해야|증빙|However|however|extend|extension|additional|"

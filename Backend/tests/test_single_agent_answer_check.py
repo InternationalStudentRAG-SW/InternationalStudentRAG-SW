@@ -498,3 +498,29 @@ def test_replay_uses_saved_evidence(monkeypatch):
 def test_caveat_feedback_skips_inapplicable_caveats():
     import inspect
     assert "사용자 상황에 적용되지 않는 단서도 넣지 않습니다" in inspect.getsource(answerer._caveat_pass)
+
+
+def test_prev_chunk_added_same_page_only():
+    """LANG 10/3 23시: 면제 조건 p6#c4만 연결되고 바로 앞 p6#c3의 점수 표가 빠짐."""
+    from app.core.single_agent.answerer import prev_chunks, neighbor_chunks, _with_extra
+    pool = _pool_of(("e.pdf#p6#c2", "C. Eligibility requirements"), ("e.pdf#p6#c3", "IELTS 5.5 TOEFL 3.5 TEPS 202"),
+                    ("e.pdf#p6#c4", "exempt countries"), ("e.pdf#p5#c9", "previous page"), ("e.pdf#p7#c0", "next page"))
+    assert prev_chunks(["e.pdf#p6#c4"], pool, 1) == ["e.pdf#p6#c3"]
+    assert prev_chunks(["e.pdf#p6#c0"], pool, 1) == []                  # 페이지 첫 조각이면 앞 페이지로 넘어가지 않음
+    assert neighbor_chunks(["e.pdf#p6#c4"], pool) == ["e.pdf#p7#c0", "e.pdf#p6#c3"]   # 바로 뒤 → 바로 앞
+    w = []
+    assert _with_extra(["e.pdf#p6#c4"], [], pool, w)[:1] == ["e.pdf#p6#c4"] and "e.pdf#p6#c3" in _with_extra(["e.pdf#p6#c4"], [], pool, w)
+
+
+def test_with_extra_keeps_slot_evidence_and_caps_extra(monkeypatch):
+    from app.core.single_agent.answerer import _with_extra
+    items = [(f"d.pdf#p1#c{i}", f"t{i}") for i in range(20)]
+    pool = _pool_of(*items)
+    ids = [f"d.pdf#p1#c{i}" for i in range(0, 20, 4)]                    # 칸 근거 5개
+    monkeypatch.setattr(cfg, "ANSWER_MAX_EXTRA", 3)
+    out = _with_extra(ids, [], pool, [])
+    assert out[:5] == ids and len(out) == 8                              # 칸 근거는 그대로, 추가는 3개까지
+
+
+def test_unconfirmed_sentence_rule_in_prompt():
+    assert "확인하지 못했다고 쓰는 문장에는 [번호]를 붙이지 않습니다" in answerer.SYSTEM_PROMPT

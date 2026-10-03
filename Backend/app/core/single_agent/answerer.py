@@ -24,7 +24,7 @@ from app.core.single_agent.analysis_schema import QuestionAnalysis
 from app.core.single_agent.answer_check import check_answer, drop_units, feedback_message
 from app.core.single_agent.answer_schema import AnswerRun, AnswerSource
 from app.core.single_agent.branching import branch_lines
-from app.core.single_agent.evidence_schema import EvidencePool
+from app.core.single_agent.evidence_schema import EvidencePool, make_evidence_id, parse_evidence_id
 from app.core.single_agent.llm import get_client, model_for, run_json_loop
 from app.core.single_agent.text_match import list_quote_in_text, normalize, quote_in_text
 from app.core.single_agent.verify_schema import VerifyDecision
@@ -304,6 +304,110 @@ def _check_and_fix(run: AnswerRun, client, model: str, messages: List[Dict], mod
             run.warnings.append("[확인 필요] 근거 없는 문장을 빼면 답이 남지 않아 그대로 둠")
 
 
+def next_chunks(ids: List[str], pool: EvidencePool, n: int) -> List[str]:
+    """근거 조각마다 같은 문서에서 바로 뒤에 오는 조각(풀에 있는 것만) 최대 n개. 문서 순서 기준."""
+    out: List[str] = []
+    if n <= 0:
+        return out
+    for eid in ids:
+        pos = parse_evidence_id(eid)
+        if pos is None:
+            continue
+        src, page, idx = pos
+        same_doc = sorted((p[1], p[2]) for p in (parse_evidence_id(k) for k in pool.chunks) if p and p[0] == src)
+        after = [(pg, ci) for pg, ci in same_doc if (pg, ci) > (page, idx) and pg <= page + 1]
+        for pg, ci in after[:n]:
+            # 바로 이어지는 조각만: 같은 페이지의 다음 번호들, 또는 다음 페이지의 앞쪽
+            if pg == page and ci > idx + n:
+                break
+            if pg == page + 1 and ci > n - 1:
+                break
+            cid = make_evidence_id(src, pg, ci)
+            if cid not in ids and cid not in out:
+                out.append(cid)
+    return out
+
+
+def _with_extra(ids: List[str], extra: Optional[List[str]], pool: EvidencePool, w: List[str]) -> List[str]:
+    """추가 근거(요구별 상위·이어지는 조각)를 근거 목록 뒤에 붙인다. 상한을 넘으면 칸 근거 뒤쪽을 덜어 자리를 만든다."""
+    extra = list(extra or []) + [e for e in next_chunks(ids, pool, cfg.ANSWER_NEXT_CHUNKS) if e not in (extra or [])]
+    add = [e for e in extra if e in pool and e not in ids]
+    if not add:
+        return ids
+    add = add[: cfg.ANSWER_MAX_EVIDENCE]
+    keep = ids[: max(cfg.ANSWER_MAX_EVIDENCE - len(add), 0)]
+    w.append(f"[보완] 추가 근거 {len(add)}개를 ⑤에 보여줌 (요구별 검색 상위·이어지는 조각)")
+    return keep + add
+
+
+_CAVEAT_RE = re.compile(r"(다만|단,|단서|연장|예외|제출하여야|제출해야|증빙|However|however|extend|extension|additional|"
+                        r"except|supporting document|must submit|must be submitted)")
+_SENT_SPLIT = re.compile(r"(?<=[.!?。])\s+|\n+|(?<=다\.)\s*|\s(?=-\s)|\s(?=[①-⑳])")
+
+
+def caveat_sentences(answer_run: AnswerRun, evidence_ids: List[str], pool: EvidencePool) -> List[str]:
+    """
+    ⑤가 출처·인용으로 쓴 근거 청크에서 단서·연장·예외·제출 문장을 찾고, facts에 옮기지 않은 것만 돌려준다.
+    (답이 한국어이고 원문이 영어일 수 있어서 답 본문과는 대조하지 않고 facts 인용과 대조한다)
+    """
+    used = {s.number for s in answer_run.sources} | {f["evidence"] for f in answer_run.facts}
+    quoted = [normalize(f.get("quote", "")) for f in answer_run.facts]
+    out: List[str] = []
+    # 인용·출처로 쓴 근거를 먼저, 그다음 보여준 나머지 근거 (E2: 연장 단서가 인용하지 않은 [2]에 있었음)
+    # 인용하지 않은 근거는 인용한 근거와 같은 문서·같은 페이지인 것만 본다 (상관없는 문서의 단서로 다시 쓰지 않게)
+    pages = {parse_evidence_id(evidence_ids[n - 1])[:2] for n in used
+             if 1 <= n <= len(evidence_ids) and parse_evidence_id(evidence_ids[n - 1])}
+    order = sorted(used) + [n for n in range(1, len(evidence_ids) + 1) if n not in used
+                            and (parse_evidence_id(evidence_ids[n - 1]) or ("", 0, 0))[:2] in pages]
+    for n in order:
+        if not 1 <= n <= len(evidence_ids):
+            continue
+        for sent in _SENT_SPLIT.split(pool.get(evidence_ids[n - 1]).text or ""):
+            sent = (sent or "").strip(" -|*")
+            key = normalize(sent)
+            if len(key) < 12 or not _CAVEAT_RE.search(sent):
+                continue
+            if any(key in q or (len(q) >= 12 and q in key) for q in quoted):
+                continue
+            item = f"[{n}] {sent[:300]}"
+            if item not in out:
+                out.append(item)
+    return out[: cfg.ANSWER_CAVEAT_MAX_SENTENCES]
+
+
+def _caveat_pass(run: AnswerRun, client, model: str, messages: List[Dict], evidence_ids: List[str],
+                 pool: EvidencePool, parse) -> None:
+    sents = caveat_sentences(run, evidence_ids, pool)
+    if not sents:
+        return
+    run.caveat_sentences = sents
+    feedback = (
+        "답변이 쓴 근거에 아래 단서·연장·예외·제출 문장이 있는데 facts와 답에 반영되지 않았습니다.\n"
+        + "\n".join(f"- {s}" for s in sents)
+        + "\n\n이 문장이 사용자 질문과 관련 있으면 facts에 원문 그대로 옮기고 답에 반영하세요 (문장 끝에 [번호]). "
+          "질문과 관련 없으면 넣지 마세요. 사용자 상황에 적용되지 않는 단서도 넣지 않습니다 "
+          "(예: 이미 '불가'라고 답한 경우에 다른 상황의 신청 절차·서류). "
+          "이미 쓴 내용은 그대로 두고, 근거에 없는 내용은 추가하지 않습니다.\n"
+          '{"facts": [...], "answer": "..."} 형식의 JSON만 다시 출력하세요.'
+    )
+    retry = messages + [{"role": "assistant", "content": run.raw_output or json.dumps({"answer": run.answer}, ensure_ascii=False)},
+                        {"role": "user", "content": feedback}]
+    before_facts = list(run.facts)
+    run.facts = []                       # parse가 새 facts를 기록하게
+    text, ok = run_json_loop(run, client, model, retry, parse=parse, temperature=0.0,
+                             max_tokens=ANSWER_MAX_TOKENS, purpose="answer_caveat",
+                             format_hint='{"facts": [...], "answer": "..."} 형식의 JSON만 다시 출력하세요.')
+    if not ok:
+        run.facts = before_facts
+        run.error = None
+        run.warnings.append("[단서 확인] 다시 쓰기 실패 → 처음 답변 유지")
+        return
+    if not run.facts:
+        run.facts = before_facts
+    run.answer, run.sources = _clean_markers(text, evidence_ids, pool, run.warnings)
+    run.warnings.append(f"[단서 확인] 반영 안 된 단서 문장 {len(sents)}개 → 1회 다시 씀")
+
+
 def write_answer(
     question: str,
     mode: str,
@@ -313,12 +417,15 @@ def write_answer(
     model: Optional[str] = None,
     client=None,
     asks=None,
+    extra_evidence_ids: Optional[List[str]] = None,
 ) -> AnswerRun:
     """최종 답변을 만든다. asks: ⓪ 라우터가 나눈 사용자 요구 (있으면 요구마다 답하게 한다). 실패해도 예외 대신 run.error에 이유를 담고 안내 문구를 answer에 넣는다."""
     run = AnswerRun(mode=mode)
     started = time.perf_counter()
     pool = pool or EvidencePool()
     evidence_ids = _evidence_order(analysis, decision, pool) if (analysis and mode in EVIDENCE_MODES) else []
+    if evidence_ids or mode in EVIDENCE_MODES:
+        evidence_ids = _with_extra(evidence_ids, extra_evidence_ids, pool, run.warnings) if analysis else evidence_ids
     run.shown_evidence_ids = evidence_ids
     if mode in ("answer", "answer_by_condition", "partial_answer") and not evidence_ids:
         run.warnings.append(f"[확인 필요] {mode}인데 넣을 근거 청크가 없음 → no_evidence로 답변")
@@ -346,6 +453,8 @@ def write_answer(
         run.latency_ms = int((time.perf_counter() - started) * 1000)
         return run
     run.answer, run.sources = _clean_markers(text, evidence_ids, pool, run.warnings)
+    if cfg.ANSWER_CAVEAT_CHECK and mode in ("answer", "answer_by_condition", "partial_answer") and evidence_ids:
+        _caveat_pass(run, client, model, messages, evidence_ids, pool, parse)
     if cfg.ANSWER_QUOTE_FIRST and mode in EVIDENCE_MODES and evidence_ids and not any(f.get("verified") for f in run.facts):
         run.warnings.append("[확인 필요] 인용 먼저 쓰기: 원문과 맞는 인용(facts)이 하나도 없음")
     if cfg.ANSWER_CHECK_ENABLED and mode in EVIDENCE_MODES and evidence_ids:

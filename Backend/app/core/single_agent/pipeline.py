@@ -59,8 +59,24 @@ def ask_seed_plans(route_asks, target_slot_id: str, tried: List[str]) -> List[Se
             continue
         seen.add(normalize(q))
         plans.append(SearchPlan(action="search", target_slot_id=target_slot_id, search_type="new",
-                                query_ko=q, query_en=en or None, reason=f"첫 라운드 요구별 검색 ({ask_id})"))
+                                query_ko=q, query_en=en or None, reason=f"{ASK_SEED_REASON} ({ask_id})"))
     return plans
+
+
+ASK_SEED_REASON = "첫 라운드 요구별 검색"
+
+
+def ask_extra_evidence(search_runs) -> List[str]:
+    """요구별 검색(첫 라운드)마다 상위 ANSWER_ASK_EXTRA개 청크. ⑤에 추가로 보여줄 근거 (중복 제거, 순서 유지)."""
+    out: List[str] = []
+    for s in search_runs or []:
+        plan = getattr(s, "plan", None)
+        if not getattr(s, "ok", False) or plan is None or not (plan.reason or "").startswith(ASK_SEED_REASON):
+            continue
+        for cid in list(s.chunk_ids)[: cfg.ANSWER_ASK_EXTRA]:
+            if cid not in out:
+                out.append(cid)
+    return out
 
 
 def general_query_for(analysis: QuestionAnalysis, question: str = "") -> str:
@@ -138,7 +154,7 @@ def run_pipeline(
         run.decision = decision
         emit("answer_start", {"mode": mode})
         run.answer_run = write_answer(question, mode, analysis, pool, decision, model=answer_model, client=client,
-                                      asks=route_asks)
+                                      asks=route_asks, extra_evidence_ids=ask_extra_evidence(run.search_runs))
         emit("answer", {"mode": run.answer_run.mode, "answer": run.answer_run.answer,
                         "sources": [s.model_dump() for s in run.answer_run.sources]})
         run.latency_ms = int((time.perf_counter() - started) * 1000)

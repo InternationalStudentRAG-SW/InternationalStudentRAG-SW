@@ -427,3 +427,71 @@ def test_pipeline_runs_per_ask_searches_without_using_budget(monkeypatch):
     assert "영어 트랙 어학 성적 면제 조건" in queries
     assert len(seen["chunks"]) >= 4                   # 합친 검색 + 요구별 3개
     assert seen["budget"].subqueries == 1             # 요구별 검색은 예산에 넣지 않음
+
+
+# ── 이어지는 조각·단서 확인 (10/3 비교 실험 GKSW·E2) ───────────────────────────
+
+def _pool_of(*items):
+    pool = EvidencePool()
+    for eid, text in items:
+        src, page, idx = eid.split("#")
+        pool.add(EvidenceChunk(evidence_id=eid, source=src, page=int(page[1:]), chunk_index=int(idx[1:]), text=text),
+                 RetrievalTag(target_slot_id="rule", search_type="new", query_ko="q"))
+    return pool
+
+
+def test_next_chunks_adds_following_list_items():
+    from app.core.single_agent.answerer import next_chunks
+    pool = _pool_of(("k.pdf#p6#c1", "제19조(자격상실) 1. 제적"), ("k.pdf#p7#c0", "3. 등록 안 함"),
+                    ("k.pdf#p7#c1", "9. 경고를 3회 이상 받은 경우"), ("k.pdf#p9#c0", "먼 조각"), ("e.pdf#p6#c2", "다른 문서"))
+    assert next_chunks(["k.pdf#p6#c1"], pool, 2) == ["k.pdf#p7#c0", "k.pdf#p7#c1"]
+    assert next_chunks(["k.pdf#p6#c1"], pool, 0) == []
+    assert next_chunks(["k.pdf#p7#c1"], pool, 2) == []          # 다음 조각이 풀에 없으면 건너뛰지 않음
+
+
+def test_caveat_sentences_from_cited_and_same_page():
+    from app.core.single_agent.answerer import caveat_sentences
+    from app.core.single_agent.answer_schema import AnswerRun, AnswerSource
+    pool = _pool_of(("g.pdf#p5#c3", "Leave of absence only under unavoidable circumstances. The recipient must submit an application along with supporting documents."),
+                    ("g.pdf#p5#c4", "Leave of absence must be applied for on a semester basis. However, the president may grant an additional extension of up to one (1) year."),
+                    ("o.pdf#p2#c0", "However, this unrelated document has a caveat sentence here."))
+    ids = ["g.pdf#p5#c3", "g.pdf#p5#c4", "o.pdf#p2#c0"]
+    ar = AnswerRun(mode="answer", sources=[AnswerSource(number=1, evidence_id=ids[0], source="g.pdf", page=5)],
+                   facts=[{"ask": "a", "evidence": 1, "quote": "Leave of absence only under unavoidable circumstances.", "verified": True}])
+    out = caveat_sentences(ar, ids, pool)
+    assert any("supporting documents" in s for s in out) and any("additional extension" in s for s in out)
+    assert not any("unrelated" in s for s in out)                 # 다른 문서의 인용 안 한 조각은 보지 않음
+
+
+def test_caveat_pass_rewrites_once(monkeypatch):
+    from app.core.single_agent.answerer import write_answer
+    pool = _pool_of(("g.pdf#p5#c3", "Leave of absence is permitted only under unavoidable circumstances. However, the president may grant an additional extension of up to one (1) year."))
+    monkeypatch.setattr(answerer, "_evidence_order", lambda a, d, p: ["g.pdf#p5#c3"])
+    first = {"facts": [{"ask": "조건", "evidence": 1, "quote": "Leave of absence is permitted only under unavoidable circumstances."}],
+             "answer": "부득이한 사유가 있을 때만 휴학할 수 있습니다[1]."}
+    second = {"facts": first["facts"] + [{"ask": "기간", "evidence": 1, "quote": "However, the president may grant an additional extension of up to one (1) year."}],
+              "answer": "부득이한 사유가 있을 때만 휴학할 수 있습니다[1]. 기관장이 인정하면 1년 추가 연장할 수 있습니다[1]."}
+    client = FakeClient([first, second])
+    analysis = QuestionAnalysis(intent_summary="휴학", answer_scope="general", next_action="search")
+    run = write_answer("q", "answer", analysis=analysis, pool=pool, client=client, model="fake")
+    assert client.calls == 2 and "1년 추가 연장" in run.answer and run.caveat_sentences
+    assert len(run.facts) == 2
+
+
+def test_replay_uses_saved_evidence(monkeypatch):
+    from evaluate import replay_answer
+    from app.core.single_agent.answer_schema import PipelineRun, AnswerRun
+    run = PipelineRun(question="q", pool=_pool_of(("g.pdf#p1#c0", "t")), answer_run=AnswerRun(mode="partial_answer"))
+    seen = {}
+
+    def fake_write(q, mode, analysis, pool, decision, asks=None, extra_evidence_ids=None):
+        seen.update(q=q, mode=mode, asks=asks, n=len(pool))
+        return AnswerRun(mode=mode, answer="새 답")
+
+    out = replay_answer.replay({"run": run.model_dump(), "router": {"result": {"asks": [{"text": "A"}]}}}, write_fn=fake_write)
+    assert out.answer == "새 답" and seen == {"q": "q", "mode": "partial_answer", "asks": [{"text": "A"}], "n": 1}
+
+
+def test_caveat_feedback_skips_inapplicable_caveats():
+    import inspect
+    assert "사용자 상황에 적용되지 않는 단서도 넣지 않습니다" in inspect.getsource(answerer._caveat_pass)

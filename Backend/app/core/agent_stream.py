@@ -58,22 +58,26 @@ def _sse(payload: Dict) -> str:
 
 
 def format_sources(run) -> List[Dict]:
-    """⑤가 본문에 실제로 쓴 근거만 프론트 출처 형식(source, chunk_index, similarity_score)으로 바꾼다."""
-    out: List[Dict] = []
-    seen = set()
+    """
+    ⑤가 본문에 실제로 쓴 근거만 프론트 출처 형식(source, chunk_index, similarity_score)으로 바꾼다.
+    화면은 문서 이름과 관련도만 보여주므로, 기존 검색 경로(retriever.retrieve_with_sources, 커밋 52ec76d)와 같이
+    **문서 하나당 한 줄**만 남긴다. 같은 문서가 여러 번이면 관련도가 가장 높은 조각을 대표로 쓴다.
+    (2026-10-03: 같은 문서의 다른 조각이 이름만 같은 여러 줄로 보여 중복처럼 보였음)
+    """
+    best: Dict[str, Dict] = {}
+    order: List[str] = []
     answer_run = getattr(run, "answer_run", None)
     for s in (answer_run.sources if answer_run else []):
         chunk = run.pool.get(s.evidence_id) if getattr(run, "pool", None) else None
-        # 같은 문서의 다른 페이지에 chunk_index가 같은 청크가 있으므로 근거 ID로 중복을 판단한다
-        # (2026-10-03: p5#c3과 p9#c3이 하나로 합쳐져 [4] 출처가 사라짐)
-        key = s.evidence_id
-        if key in seen:
-            continue
-        seen.add(key)
         score = chunk.score if chunk and chunk.score is not None else 1.0  # 확장으로만 얻은 청크는 점수 없음
-        out.append({"source": s.source, "chunk_index": chunk.chunk_index if chunk else 0,
-                    "similarity_score": float(score)})
-    return out
+        item = {"source": s.source, "chunk_index": chunk.chunk_index if chunk else 0,
+                "similarity_score": float(score)}
+        if s.source not in best:
+            order.append(s.source)
+            best[s.source] = item
+        elif item["similarity_score"] > best[s.source]["similarity_score"]:
+            best[s.source] = item
+    return [best[src] for src in order]
 
 
 async def run_agent_stream(

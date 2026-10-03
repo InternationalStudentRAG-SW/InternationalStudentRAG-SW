@@ -361,18 +361,21 @@ def test_model_for_answer_uses_answer_model(monkeypatch):
     assert model_for("analyze") == "gpt-4o-mini"
 
 
-def test_format_sources_keeps_same_chunk_index_on_different_pages(monkeypatch):
+def test_format_sources_one_line_per_document(monkeypatch):
     from tests.test_single_agent_router import _load_agent_stream
     format_sources = _load_agent_stream(monkeypatch).format_sources
     from app.core.single_agent.answer_schema import AnswerRun, AnswerSource
     pool = EvidencePool()
-    for page in (5, 9):
-        pool.add(EvidenceChunk(evidence_id=f"g.pdf#p{page}#c3", source="g.pdf", page=page, chunk_index=3, text="t", score=0.9),
+    for eid, src, page, idx, score in (("g.pdf#p5#c3", "g.pdf", 5, 3, 0.7), ("k.pdf#p2#c0", "k.pdf", 2, 0, 0.8),
+                                       ("g.pdf#p9#c3", "g.pdf", 9, 3, 0.95)):
+        pool.add(EvidenceChunk(evidence_id=eid, source=src, page=page, chunk_index=idx, text="t", score=score),
                  RetrievalTag(target_slot_id="rule", search_type="new", query_ko="q"))
     ar = AnswerRun(mode="answer", sources=[AnswerSource(number=1, evidence_id="g.pdf#p5#c3", source="g.pdf", page=5),
+                                           AnswerSource(number=2, evidence_id="k.pdf#p2#c0", source="k.pdf", page=2),
                                            AnswerSource(number=4, evidence_id="g.pdf#p9#c3", source="g.pdf", page=9)])
     out = format_sources(SimpleNamespace(answer_run=ar, pool=pool))
-    assert len(out) == 2 and [o["chunk_index"] for o in out] == [3, 3]
+    # 문서당 한 줄, 처음 나온 순서 유지, 같은 문서는 관련도가 가장 높은 조각으로
+    assert [(o["source"], o["similarity_score"]) for o in out] == [("g.pdf", 0.95), ("k.pdf", 0.8)]
 
 
 def test_answer_prompt_keeps_prohibition_across_documents():

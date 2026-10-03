@@ -36,6 +36,33 @@ from app.core.single_agent.verify_schema import VerifyDecision
 EventFn = Callable[[str, Dict], None]
 
 
+_ASK_REF_RE = re.compile(r"#A\d+")
+
+
+def ask_seed_plans(route_asks, target_slot_id: str, tried: List[str]) -> List[SearchPlan]:
+    """
+    ⓪ 라우터 요구마다 첫 라운드 검색 계획을 만든다. 요구가 2개 미만이면 만들지 않는다.
+    의존 요구의 '#A1' 자리 표시는 지우고, 이미 시도한 검색어와 같으면 건너뛴다.
+    """
+    asks = []
+    for a in route_asks or []:
+        d = a.model_dump() if hasattr(a, "model_dump") else dict(a)
+        q = " ".join(_ASK_REF_RE.sub(" ", str(d.get("query_ko") or d.get("text") or "")).split())
+        if q:
+            asks.append((d.get("ask_id", ""), q, " ".join(_ASK_REF_RE.sub(" ", str(d.get("query_en") or "")).split())))
+    if len(asks) < 2:
+        return []
+    seen = {normalize(t) for t in tried}
+    plans = []
+    for ask_id, q, en in asks[: cfg.ROUTER_MAX_ASKS]:
+        if normalize(q) in seen:
+            continue
+        seen.add(normalize(q))
+        plans.append(SearchPlan(action="search", target_slot_id=target_slot_id, search_type="new",
+                                query_ko=q, query_en=en or None, reason=f"첫 라운드 요구별 검색 ({ask_id})"))
+    return plans
+
+
 def general_query_for(analysis: QuestionAnalysis, question: str = "") -> str:
     """
     사용자 조건을 뺀 일반 규정 검색어. 첫 검색어에서 사용자 사례 조건(user_self / other_person)의 단어
@@ -168,6 +195,17 @@ def run_pipeline(
             completed_expansions.add((tuple(sorted(set(ex.anchor_ids))), cfg.EXPAND_WINDOW))
         round_chunks += ex.chunk_ids
         round_new_chunks = list(ex.new_chunk_ids)
+        if rnd == 1 and cfg.PER_ASK_FIRST_ROUND and plan.search_type == "new":
+            # 요구별 검색: 예산 계산에 넣지 않도록 복사본 예산으로 실행하고 결과 예산은 버린다 (상한은 요구 수)
+            for seed in ask_seed_plans(route_asks, plan.target_slot_id, [h.query_ko for h in attempts]):
+                exs = execute_search(seed, pool, SearchBudget(), search_fn=search_fn, store=store)
+                run.search_runs.append(exs)
+                if exs.ok:
+                    # 검색 기록(attempts)에는 넣지 않는다: 칸별 시도 상한을 쓰면 ②가 그 칸을 더 못 찾는다
+                    round_chunks += exs.chunk_ids
+                    round_new_chunks += exs.new_chunk_ids
+                else:
+                    run.warnings.append(f"③ 요구별 검색 실패 [{exs.error_type}]: {exs.error}")
         if (rnd == 1 and cfg.AUTO_EXPAND_FIRST_ROUND and plan.search_type == "new" and ex.chunk_ids
                 and check_budget(budget, "expand_context") is None):
             plan2 = SearchPlan(action="search", target_slot_id=plan.target_slot_id, search_type="expand_context",

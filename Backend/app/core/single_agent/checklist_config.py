@@ -541,7 +541,11 @@ ROUTER_ACTIONS = {
     "no_retrieval": "검색이 필요 없는 발화 (인사, 감사 등)",
 }
 ROUTER_CONDITION_SUBJECTS = {"user_self": "사용자 본인", "other_person": "다른 사람 사례"}
-ROUTER_MAX_ASKS = MAX_SUBQUERIES   # 요구 단위 최대 개수 (넘으면 앞에서부터 자름)
+ROUTER_MAX_ASKS = 3                # 요구 단위 최대 개수 (넘으면 앞에서부터 자름). MAX_SUBQUERIES와 같은 값으로 시작
+# 첫 라운드 요구별 검색 (2026-10-03): 요구가 2개 이상이면 ①의 합친 검색어와 별도로 요구마다 따로 검색한다.
+# 합친 검색어("한국어 트랙 영어 트랙 어학 기준 및 면제 조건")는 한쪽 문서만 상위에 올라 다른 요구의 근거를 놓쳤다(LANG).
+# 이 검색은 신규 검색 예산(MAX_SUBQUERIES)에 넣지 않아 뒤 라운드의 보충 검색 여유를 남긴다. 상한은 요구 수(최대 ROUTER_MAX_ASKS).
+PER_ASK_FIRST_ROUND = True
 ROUTER_SIMPLE_ACTIONS = {"no_retrieval", "out_of_scope"}  # 기존 경로가 안내 문구를 이미 갖고 있음
 ROUTER_AGENT_ACTIONS = {"clarify_scope"}                 # ①의 범위 되묻기 규칙을 쓴다
 # 요구가 하나여도 이 유형이면 에이전트로 보낸다. 기본은 비워 둔다:

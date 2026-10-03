@@ -21,6 +21,7 @@ class Ask(BaseModel):
     quote: str = Field(description="현재 질문에서 그대로 옮긴 구절 (서버가 대조)")
     kind: Optional[str] = None               # T1~T6 (답의 모양). 잘못된 값이면 서버가 None으로 둔다
     query_ko: str = ""                       # 이 요구의 첫 검색어 (한국어). 의존이면 "#A1" 참조 가능
+    query_en: str = ""                       # 같은 뜻의 영어 검색어 (영어로만 된 문서용, 2026-10-03)
     depends_on: List[str] = []               # 이 요구보다 앞에 있는 ask_id만 허용
     only_if: str = ""                        # 앞 요구 결과가 이럴 때만 필요 (예: "A1이 허용일 때")
 

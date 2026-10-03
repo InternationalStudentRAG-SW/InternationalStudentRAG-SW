@@ -25,7 +25,7 @@ from app.core.single_agent import checklist_config as cfg
 from app.core.single_agent.analyzer import number_messages
 from app.core.single_agent.llm import get_client, model_for, run_json_loop
 from app.core.single_agent.router_schema import RouteResult, RouteRun
-from app.core.single_agent.text_match import quote_in_text
+from app.core.single_agent.text_match import normalize, quote_in_text
 
 ROUTER_HISTORY_MESSAGES = 6   # 프롬프트에 넣을 최근 대화 수 (후속 질문의 맥락·사용자 조건 확인용)
 ROUTER_MAX_TOKENS = 700
@@ -69,9 +69,13 @@ SYSTEM_PROMPT_TEMPLATE = """당신은 동아대학교 유학생 생활·행정 �
 3. 한 서류·절차의 세부 항목은 하나로 묶습니다. 예: "어떤 서류를 어디에 내요?" → 1개 (서류와 제출처)
 4. 최대 {max_asks}개입니다.
 5. quote에는 현재 질문에서 그 요구에 해당하는 구절을 한 글자도 바꾸지 않고 옮깁니다. 이전 대화에서 인용하지 않습니다.
+   여러 요구가 한 구절을 같이 쓰면(예: "한국어 트랙과 영어 트랙의 어학 기준이") 그 구절 전체를 각 요구의 quote로 옮깁니다.
+   글자를 바꿔 요구마다 따로 만들지 않습니다(예: "한국어 트랙의 어학 기준이"는 질문에 없는 구절).
 6. 후속 질문(예: 이전 대화가 기숙사 이야기일 때 "비용은요?")은 이전 대화를 반영해 text·query_ko를 완성합니다.
 7. kind는 단어가 아니라 원하는 답의 모양으로 T1~T6 중 하나를 고릅니다.
 8. text와 query_ko는 한국어로 씁니다. query_ko는 검색어이며 GKS, D-4, TOPIK 같은 공식 명칭·코드는 그대로 둡니다.
+   query_en에는 query_ko와 같은 뜻의 영어 검색어를 적습니다 (영어로만 된 문서를 찾기 위함). 요구마다 따로 검색하므로
+   query_ko·query_en에는 그 요구에 해당하는 내용만 넣습니다.
 
 [의존 관계]
 9. 뒤 요구가 필요한지, 무엇을 찾을지가 앞 요구의 답에 따라 달라지면 depends_on에 앞 요구의 ask_id를 적고
@@ -99,7 +103,7 @@ SYSTEM_PROMPT_TEMPLATE = """당신은 동아대학교 유학생 생활·행정 �
 ## 출력 JSON 형식
 {{"action": "search",
   "asks": [{{"ask_id": "A1", "text": "요구 요약", "quote": "질문 구절 그대로", "kind": "T5",
-            "query_ko": "검색어", "depends_on": [], "only_if": ""}}],
+            "query_ko": "검색어", "query_en": "search query", "depends_on": [], "only_if": ""}}],
   "user_conditions": [{{"field_id": "gks_status", "value": "예", "subject": "user_self",
                        "source_message_id": "m1", "quote": "저 GKS 장학생인데"}}],
   "reason": "한 줄 설명"}}
@@ -108,9 +112,11 @@ SYSTEM_PROMPT_TEMPLATE = """당신은 동아대학교 유학생 생활·행정 �
 질문: "저 GKS 장학생인데 아르바이트 해도 돼요? 된다면 어떤 서류를 어디에 내야 해요?"
 {{"action": "search",
   "asks": [{{"ask_id": "A1", "text": "GKS 장학생 아르바이트 허용 여부", "quote": "아르바이트 해도 돼요", "kind": "T5",
-            "query_ko": "GKS 장학생 시간제 취업 허용 기준", "depends_on": [], "only_if": ""}},
+            "query_ko": "GKS 장학생 시간제 취업 허용 기준", "query_en": "GKS scholarship part-time work permission",
+            "depends_on": [], "only_if": ""}},
            {{"ask_id": "A2", "text": "아르바이트 신청 서류와 제출처", "quote": "어떤 서류를 어디에 내야 해요", "kind": "T3",
-            "query_ko": "#A1 GKS 장학생 시간제 취업 신청 서류 제출처", "depends_on": ["A1"], "only_if": "A1이 허용일 때"}}],
+            "query_ko": "#A1 GKS 장학생 시간제 취업 신청 서류 제출처",
+            "query_en": "GKS scholarship part-time work application documents", "depends_on": ["A1"], "only_if": "A1이 허용일 때"}}],
   "user_conditions": [{{"field_id": "gks_status", "value": "예", "subject": "user_self",
                        "source_message_id": "m1", "quote": "저 GKS 장학생인데"}}],
   "reason": "허용 여부를 알아야 서류가 필요한지 정해짐"}}
@@ -118,7 +124,8 @@ SYSTEM_PROMPT_TEMPLATE = """당신은 동아대학교 유학생 생활·행정 �
 질문: "GKS 장학생은 아르바이트할 수 있어?"
 {{"action": "search",
   "asks": [{{"ask_id": "A1", "text": "GKS 장학생 아르바이트 허용 여부", "quote": "아르바이트할 수 있어", "kind": "T5",
-            "query_ko": "GKS 장학생 시간제 취업 허용 기준", "depends_on": [], "only_if": ""}}],
+            "query_ko": "GKS 장학생 시간제 취업 허용 기준", "query_en": "GKS scholarship part-time work permission",
+            "depends_on": [], "only_if": ""}}],
   "user_conditions": [],
   "reason": "일반 대상(GKS 장학생)에 대한 단일 요구"}}"""
 
@@ -140,6 +147,35 @@ def build_user_prompt(numbered: List[Dict]) -> str:
         f"## 현재 질문 [{current['id']}]\n{current['content']}\n\n"
         "위 규칙에 따라 JSON을 출력하세요."
     )
+
+
+# 낱말 끝에 붙는 조사 (긴 것부터). 인용 낱말 대조에서 떼고 비교한다.
+_PARTICLES = ("에서는", "으로는", "에게서", "이랑", "에서", "에게", "으로", "까지", "부터", "하고", "이나",
+              "과", "와", "의", "이", "가", "을", "를", "은", "는", "에", "도", "로", "만", "나", "랑")
+
+
+def _strip_particle(word: str) -> str:
+    w = word
+    for _ in range(2):
+        for p in _PARTICLES:
+            if len(w) > len(p) and w.endswith(p):
+                w = w[: -len(p)]
+                break
+        else:
+            break
+    return w
+
+
+def quote_words_in_text(quote: str, text: str, min_words: int = 2) -> bool:
+    """
+    인용이 글자 그대로는 없어도, 낱말(조사를 뗀 것)이 모두 질문에 있으면 True.
+    2026-10-03: "한국어 트랙과 영어 트랙의 어학 기준이"에서 LLM이 "한국어 트랙의 어학 기준이"로 나눠 인용해
+    맞는 요구가 '지어낸 요구'로 지워졌다. 낱말이 min_words개 미만이면 아무 데나 맞으므로 인정하지 않는다.
+    """
+    body = normalize(text)
+    words = [normalize(_strip_particle(w)) for w in (quote or "").split()]
+    words = [w for w in words if w]
+    return len(words) >= min_words and all(w in body for w in words)
 
 
 # ── 서버 검증 ─────────────────────────────────────────────────────────────
@@ -190,8 +226,11 @@ def validate_route(r: RouteResult, numbered: List[Dict]) -> Tuple[RouteResult, L
             w.append(f"[제거] 요구 {a.ask_id}: ID 중복")
             continue
         if not quote_in_text(a.quote, current["content"], min_chars=2):
-            w.append(f"[제거] 요구 {a.ask_id}: 인용 '{a.quote}'이 현재 질문에 없음 (지어낸 요구 의심)")
-            continue
+            if quote_words_in_text(a.quote, current["content"]):
+                w.append(f"[확인] 요구 {a.ask_id}: 인용 '{a.quote}'이 글자 그대로는 없지만 낱말이 모두 질문에 있어 인정")
+            else:
+                w.append(f"[제거] 요구 {a.ask_id}: 인용 '{a.quote}'이 현재 질문에 없음 (지어낸 요구 의심)")
+                continue
         if a.kind is not None and a.kind not in cfg.PROFILES:
             w.append(f"[수정] 요구 {a.ask_id}: kind '{a.kind}'은 T1~T6이 아님 → 비움")
             a.kind = None

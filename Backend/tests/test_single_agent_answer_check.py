@@ -377,3 +377,53 @@ def test_format_sources_keeps_same_chunk_index_on_different_pages(monkeypatch):
 
 def test_answer_prompt_keeps_prohibition_across_documents():
     assert "그 금지가 풀린다고 쓰지 않습니다" in answerer.SYSTEM_PROMPT
+
+
+# ── 첫 라운드 요구별 검색 (LANG: 합친 검색어로 영어 트랙 근거를 놓침) ─────────────────
+
+LANG_ASKS = [{"ask_id": "A1", "text": "한국어 트랙 어학 기준", "query_ko": "한국어 트랙 어학 기준", "query_en": "Korean track language requirement"},
+             {"ask_id": "A2", "text": "영어 트랙 어학 기준", "query_ko": "영어 트랙 어학 기준", "query_en": "English track language requirement"},
+             {"ask_id": "A3", "text": "영어 트랙 면제", "query_ko": "#A2 영어 트랙 어학 성적 면제 조건", "query_en": ""}]
+
+
+def test_ask_seed_plans_one_per_ask_and_skips_tried():
+    from app.core.single_agent.pipeline import ask_seed_plans
+    plans = ask_seed_plans(LANG_ASKS, "rule", tried=["한국어 트랙 어학 기준"])
+    assert [p.query_ko for p in plans] == ["영어 트랙 어학 기준", "영어 트랙 어학 성적 면제 조건"]
+    assert plans[0].query_en == "English track language requirement" and plans[1].query_en is None
+    assert all(p.search_type == "new" and p.target_slot_id == "rule" for p in plans)
+    assert ask_seed_plans(LANG_ASKS[:1], "rule", []) == []          # 요구 1개면 만들지 않음
+
+
+def test_pipeline_runs_per_ask_searches_without_using_budget(monkeypatch):
+    from app.core.single_agent import pipeline as pl
+    from app.core.single_agent.analysis_schema import AnalysisRun, DocSlot, FirstSearch
+    from app.core.single_agent.answer_schema import AnswerRun
+    from app.core.single_agent.verify_schema import VerificationRun, VerifyDecision
+    analysis = QuestionAnalysis(
+        intent_summary="어학 기준", answer_scope="general", primary_type="T1", next_action="search",
+        document_slots=[DocSlot(slot_id="rule", requirement="required", active=True)],
+        first_search=FirstSearch(query_ko="한국어 트랙 영어 트랙 어학 기준 및 면제", target_slot_ids=["rule"]))
+    monkeypatch.setattr(pl, "analyze_question", lambda *a, **k: AnalysisRun(question="q", analysis=analysis))
+    monkeypatch.setattr(cfg, "AUTO_EXPAND_FIRST_ROUND", False)
+    monkeypatch.setattr(cfg, "GENERAL_QUERY_FIRST_ROUND", False)
+    queries = []
+
+    def search(q, k):
+        queries.append(q)
+        return [SimpleNamespace(page_content=q, metadata={"source": f"{q}.pdf", "page": 1, "chunk_index": 0,
+                                                          "similarity_score": 0.9})]
+
+    seen = {}
+
+    def fake_verify(analysis, pool, budget, attempts, round_chunk_ids=None, **k):
+        seen["chunks"], seen["budget"] = list(round_chunk_ids), budget
+        return VerificationRun(analysis=analysis, decision=VerifyDecision(next_action="answer", reason="ok"))
+
+    monkeypatch.setattr(pl, "verify_evidence", fake_verify)
+    monkeypatch.setattr(pl, "write_answer", lambda *a, **k: AnswerRun(mode="answer", answer="x"))
+    run = pl.run_pipeline("q", route_asks=LANG_ASKS, client=FakeClient([]), search_fn=search)
+    assert "영어 트랙 어학 기준" in queries and "English track language requirement" in queries
+    assert "영어 트랙 어학 성적 면제 조건" in queries
+    assert len(seen["chunks"]) >= 4                   # 합친 검색 + 요구별 3개
+    assert seen["budget"].subqueries == 1             # 요구별 검색은 예산에 넣지 않음

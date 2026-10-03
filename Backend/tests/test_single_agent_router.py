@@ -614,3 +614,34 @@ def test_verifier_shows_short_aliases_and_maps_them_back():
     finally:
         v._ALIAS_KEYS.reset(token)
     assert v.alias_of(ids[0]) == ids[0]   # 별칭 범위 밖에서는 실제 ID 그대로
+
+
+# ── 인용 낱말 대조 (2026-10-03 LANG: 맞는 요구가 지워짐) ─────────────────────────
+
+LANG_Q = "동아대 학부 신입학에 지원하려는데, 한국어 트랙과 영어 트랙의 어학 기준이 각각 뭐야? 영어 트랙에서 어학 성적을 안 내도 되는 경우도 있어?"
+
+
+def test_shared_phrase_ask_is_kept_by_word_match():
+    asks = [_ask(1, "한국어 트랙의 어학 기준이"), _ask(2, "영어 트랙의 어학 기준이"), _ask(3, "어학 성적을 안 내도 되는 경우")]
+    r, w = _validated(RouteResult(action="search", asks=asks), LANG_Q)
+    assert [a.ask_id for a in r.asks] == ["A1", "A2", "A3"]
+    assert any("[확인] 요구 A1" in x for x in w) and not any("[제거]" in x for x in w)
+
+
+def test_made_up_ask_is_still_removed():
+    r, w = _validated(RouteResult(action="search", asks=[_ask(1, "어학 기준이"), _ask(2, "기숙사 신청 방법")]), LANG_Q)
+    assert [a.ask_id for a in r.asks] == ["A1"] and any("[제거] 요구 A2" in x for x in w)
+
+
+def test_single_word_quote_needs_exact_match():
+    from app.core.single_agent.router import quote_words_in_text
+    assert not quote_words_in_text("기숙사", LANG_Q)
+    assert not quote_words_in_text("트랙의", LANG_Q)          # 낱말 1개는 낱말 대조로 인정하지 않음
+    assert quote_words_in_text("한국어 트랙의 어학 기준이", LANG_Q)
+    assert not quote_words_in_text("한국어 트랙의 기숙사 기준이", LANG_Q)
+
+
+def test_router_prompt_and_answer_rule_for_shared_phrase():
+    from app.core.single_agent import router, answerer
+    assert "그 구절 전체를 각 요구의 quote로" in router.SYSTEM_PROMPT_TEMPLATE
+    assert "목록에 빠진 부분이 있어도" in answerer.SYSTEM_PROMPT

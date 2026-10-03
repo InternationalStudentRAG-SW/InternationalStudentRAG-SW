@@ -85,7 +85,8 @@ def fields_named_in_question(question: str) -> Set[str]:
     q = normalize(question or "")
     if not q:
         return set()
-    return {d["field_id"] for d in cfg.DOC_SCOPES
+    scopes = list(cfg.DOC_SCOPES) + list(getattr(cfg, "QUESTION_FIELD_ALIASES", []))
+    return {d["field_id"] for d in scopes
             if any(normalize(al) and normalize(al) in q for al in d.get("aliases", []) + [d["value"]])}
 
 

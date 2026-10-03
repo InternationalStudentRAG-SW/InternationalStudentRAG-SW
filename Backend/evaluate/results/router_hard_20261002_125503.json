@@ -1,0 +1,1893 @@
+{
+  "meta": {
+    "model": "gpt-4o-mini",
+    "checklist_version": "v1-2026-09-28",
+    "prompt_chars": 3990,
+    "agent_kinds": [],
+    "only": null,
+    "set": "hard"
+  },
+  "summary": {
+    "n": 24,
+    "n_scored": 13,
+    "n_boundary": 11,
+    "route_acc": 1.0,
+    "miss_rate": 0.0,
+    "over_rate": 0.0,
+    "action_acc": 1.0,
+    "asks_acc": 1.0,
+    "depends_acc": 0.8,
+    "fallbacks": 0,
+    "avg_prompt_tokens": 1924.333,
+    "avg_completion_tokens": 136.083,
+    "avg_latency_ms": 3256.625,
+    "boundary": [
+      {
+        "id": "X01",
+        "gold": "simple",
+        "pred": "simple"
+      },
+      {
+        "id": "X02",
+        "gold": "simple",
+        "pred": "agent"
+      },
+      {
+        "id": "X04",
+        "gold": "simple",
+        "pred": "simple"
+      },
+      {
+        "id": "X06",
+        "gold": "simple",
+        "pred": "agent"
+      },
+      {
+        "id": "X13",
+        "gold": "simple",
+        "pred": "simple"
+      },
+      {
+        "id": "X14",
+        "gold": "agent",
+        "pred": "simple"
+      },
+      {
+        "id": "X18",
+        "gold": "simple",
+        "pred": "agent"
+      },
+      {
+        "id": "X20",
+        "gold": "agent",
+        "pred": "agent"
+      },
+      {
+        "id": "X21",
+        "gold": "simple",
+        "pred": "agent"
+      },
+      {
+        "id": "X22",
+        "gold": "simple",
+        "pred": "simple"
+      },
+      {
+        "id": "X24",
+        "gold": "simple",
+        "pred": "simple"
+      }
+    ]
+  },
+  "rows": [
+    {
+      "id": "X01",
+      "question": "한국어 트랙이랑 영어 트랙 중에 서류 접수는 어디가 먼저 시작해?",
+      "boundary": true,
+      "label_src": "design_hard",
+      "gold": {
+        "route": "simple",
+        "action": "search",
+        "n_asks": 1,
+        "depends": false
+      },
+      "pred": {
+        "route": "simple",
+        "action": "search",
+        "n_asks": 1,
+        "depends": false
+      },
+      "ok": {
+        "route": true,
+        "action": true,
+        "n_asks": true,
+        "depends": true
+      },
+      "fallback": false,
+      "run": {
+        "calls": [
+          {
+            "purpose": "route",
+            "latency_ms": 2780.4,
+            "prompt_tokens": 1923,
+            "completion_tokens": 107,
+            "cached_prompt_tokens": 0,
+            "error_type": null
+          }
+        ],
+        "question": "한국어 트랙이랑 영어 트랙 중에 서류 접수는 어디가 먼저 시작해?",
+        "history": [],
+        "result": {
+          "action": "search",
+          "asks": [
+            {
+              "ask_id": "A1",
+              "text": "한국어 트랙과 영어 트랙의 서류 접수 시작일",
+              "quote": "서류 접수는 어디가 먼저 시작해",
+              "kind": "T4",
+              "query_ko": "한국어 트랙 영어 트랙 서류 접수 시작일",
+              "depends_on": [],
+              "only_if": ""
+            }
+          ],
+          "user_conditions": [],
+          "reason": "트랙별 서류 접수 시작일에 대한 정보 요청",
+          "route": "simple",
+          "route_reasons": [
+            "단일 요구, 의존·사용자 조건 없음"
+          ]
+        },
+        "fallback_used": false,
+        "warnings": [],
+        "error": null,
+        "model": "gpt-4o-mini",
+        "latency_ms": 2975,
+        "prompt_tokens": 1923,
+        "completion_tokens": 107,
+        "attempts": 1,
+        "raw_output": "{\"action\": \"search\",\n  \"asks\": [{\"ask_id\": \"A1\", \"text\": \"한국어 트랙과 영어 트랙의 서류 접수 시작일\", \"quote\": \"서류 접수는 어디가 먼저 시작해\", \"kind\": \"T4\",\n            \"query_ko\": \"한국어 트랙 영어 트랙 서류 접수 시작일\"}],\n  \"user_conditions\": [],\n  \"reason\": \"트랙별 서류 접수 시작일에 대한 정보 요청\"}",
+        "checklist_version": "v1-2026-09-28"
+      }
+    },
+    {
+      "id": "X02",
+      "question": "수업료랑 입학금 얼마야?",
+      "boundary": true,
+      "label_src": "design_hard",
+      "gold": {
+        "route": "simple",
+        "action": "search",
+        "n_asks": 2,
+        "depends": false
+      },
+      "pred": {
+        "route": "agent",
+        "action": "search",
+        "n_asks": 2,
+        "depends": false
+      },
+      "ok": {
+        "route": false,
+        "action": true,
+        "n_asks": true,
+        "depends": true
+      },
+      "fallback": false,
+      "run": {
+        "calls": [
+          {
+            "purpose": "route",
+            "latency_ms": 3181.432,
+            "prompt_tokens": 1911,
+            "completion_tokens": 127,
+            "cached_prompt_tokens": 1024,
+            "error_type": null
+          }
+        ],
+        "question": "수업료랑 입학금 얼마야?",
+        "history": [],
+        "result": {
+          "action": "search",
+          "asks": [
+            {
+              "ask_id": "A1",
+              "text": "수업료",
+              "quote": "수업료랑",
+              "kind": "T1",
+              "query_ko": "수업료",
+              "depends_on": [],
+              "only_if": ""
+            },
+            {
+              "ask_id": "A2",
+              "text": "입학금",
+              "quote": "입학금 얼마야",
+              "kind": "T1",
+              "query_ko": "입학금",
+              "depends_on": [],
+              "only_if": ""
+            }
+          ],
+          "user_conditions": [],
+          "reason": "수업료와 입학금이 다른 정보이므로 각각 검색 필요",
+          "route": "agent",
+          "route_reasons": [
+            "요구 2개 (수업료, 입학금)"
+          ]
+        },
+        "fallback_used": false,
+        "warnings": [],
+        "error": null,
+        "model": "gpt-4o-mini",
+        "latency_ms": 3181,
+        "prompt_tokens": 1911,
+        "completion_tokens": 127,
+        "attempts": 1,
+        "raw_output": "{\"action\": \"search\",\n  \"asks\": [{\"ask_id\": \"A1\", \"text\": \"수업료\", \"quote\": \"수업료랑\", \"kind\": \"T1\",\n            \"query_ko\": \"수업료\"}, \n           {\"ask_id\": \"A2\", \"text\": \"입학금\", \"quote\": \"입학금 얼마야\", \"kind\": \"T1\",\n            \"query_ko\": \"입학금\"}],\n  \"user_conditions\": [],\n  \"reason\": \"수업료와 입학금이 다른 정보이므로 각각 검색 필요\"}",
+        "checklist_version": "v1-2026-09-28"
+      }
+    },
+    {
+      "id": "X03",
+      "question": "GKS 장학생인데 휴학은 몇 번까지 가능해?",
+      "boundary": false,
+      "label_src": "design_hard",
+      "gold": {
+        "route": "simple",
+        "action": "search",
+        "n_asks": 1,
+        "depends": false
+      },
+      "pred": {
+        "route": "simple",
+        "action": "search",
+        "n_asks": 1,
+        "depends": false
+      },
+      "ok": {
+        "route": true,
+        "action": true,
+        "n_asks": true,
+        "depends": true
+      },
+      "fallback": false,
+      "run": {
+        "calls": [
+          {
+            "purpose": "route",
+            "latency_ms": 2971.686,
+            "prompt_tokens": 1915,
+            "completion_tokens": 146,
+            "cached_prompt_tokens": 1024,
+            "error_type": null
+          }
+        ],
+        "question": "GKS 장학생인데 휴학은 몇 번까지 가능해?",
+        "history": [],
+        "result": {
+          "action": "search",
+          "asks": [
+            {
+              "ask_id": "A1",
+              "text": "GKS 장학생 휴학 가능 횟수",
+              "quote": "휴학은 몇 번까지 가능해",
+              "kind": "T5",
+              "query_ko": "GKS 장학생 휴학 가능 횟수",
+              "depends_on": [],
+              "only_if": ""
+            }
+          ],
+          "user_conditions": [
+            {
+              "field_id": "gks_status",
+              "value": "예",
+              "subject": "user_self",
+              "source_message_id": "m1",
+              "quote": "GKS 장학생인데"
+            }
+          ],
+          "reason": "GKS 장학생에 대한 구체적인 질문",
+          "route": "simple",
+          "route_reasons": [
+            "단일 요구, 사용자 조건 1개(user_self:GKS 장학생인데)는 기존 경로로 충분"
+          ]
+        },
+        "fallback_used": false,
+        "warnings": [],
+        "error": null,
+        "model": "gpt-4o-mini",
+        "latency_ms": 2971,
+        "prompt_tokens": 1915,
+        "completion_tokens": 146,
+        "attempts": 1,
+        "raw_output": "{\"action\": \"search\",\n  \"asks\": [{\"ask_id\": \"A1\", \"text\": \"GKS 장학생 휴학 가능 횟수\", \"quote\": \"휴학은 몇 번까지 가능해\", \"kind\": \"T5\",\n            \"query_ko\": \"GKS 장학생 휴학 가능 횟수\", \"depends_on\": [], \"only_if\": \"\"}],\n  \"user_conditions\": [{\"field_id\": \"gks_status\", \"value\": \"예\", \"subject\": \"user_self\",\n                       \"source_message_id\": \"m1\", \"quote\": \"GKS 장학생인데\"}],\n  \"reason\": \"GKS 장학생에 대한 구체적인 질문\"}",
+        "checklist_version": "v1-2026-09-28"
+      }
+    },
+    {
+      "id": "X04",
+      "question": "TOPIK 4급이고 한국어 트랙 지원할 건데 접수 마감일이 언제야?",
+      "boundary": true,
+      "label_src": "design_hard",
+      "gold": {
+        "route": "simple",
+        "action": "search",
+        "n_asks": 1,
+        "depends": false
+      },
+      "pred": {
+        "route": "simple",
+        "action": "search",
+        "n_asks": 1,
+        "depends": false
+      },
+      "ok": {
+        "route": true,
+        "action": true,
+        "n_asks": true,
+        "depends": true
+      },
+      "fallback": false,
+      "run": {
+        "calls": [
+          {
+            "purpose": "route",
+            "latency_ms": 2897.748,
+            "prompt_tokens": 1924,
+            "completion_tokens": 148,
+            "cached_prompt_tokens": 1024,
+            "error_type": null
+          }
+        ],
+        "question": "TOPIK 4급이고 한국어 트랙 지원할 건데 접수 마감일이 언제야?",
+        "history": [],
+        "result": {
+          "action": "search",
+          "asks": [
+            {
+              "ask_id": "A1",
+              "text": "한국어 트랙 접수 마감일",
+              "quote": "접수 마감일이 언제야",
+              "kind": "T1",
+              "query_ko": "한국어 트랙 지원 접수 마감일",
+              "depends_on": [],
+              "only_if": ""
+            }
+          ],
+          "user_conditions": [
+            {
+              "field_id": "track",
+              "value": "한국어 트랙",
+              "subject": "user_self",
+              "source_message_id": "m1",
+              "quote": "한국어 트랙 지원할 건데"
+            }
+          ],
+          "reason": "지원할 트랙에 대한 단일 요구",
+          "route": "simple",
+          "route_reasons": [
+            "단일 요구, 사용자 조건 1개(user_self:한국어 트랙 지원할 건데)는 기존 경로로 충분"
+          ]
+        },
+        "fallback_used": false,
+        "warnings": [],
+        "error": null,
+        "model": "gpt-4o-mini",
+        "latency_ms": 2897,
+        "prompt_tokens": 1924,
+        "completion_tokens": 148,
+        "attempts": 1,
+        "raw_output": "{\"action\": \"search\",\n  \"asks\": [{\"ask_id\": \"A1\", \"text\": \"한국어 트랙 접수 마감일\", \"quote\": \"접수 마감일이 언제야\", \"kind\": \"T1\",\n            \"query_ko\": \"한국어 트랙 지원 접수 마감일\", \"depends_on\": [], \"only_if\": \"\"}],\n  \"user_conditions\": [{\"field_id\": \"track\", \"value\": \"한국어 트랙\", \"subject\": \"user_self\",\n                       \"source_message_id\": \"m1\", \"quote\": \"한국어 트랙 지원할 건데\"}],\n  \"reason\": \"지원할 트랙에 대한 단일 요구\"}",
+        "checklist_version": "v1-2026-09-28"
+      }
+    },
+    {
+      "id": "X05",
+      "question": "기숙사 비용이 얼마예요? 승학 캠퍼스 여학생이에요.",
+      "boundary": false,
+      "label_src": "design_hard",
+      "gold": {
+        "route": "simple",
+        "action": "search",
+        "n_asks": 1,
+        "depends": false
+      },
+      "pred": {
+        "route": "simple",
+        "action": "search",
+        "n_asks": 1,
+        "depends": false
+      },
+      "ok": {
+        "route": true,
+        "action": true,
+        "n_asks": true,
+        "depends": true
+      },
+      "fallback": false,
+      "run": {
+        "calls": [
+          {
+            "purpose": "route",
+            "latency_ms": 2394.239,
+            "prompt_tokens": 1920,
+            "completion_tokens": 95,
+            "cached_prompt_tokens": 1024,
+            "error_type": null
+          }
+        ],
+        "question": "기숙사 비용이 얼마예요? 승학 캠퍼스 여학생이에요.",
+        "history": [],
+        "result": {
+          "action": "search",
+          "asks": [
+            {
+              "ask_id": "A1",
+              "text": "승학 캠퍼스 여학생 기숙사 비용",
+              "quote": "기숙사 비용이 얼마예요",
+              "kind": "T1",
+              "query_ko": "승학 캠퍼스 여학생 기숙사 비용",
+              "depends_on": [],
+              "only_if": ""
+            }
+          ],
+          "user_conditions": [],
+          "reason": "기숙사 비용에 대한 단일 요구",
+          "route": "simple",
+          "route_reasons": [
+            "단일 요구, 의존·사용자 조건 없음"
+          ]
+        },
+        "fallback_used": false,
+        "warnings": [],
+        "error": null,
+        "model": "gpt-4o-mini",
+        "latency_ms": 2394,
+        "prompt_tokens": 1920,
+        "completion_tokens": 95,
+        "attempts": 1,
+        "raw_output": "{\"action\": \"search\",\n  \"asks\": [{\"ask_id\": \"A1\", \"text\": \"승학 캠퍼스 여학생 기숙사 비용\", \"quote\": \"기숙사 비용이 얼마예요\", \"kind\": \"T1\",\n            \"query_ko\": \"승학 캠퍼스 여학생 기숙사 비용\"}],\n  \"user_conditions\": [],\n  \"reason\": \"기숙사 비용에 대한 단일 요구\"}",
+        "checklist_version": "v1-2026-09-28"
+      }
+    },
+    {
+      "id": "X06",
+      "question": "비자 신청할 때 수수료가 얼마인지랑 어디서 하는지 알려줘",
+      "boundary": true,
+      "label_src": "design_hard",
+      "gold": {
+        "route": "simple",
+        "action": "search",
+        "n_asks": 2,
+        "depends": false
+      },
+      "pred": {
+        "route": "agent",
+        "action": "search",
+        "n_asks": 2,
+        "depends": false
+      },
+      "ok": {
+        "route": false,
+        "action": true,
+        "n_asks": true,
+        "depends": true
+      },
+      "fallback": false,
+      "run": {
+        "calls": [
+          {
+            "purpose": "route",
+            "latency_ms": 3136.935,
+            "prompt_tokens": 1920,
+            "completion_tokens": 151,
+            "cached_prompt_tokens": 1024,
+            "error_type": null
+          }
+        ],
+        "question": "비자 신청할 때 수수료가 얼마인지랑 어디서 하는지 알려줘",
+        "history": [],
+        "result": {
+          "action": "search",
+          "asks": [
+            {
+              "ask_id": "A1",
+              "text": "비자 신청 수수료",
+              "quote": "수수료가 얼마인지",
+              "kind": "T1",
+              "query_ko": "비자 신청 수수료",
+              "depends_on": [],
+              "only_if": ""
+            },
+            {
+              "ask_id": "A2",
+              "text": "비자 신청 장소",
+              "quote": "어디서 하는지",
+              "kind": "T4",
+              "query_ko": "비자 신청 방법",
+              "depends_on": [],
+              "only_if": ""
+            }
+          ],
+          "user_conditions": [],
+          "reason": "수수료와 신청 장소는 별개의 정보",
+          "route": "agent",
+          "route_reasons": [
+            "요구 2개 (비자 신청 수수료, 비자 신청 장소)"
+          ]
+        },
+        "fallback_used": false,
+        "warnings": [],
+        "error": null,
+        "model": "gpt-4o-mini",
+        "latency_ms": 3137,
+        "prompt_tokens": 1920,
+        "completion_tokens": 151,
+        "attempts": 1,
+        "raw_output": "{\"action\": \"search\",\n  \"asks\": [{\"ask_id\": \"A1\", \"text\": \"비자 신청 수수료\", \"quote\": \"수수료가 얼마인지\", \"kind\": \"T1\",\n            \"query_ko\": \"비자 신청 수수료\", \"depends_on\": [], \"only_if\": \"\"},\n           {\"ask_id\": \"A2\", \"text\": \"비자 신청 장소\", \"quote\": \"어디서 하는지\", \"kind\": \"T4\",\n            \"query_ko\": \"비자 신청 방법\", \"depends_on\": [], \"only_if\": \"\"}],\n  \"user_conditions\": [],\n  \"reason\": \"수수료와 신청 장소는 별개의 정보\"}",
+        "checklist_version": "v1-2026-09-28"
+      }
+    },
+    {
+      "id": "X07",
+      "question": "영어 트랙 합격하면 비자는 어떻게 받고 기숙사는 언제 신청해?",
+      "boundary": false,
+      "label_src": "design_hard",
+      "gold": {
+        "route": "agent",
+        "action": "search",
+        "n_asks": 2,
+        "depends": false
+      },
+      "pred": {
+        "route": "agent",
+        "action": "search",
+        "n_asks": 2,
+        "depends": false
+      },
+      "ok": {
+        "route": true,
+        "action": true,
+        "n_asks": true,
+        "depends": true
+      },
+      "fallback": false,
+      "run": {
+        "calls": [
+          {
+            "purpose": "route",
+            "latency_ms": 3316.286,
+            "prompt_tokens": 1919,
+            "completion_tokens": 183,
+            "cached_prompt_tokens": 1024,
+            "error_type": null
+          }
+        ],
+        "question": "영어 트랙 합격하면 비자는 어떻게 받고 기숙사는 언제 신청해?",
+        "history": [],
+        "result": {
+          "action": "search",
+          "asks": [
+            {
+              "ask_id": "A1",
+              "text": "영어 트랙 합격 후 비자 신청 방법",
+              "quote": "비자는 어떻게 받고",
+              "kind": "T4",
+              "query_ko": "영어 트랙 합격 후 비자 신청 절차",
+              "depends_on": [],
+              "only_if": ""
+            },
+            {
+              "ask_id": "A2",
+              "text": "영어 트랙 합격 후 기숙사 신청 시점",
+              "quote": "기숙사는 언제 신청해",
+              "kind": "T4",
+              "query_ko": "영어 트랙 합격 후 기숙사 신청 절차",
+              "depends_on": [],
+              "only_if": ""
+            }
+          ],
+          "user_conditions": [],
+          "reason": "비자와 기숙사 신청 절차에 대한 두 가지 요구",
+          "route": "agent",
+          "route_reasons": [
+            "요구 2개 (영어 트랙 합격 후 비자 신청 방법, 영어 트랙 합격 후 기숙사 신청 시점)"
+          ]
+        },
+        "fallback_used": false,
+        "warnings": [],
+        "error": null,
+        "model": "gpt-4o-mini",
+        "latency_ms": 3316,
+        "prompt_tokens": 1919,
+        "completion_tokens": 183,
+        "attempts": 1,
+        "raw_output": "{\"action\": \"search\",\n  \"asks\": [{\"ask_id\": \"A1\", \"text\": \"영어 트랙 합격 후 비자 신청 방법\", \"quote\": \"비자는 어떻게 받고\", \"kind\": \"T4\",\n            \"query_ko\": \"영어 트랙 합격 후 비자 신청 절차\", \"depends_on\": [], \"only_if\": \"\"},\n           {\"ask_id\": \"A2\", \"text\": \"영어 트랙 합격 후 기숙사 신청 시점\", \"quote\": \"기숙사는 언제 신청해\", \"kind\": \"T4\",\n            \"query_ko\": \"영어 트랙 합격 후 기숙사 신청 절차\", \"depends_on\": [], \"only_if\": \"\"}],\n  \"user_conditions\": [],\n  \"reason\": \"비자와 기숙사 신청 절차에 대한 두 가지 요구\"}",
+        "checklist_version": "v1-2026-09-28"
+      }
+    },
+    {
+      "id": "X08",
+      "question": "GKS 장학생이 한국어과정 중에 휴학하면 연수 기간이랑 장학금은 어떻게 돼?",
+      "boundary": false,
+      "label_src": "design_hard",
+      "gold": {
+        "route": "agent",
+        "action": "search",
+        "n_asks": 2,
+        "depends": false
+      },
+      "pred": {
+        "route": "agent",
+        "action": "search",
+        "n_asks": 2,
+        "depends": false
+      },
+      "ok": {
+        "route": true,
+        "action": true,
+        "n_asks": true,
+        "depends": true
+      },
+      "fallback": false,
+      "run": {
+        "calls": [
+          {
+            "purpose": "route",
+            "latency_ms": 4556.582,
+            "prompt_tokens": 1928,
+            "completion_tokens": 190,
+            "cached_prompt_tokens": 1024,
+            "error_type": null
+          }
+        ],
+        "question": "GKS 장학생이 한국어과정 중에 휴학하면 연수 기간이랑 장학금은 어떻게 돼?",
+        "history": [],
+        "result": {
+          "action": "search",
+          "asks": [
+            {
+              "ask_id": "A1",
+              "text": "GKS 장학생 휴학 시 연수 기간",
+              "quote": "휴학하면 연수 기간이랑",
+              "kind": "T6",
+              "query_ko": "GKS 장학생 한국어 과정 휴학 시 연수 기간 규정",
+              "depends_on": [],
+              "only_if": ""
+            },
+            {
+              "ask_id": "A2",
+              "text": "GKS 장학생 휴학 시 장학금",
+              "quote": "장학금은 어떻게 돼",
+              "kind": "T6",
+              "query_ko": "GKS 장학생 한국어 과정 휴학 시 장학금 규정",
+              "depends_on": [],
+              "only_if": ""
+            }
+          ],
+          "user_conditions": [],
+          "reason": "휴학 시 연수 기간과 장학금에 대한 두 가지 요구",
+          "route": "agent",
+          "route_reasons": [
+            "요구 2개 (GKS 장학생 휴학 시 연수 기간, GKS 장학생 휴학 시 장학금)"
+          ]
+        },
+        "fallback_used": false,
+        "warnings": [],
+        "error": null,
+        "model": "gpt-4o-mini",
+        "latency_ms": 4556,
+        "prompt_tokens": 1928,
+        "completion_tokens": 190,
+        "attempts": 1,
+        "raw_output": "{\"action\": \"search\",\n  \"asks\": [{\"ask_id\": \"A1\", \"text\": \"GKS 장학생 휴학 시 연수 기간\", \"quote\": \"휴학하면 연수 기간이랑\", \"kind\": \"T6\",\n            \"query_ko\": \"GKS 장학생 한국어 과정 휴학 시 연수 기간 규정\", \"depends_on\": [], \"only_if\": \"\"},\n           {\"ask_id\": \"A2\", \"text\": \"GKS 장학생 휴학 시 장학금\", \"quote\": \"장학금은 어떻게 돼\", \"kind\": \"T6\",\n            \"query_ko\": \"GKS 장학생 한국어 과정 휴학 시 장학금 규정\", \"depends_on\": [], \"only_if\": \"\"}],\n  \"user_conditions\": [],\n  \"reason\": \"휴학 시 연수 기간과 장학금에 대한 두 가지 요구\"}",
+        "checklist_version": "v1-2026-09-28"
+      }
+    },
+    {
+      "id": "X09",
+      "question": "입학 전에 잔고증명 내야 한다던데 얼마고, 그걸로 비자도 되는 거야?",
+      "boundary": false,
+      "label_src": "design_hard",
+      "gold": {
+        "route": "agent",
+        "action": "search",
+        "n_asks": 2,
+        "depends": true
+      },
+      "pred": {
+        "route": "agent",
+        "action": "search",
+        "n_asks": 2,
+        "depends": false
+      },
+      "ok": {
+        "route": true,
+        "action": true,
+        "n_asks": true,
+        "depends": false
+      },
+      "fallback": false,
+      "run": {
+        "calls": [
+          {
+            "purpose": "route",
+            "latency_ms": 3606.341,
+            "prompt_tokens": 1927,
+            "completion_tokens": 174,
+            "cached_prompt_tokens": 1024,
+            "error_type": null
+          }
+        ],
+        "question": "입학 전에 잔고증명 내야 한다던데 얼마고, 그걸로 비자도 되는 거야?",
+        "history": [],
+        "result": {
+          "action": "search",
+          "asks": [
+            {
+              "ask_id": "A1",
+              "text": "입학 전 잔고증명 금액",
+              "quote": "얼마고",
+              "kind": "T1",
+              "query_ko": "입학 전 잔고증명 금액",
+              "depends_on": [],
+              "only_if": ""
+            },
+            {
+              "ask_id": "A2",
+              "text": "잔고증명으로 비자 가능 여부",
+              "quote": "그걸로 비자도 되는 거야",
+              "kind": "T5",
+              "query_ko": "잔고증명 비자 사용 가능 여부",
+              "depends_on": [],
+              "only_if": ""
+            }
+          ],
+          "user_conditions": [],
+          "reason": "입학 전 잔고증명과 비자 관련 정보 요청",
+          "route": "agent",
+          "route_reasons": [
+            "요구 2개 (입학 전 잔고증명 금액, 잔고증명으로 비자 가능 여부)"
+          ]
+        },
+        "fallback_used": false,
+        "warnings": [],
+        "error": null,
+        "model": "gpt-4o-mini",
+        "latency_ms": 3606,
+        "prompt_tokens": 1927,
+        "completion_tokens": 174,
+        "attempts": 1,
+        "raw_output": "{\"action\": \"search\",\n  \"asks\": [{\"ask_id\": \"A1\", \"text\": \"입학 전 잔고증명 금액\", \"quote\": \"얼마고\", \"kind\": \"T1\",\n            \"query_ko\": \"입학 전 잔고증명 금액\", \"depends_on\": [], \"only_if\": \"\"},\n           {\"ask_id\": \"A2\", \"text\": \"잔고증명으로 비자 가능 여부\", \"quote\": \"그걸로 비자도 되는 거야\", \"kind\": \"T5\",\n            \"query_ko\": \"잔고증명 비자 사용 가능 여부\", \"depends_on\": [], \"only_if\": \"\"}],\n  \"user_conditions\": [],\n  \"reason\": \"입학 전 잔고증명과 비자 관련 정보 요청\"}",
+        "checklist_version": "v1-2026-09-28"
+      }
+    },
+    {
+      "id": "X10",
+      "question": "영어 트랙 지원 자격이 되는지 모르겠어. 나 TOEFL 70점이고 이미 한국에 살고 있는데 지원 가능해?",
+      "boundary": false,
+      "label_src": "design_hard",
+      "gold": {
+        "route": "agent",
+        "action": "search",
+        "n_asks": 1,
+        "depends": true
+      },
+      "pred": {
+        "route": "agent",
+        "action": "search",
+        "n_asks": 1,
+        "depends": false
+      },
+      "ok": {
+        "route": true,
+        "action": true,
+        "n_asks": true,
+        "depends": false
+      },
+      "fallback": false,
+      "run": {
+        "calls": [
+          {
+            "purpose": "route",
+            "latency_ms": 3681.068,
+            "prompt_tokens": 1932,
+            "completion_tokens": 196,
+            "cached_prompt_tokens": 1024,
+            "error_type": null
+          }
+        ],
+        "question": "영어 트랙 지원 자격이 되는지 모르겠어. 나 TOEFL 70점이고 이미 한국에 살고 있는데 지원 가능해?",
+        "history": [],
+        "result": {
+          "action": "search",
+          "asks": [
+            {
+              "ask_id": "A1",
+              "text": "영어 트랙 지원 자격",
+              "quote": "영어 트랙 지원 자격이 되는지 모르겠어",
+              "kind": "T5",
+              "query_ko": "영어 트랙 지원 자격 기준",
+              "depends_on": [],
+              "only_if": ""
+            }
+          ],
+          "user_conditions": [
+            {
+              "field_id": "current_location",
+              "value": "한국",
+              "subject": "user_self",
+              "source_message_id": "m1",
+              "quote": "이미 한국에 살고 있는데"
+            },
+            {
+              "field_id": "document_issuing_country",
+              "value": "미국",
+              "subject": "user_self",
+              "source_message_id": "m1",
+              "quote": "TOEFL 70점"
+            }
+          ],
+          "reason": "지원 자격을 확인하기 위해 필요한 조건을 수집함",
+          "route": "agent",
+          "route_reasons": [
+            "사용자 조건 2개 (user_self:이미 한국에 살고 있는데, user_self:TOEFL 70점)"
+          ]
+        },
+        "fallback_used": false,
+        "warnings": [],
+        "error": null,
+        "model": "gpt-4o-mini",
+        "latency_ms": 3681,
+        "prompt_tokens": 1932,
+        "completion_tokens": 196,
+        "attempts": 1,
+        "raw_output": "{\"action\": \"search\",\n  \"asks\": [{\"ask_id\": \"A1\", \"text\": \"영어 트랙 지원 자격\", \"quote\": \"영어 트랙 지원 자격이 되는지 모르겠어\", \"kind\": \"T5\",\n            \"query_ko\": \"영어 트랙 지원 자격 기준\", \"depends_on\": [], \"only_if\": \"\"}],\n  \"user_conditions\": [{\"field_id\": \"current_location\", \"value\": \"한국\", \"subject\": \"user_self\",\n                       \"source_message_id\": \"m1\", \"quote\": \"이미 한국에 살고 있는데\"},\n                      {\"field_id\": \"document_issuing_country\", \"value\": \"미국\", \"subject\": \"user_self\",\n                       \"source_message_id\": \"m1\", \"quote\": \"TOEFL 70점\"}],\n  \"reason\": \"지원 자격을 확인하기 위해 필요한 조건을 수집함\"}",
+        "checklist_version": "v1-2026-09-28"
+      }
+    },
+    {
+      "id": "X11",
+      "question": "D-4로 한국어학당 다니다 학부 합격하면 비자 바꿔야 돼? 바꾸면 비용은?",
+      "boundary": false,
+      "label_src": "design_hard",
+      "gold": {
+        "route": "agent",
+        "action": "search",
+        "n_asks": 2,
+        "depends": true
+      },
+      "pred": {
+        "route": "agent",
+        "action": "search",
+        "n_asks": 2,
+        "depends": true
+      },
+      "ok": {
+        "route": true,
+        "action": true,
+        "n_asks": true,
+        "depends": true
+      },
+      "fallback": false,
+      "run": {
+        "calls": [
+          {
+            "purpose": "route",
+            "latency_ms": 4690.725,
+            "prompt_tokens": 1932,
+            "completion_tokens": 238,
+            "cached_prompt_tokens": 1024,
+            "error_type": null
+          }
+        ],
+        "question": "D-4로 한국어학당 다니다 학부 합격하면 비자 바꿔야 돼? 바꾸면 비용은?",
+        "history": [],
+        "result": {
+          "action": "search",
+          "asks": [
+            {
+              "ask_id": "A1",
+              "text": "D-4 비자에서 학부 비자로 변경 필요 여부",
+              "quote": "비자 바꿔야 돼",
+              "kind": "T5",
+              "query_ko": "D-4 비자에서 학부 비자로 변경 필요 여부",
+              "depends_on": [],
+              "only_if": ""
+            },
+            {
+              "ask_id": "A2",
+              "text": "비자 변경 비용",
+              "quote": "바꾸면 비용은",
+              "kind": "T1",
+              "query_ko": "D-4 비자에서 학부 비자로 변경 비용",
+              "depends_on": [
+                "A1"
+              ],
+              "only_if": "A1이 필요할 때"
+            }
+          ],
+          "user_conditions": [
+            {
+              "field_id": "visa_status",
+              "value": "D-4",
+              "subject": "user_self",
+              "source_message_id": "m1",
+              "quote": "D-4로 한국어학당 다니다"
+            }
+          ],
+          "reason": "비자 변경 필요 여부에 따라 비용이 달라질 수 있음",
+          "route": "agent",
+          "route_reasons": [
+            "요구 2개 (D-4 비자에서 학부 비자로 변경 필요 여부, 비자 변경 비용)",
+            "의존 관계 A2←A1"
+          ]
+        },
+        "fallback_used": false,
+        "warnings": [
+          "[확인 필요] 사용자 조건 visa_status='D-4': 체크리스트에 없는 칸 → 경로 판단에만 사용"
+        ],
+        "error": null,
+        "model": "gpt-4o-mini",
+        "latency_ms": 4690,
+        "prompt_tokens": 1932,
+        "completion_tokens": 238,
+        "attempts": 1,
+        "raw_output": "{\"action\": \"search\",\n  \"asks\": [{\"ask_id\": \"A1\", \"text\": \"D-4 비자에서 학부 비자로 변경 필요 여부\", \"quote\": \"비자 바꿔야 돼\", \"kind\": \"T5\",\n            \"query_ko\": \"D-4 비자에서 학부 비자로 변경 필요 여부\", \"depends_on\": [], \"only_if\": \"\"},\n           {\"ask_id\": \"A2\", \"text\": \"비자 변경 비용\", \"quote\": \"바꾸면 비용은\", \"kind\": \"T1\",\n            \"query_ko\": \"D-4 비자에서 학부 비자로 변경 비용\", \"depends_on\": [\"A1\"], \"only_if\": \"A1이 필요할 때\"}],\n  \"user_conditions\": [{\"field_id\": \"visa_status\", \"value\": \"D-4\", \"subject\": \"user_self\",\n                       \"source_message_id\": \"m1\", \"quote\": \"D-4로 한국어학당 다니다\"}],\n  \"reason\": \"비자 변경 필요 여부에 따라 비용이 달라질 수 있음\"}",
+        "checklist_version": "v1-2026-09-28"
+      }
+    },
+    {
+      "id": "X12",
+      "question": "그럼 영어 트랙은?",
+      "boundary": false,
+      "label_src": "design_hard",
+      "gold": {
+        "route": "simple",
+        "action": "search",
+        "n_asks": 1,
+        "depends": false
+      },
+      "pred": {
+        "route": "simple",
+        "action": "search",
+        "n_asks": 1,
+        "depends": false
+      },
+      "ok": {
+        "route": true,
+        "action": true,
+        "n_asks": true,
+        "depends": true
+      },
+      "fallback": false,
+      "run": {
+        "calls": [
+          {
+            "purpose": "route",
+            "latency_ms": 4635.428,
+            "prompt_tokens": 1944,
+            "completion_tokens": 96,
+            "cached_prompt_tokens": 1024,
+            "error_type": null
+          }
+        ],
+        "question": "그럼 영어 트랙은?",
+        "history": [
+          {
+            "role": "user",
+            "content": "한국어 트랙 지원 마감일이 언제예요?"
+          },
+          {
+            "role": "assistant",
+            "content": "한국어 트랙 접수 기간은 모집요강에서 확인할 수 있습니다."
+          }
+        ],
+        "result": {
+          "action": "search",
+          "asks": [
+            {
+              "ask_id": "A1",
+              "text": "영어 트랙 지원 마감일",
+              "quote": "영어 트랙은?",
+              "kind": "T1",
+              "query_ko": "영어 트랙 지원 마감일",
+              "depends_on": [],
+              "only_if": ""
+            }
+          ],
+          "user_conditions": [],
+          "reason": "영어 트랙에 대한 단일 요구",
+          "route": "simple",
+          "route_reasons": [
+            "단일 요구, 의존·사용자 조건 없음"
+          ]
+        },
+        "fallback_used": false,
+        "warnings": [],
+        "error": null,
+        "model": "gpt-4o-mini",
+        "latency_ms": 4635,
+        "prompt_tokens": 1944,
+        "completion_tokens": 96,
+        "attempts": 1,
+        "raw_output": "{\"action\": \"search\",\n  \"asks\": [{\"ask_id\": \"A1\", \"text\": \"영어 트랙 지원 마감일\", \"quote\": \"영어 트랙은?\", \"kind\": \"T1\",\n            \"query_ko\": \"영어 트랙 지원 마감일\", \"depends_on\": [], \"only_if\": \"\"}],\n  \"user_conditions\": [],\n  \"reason\": \"영어 트랙에 대한 단일 요구\"}",
+        "checklist_version": "v1-2026-09-28"
+      }
+    },
+    {
+      "id": "X13",
+      "question": "그거 휴학하면 어떻게 돼?",
+      "boundary": true,
+      "label_src": "design_hard",
+      "gold": {
+        "route": "simple",
+        "action": "search",
+        "n_asks": 1,
+        "depends": false
+      },
+      "pred": {
+        "route": "simple",
+        "action": "search",
+        "n_asks": 1,
+        "depends": false
+      },
+      "ok": {
+        "route": true,
+        "action": true,
+        "n_asks": true,
+        "depends": true
+      },
+      "fallback": false,
+      "run": {
+        "calls": [
+          {
+            "purpose": "route",
+            "latency_ms": 3766.138,
+            "prompt_tokens": 1944,
+            "completion_tokens": 185,
+            "cached_prompt_tokens": 1024,
+            "error_type": null
+          }
+        ],
+        "question": "그거 휴학하면 어떻게 돼?",
+        "history": [
+          {
+            "role": "user",
+            "content": "GKS 장학생이 장학금 받는 기간이 얼마나 돼?"
+          },
+          {
+            "role": "assistant",
+            "content": "학사과정은 4~6년입니다."
+          }
+        ],
+        "result": {
+          "action": "search",
+          "asks": [
+            {
+              "ask_id": "A1",
+              "text": "GKS 장학생 장학금 수혜 기간과 휴학 시 영향",
+              "quote": "휴학하면 어떻게 돼",
+              "kind": "T6",
+              "query_ko": "GKS 장학생 휴학 시 장학금 수혜 기간 영향",
+              "depends_on": [],
+              "only_if": ""
+            }
+          ],
+          "user_conditions": [
+            {
+              "field_id": "gks_status",
+              "value": "예",
+              "subject": "other_person",
+              "source_message_id": "m1",
+              "quote": "GKS 장학생이 장학금 받는 기간이 얼마나 돼?"
+            }
+          ],
+          "reason": "휴학이 장학금 수혜에 미치는 영향을 알아야 함",
+          "route": "simple",
+          "route_reasons": [
+            "단일 요구, 사용자 조건 1개(other_person:GKS 장학생이 장학금 받는 기간이 얼마나 돼?)는 기존 경로로 충분"
+          ]
+        },
+        "fallback_used": false,
+        "warnings": [
+          "[제거] 요구 A1의 의존 'A1': 앞에 있는 요구가 아님",
+          "[수정] 요구 A1: 의존이 없으므로 only_if 비움"
+        ],
+        "error": null,
+        "model": "gpt-4o-mini",
+        "latency_ms": 3766,
+        "prompt_tokens": 1944,
+        "completion_tokens": 185,
+        "attempts": 1,
+        "raw_output": "{\"action\": \"search\",\n  \"asks\": [{\"ask_id\": \"A1\", \"text\": \"GKS 장학생 장학금 수혜 기간과 휴학 시 영향\", \"quote\": \"휴학하면 어떻게 돼\", \"kind\": \"T6\",\n            \"query_ko\": \"GKS 장학생 휴학 시 장학금 수혜 기간 영향\", \"depends_on\": [\"A1\"], \"only_if\": \"A1의 장학금 수혜 기간이 영향을 받을 때\"}],\n  \"user_conditions\": [{\"field_id\": \"gks_status\", \"value\": \"예\", \"subject\": \"other_person\",\n                       \"source_message_id\": \"m1\", \"quote\": \"GKS 장학생이 장학금 받는 기간이 얼마나 돼?\"}],\n  \"reason\": \"휴학이 장학금 수혜에 미치는 영향을 알아야 함\"}",
+        "checklist_version": "v1-2026-09-28"
+      }
+    },
+    {
+      "id": "X14",
+      "question": "그럼 비용은 대충 얼마나 들어?",
+      "boundary": true,
+      "label_src": "design_hard",
+      "gold": {
+        "route": "agent",
+        "action": "search",
+        "n_asks": 3,
+        "depends": false
+      },
+      "pred": {
+        "route": "simple",
+        "action": "search",
+        "n_asks": 1,
+        "depends": false
+      },
+      "ok": {
+        "route": false,
+        "action": true,
+        "n_asks": false,
+        "depends": true
+      },
+      "fallback": false,
+      "run": {
+        "calls": [
+          {
+            "purpose": "route",
+            "latency_ms": 3291.029,
+            "prompt_tokens": 1948,
+            "completion_tokens": 126,
+            "cached_prompt_tokens": 1024,
+            "error_type": null
+          }
+        ],
+        "question": "그럼 비용은 대충 얼마나 들어?",
+        "history": [
+          {
+            "role": "user",
+            "content": "영어 트랙으로 입학해서 기숙사 살고 비자도 받으려고 해요."
+          },
+          {
+            "role": "assistant",
+            "content": "네, 무엇이 궁금하신가요?"
+          }
+        ],
+        "result": {
+          "action": "search",
+          "asks": [
+            {
+              "ask_id": "A1",
+              "text": "기숙사 비용",
+              "quote": "비용은 대충 얼마나 들어",
+              "kind": "T1",
+              "query_ko": "기숙사 비용",
+              "depends_on": [],
+              "only_if": ""
+            }
+          ],
+          "user_conditions": [
+            {
+              "field_id": "track",
+              "value": "영어 트랙",
+              "subject": "user_self",
+              "source_message_id": "m1",
+              "quote": "영어 트랙으로 입학해서"
+            }
+          ],
+          "reason": "기숙사 비용에 대한 단일 요구",
+          "route": "simple",
+          "route_reasons": [
+            "단일 요구, 사용자 조건 1개(user_self:영어 트랙으로 입학해서)는 기존 경로로 충분"
+          ]
+        },
+        "fallback_used": false,
+        "warnings": [],
+        "error": null,
+        "model": "gpt-4o-mini",
+        "latency_ms": 3291,
+        "prompt_tokens": 1948,
+        "completion_tokens": 126,
+        "attempts": 1,
+        "raw_output": "{\"action\": \"search\",\n  \"asks\": [{\"ask_id\": \"A1\", \"text\": \"기숙사 비용\", \"quote\": \"비용은 대충 얼마나 들어\", \"kind\": \"T1\",\n            \"query_ko\": \"기숙사 비용\"}],\n  \"user_conditions\": [{\"field_id\": \"track\", \"value\": \"영어 트랙\", \"subject\": \"user_self\",\n                       \"source_message_id\": \"m1\", \"quote\": \"영어 트랙으로 입학해서\"}],\n  \"reason\": \"기숙사 비용에 대한 단일 요구\"}",
+        "checklist_version": "v1-2026-09-28"
+      }
+    },
+    {
+      "id": "X15",
+      "question": "안녕! 오늘 날씨 좋다",
+      "boundary": false,
+      "label_src": "design_hard",
+      "gold": {
+        "route": "simple",
+        "action": "no_retrieval",
+        "n_asks": 0,
+        "depends": false
+      },
+      "pred": {
+        "route": "simple",
+        "action": "no_retrieval",
+        "n_asks": 0,
+        "depends": false
+      },
+      "ok": {
+        "route": true,
+        "action": true,
+        "n_asks": true,
+        "depends": true
+      },
+      "fallback": false,
+      "run": {
+        "calls": [
+          {
+            "purpose": "route",
+            "latency_ms": 1044.436,
+            "prompt_tokens": 1910,
+            "completion_tokens": 33,
+            "cached_prompt_tokens": 1024,
+            "error_type": null
+          }
+        ],
+        "question": "안녕! 오늘 날씨 좋다",
+        "history": [],
+        "result": {
+          "action": "no_retrieval",
+          "asks": [],
+          "user_conditions": [],
+          "reason": "인사 및 날씨에 대한 일반적인 발화",
+          "route": "simple",
+          "route_reasons": [
+            "no_retrieval: 기존 경로의 안내로 충분"
+          ]
+        },
+        "fallback_used": false,
+        "warnings": [],
+        "error": null,
+        "model": "gpt-4o-mini",
+        "latency_ms": 1044,
+        "prompt_tokens": 1910,
+        "completion_tokens": 33,
+        "attempts": 1,
+        "raw_output": "{\"action\": \"no_retrieval\",\"asks\": [], \"user_conditions\": [], \"reason\": \"인사 및 날씨에 대한 일반적인 발화\"}",
+        "checklist_version": "v1-2026-09-28"
+      }
+    },
+    {
+      "id": "X16",
+      "question": "부산 돼지국밥 맛집 추천해줘",
+      "boundary": false,
+      "label_src": "design_hard",
+      "gold": {
+        "route": "simple",
+        "action": "out_of_scope",
+        "n_asks": 0,
+        "depends": false
+      },
+      "pred": {
+        "route": "simple",
+        "action": "out_of_scope",
+        "n_asks": 0,
+        "depends": false
+      },
+      "ok": {
+        "route": true,
+        "action": true,
+        "n_asks": true,
+        "depends": true
+      },
+      "fallback": false,
+      "run": {
+        "calls": [
+          {
+            "purpose": "route",
+            "latency_ms": 1030.371,
+            "prompt_tokens": 1915,
+            "completion_tokens": 33,
+            "cached_prompt_tokens": 1024,
+            "error_type": null
+          }
+        ],
+        "question": "부산 돼지국밥 맛집 추천해줘",
+        "history": [],
+        "result": {
+          "action": "out_of_scope",
+          "asks": [],
+          "user_conditions": [],
+          "reason": "학교생활·행정과 무관한 요청입니다.",
+          "route": "simple",
+          "route_reasons": [
+            "out_of_scope: 기존 경로의 안내로 충분"
+          ]
+        },
+        "fallback_used": false,
+        "warnings": [],
+        "error": null,
+        "model": "gpt-4o-mini",
+        "latency_ms": 1030,
+        "prompt_tokens": 1915,
+        "completion_tokens": 33,
+        "attempts": 1,
+        "raw_output": "{\"action\": \"out_of_scope\",\"asks\": [],\"user_conditions\": [],\"reason\": \"학교생활·행정과 무관한 요청입니다.\"}",
+        "checklist_version": "v1-2026-09-28"
+      }
+    },
+    {
+      "id": "X17",
+      "question": "서울대 장학금도 알려줘",
+      "boundary": false,
+      "label_src": "design_hard",
+      "gold": {
+        "route": "simple",
+        "action": "out_of_scope",
+        "n_asks": 0,
+        "depends": false
+      },
+      "pred": {
+        "route": "simple",
+        "action": "out_of_scope",
+        "n_asks": 0,
+        "depends": false
+      },
+      "ok": {
+        "route": true,
+        "action": true,
+        "n_asks": true,
+        "depends": true
+      },
+      "fallback": false,
+      "run": {
+        "calls": [
+          {
+            "purpose": "route",
+            "latency_ms": 1367.874,
+            "prompt_tokens": 1910,
+            "completion_tokens": 39,
+            "cached_prompt_tokens": 1024,
+            "error_type": null
+          }
+        ],
+        "question": "서울대 장학금도 알려줘",
+        "history": [],
+        "result": {
+          "action": "out_of_scope",
+          "asks": [],
+          "user_conditions": [],
+          "reason": "동아대 유학생의 학교생활·행정과 무관한 요청입니다.",
+          "route": "simple",
+          "route_reasons": [
+            "out_of_scope: 기존 경로의 안내로 충분"
+          ]
+        },
+        "fallback_used": false,
+        "warnings": [],
+        "error": null,
+        "model": "gpt-4o-mini",
+        "latency_ms": 1367,
+        "prompt_tokens": 1910,
+        "completion_tokens": 39,
+        "attempts": 1,
+        "raw_output": "{\"action\": \"out_of_scope\",\"asks\": [],\"user_conditions\": [],\"reason\": \"동아대 유학생의 학교생활·행정과 무관한 요청입니다.\"}",
+        "checklist_version": "v1-2026-09-28"
+      }
+    },
+    {
+      "id": "X18",
+      "question": "장학금",
+      "boundary": true,
+      "label_src": "design_hard",
+      "gold": {
+        "route": "simple",
+        "action": "search",
+        "n_asks": 1,
+        "depends": false
+      },
+      "pred": {
+        "route": "agent",
+        "action": "clarify_scope",
+        "n_asks": 0,
+        "depends": false
+      },
+      "ok": {
+        "route": false,
+        "action": false,
+        "n_asks": false,
+        "depends": true
+      },
+      "fallback": false,
+      "run": {
+        "calls": [
+          {
+            "purpose": "route",
+            "latency_ms": 1314.942,
+            "prompt_tokens": 1905,
+            "completion_tokens": 33,
+            "cached_prompt_tokens": 1024,
+            "error_type": null
+          }
+        ],
+        "question": "장학금",
+        "history": [],
+        "result": {
+          "action": "clarify_scope",
+          "asks": [],
+          "user_conditions": [],
+          "reason": "요청 대상이 불분명함",
+          "route": "agent",
+          "route_reasons": [
+            "clarify_scope: ①의 범위 되묻기 사용"
+          ]
+        },
+        "fallback_used": false,
+        "warnings": [],
+        "error": null,
+        "model": "gpt-4o-mini",
+        "latency_ms": 1315,
+        "prompt_tokens": 1905,
+        "completion_tokens": 33,
+        "attempts": 1,
+        "raw_output": "{\"action\": \"clarify_scope\",\n  \"asks\": [],\n  \"user_conditions\": [],\n  \"reason\": \"요청 대상이 불분명함\"}",
+        "checklist_version": "v1-2026-09-28"
+      }
+    },
+    {
+      "id": "X19",
+      "question": "한림생활관 승학1관 비용 얼마에용?? ㅠㅠ",
+      "boundary": false,
+      "label_src": "design_hard",
+      "gold": {
+        "route": "simple",
+        "action": "search",
+        "n_asks": 1,
+        "depends": false
+      },
+      "pred": {
+        "route": "simple",
+        "action": "search",
+        "n_asks": 1,
+        "depends": false
+      },
+      "ok": {
+        "route": true,
+        "action": true,
+        "n_asks": true,
+        "depends": true
+      },
+      "fallback": false,
+      "run": {
+        "calls": [
+          {
+            "purpose": "route",
+            "latency_ms": 2877.355,
+            "prompt_tokens": 1918,
+            "completion_tokens": 86,
+            "cached_prompt_tokens": 1792,
+            "error_type": null
+          }
+        ],
+        "question": "한림생활관 승학1관 비용 얼마에용?? ㅠㅠ",
+        "history": [],
+        "result": {
+          "action": "search",
+          "asks": [
+            {
+              "ask_id": "A1",
+              "text": "한림생활관 승학1관 비용",
+              "quote": "비용 얼마에용",
+              "kind": "T1",
+              "query_ko": "한림생활관 승학1관 비용",
+              "depends_on": [],
+              "only_if": ""
+            }
+          ],
+          "user_conditions": [],
+          "reason": "비용에 대한 단일 요구",
+          "route": "simple",
+          "route_reasons": [
+            "단일 요구, 의존·사용자 조건 없음"
+          ]
+        },
+        "fallback_used": false,
+        "warnings": [],
+        "error": null,
+        "model": "gpt-4o-mini",
+        "latency_ms": 2877,
+        "prompt_tokens": 1918,
+        "completion_tokens": 86,
+        "attempts": 1,
+        "raw_output": "{\"action\": \"search\",\n  \"asks\": [{\"ask_id\": \"A1\", \"text\": \"한림생활관 승학1관 비용\", \"quote\": \"비용 얼마에용\", \"kind\": \"T1\",\n            \"query_ko\": \"한림생활관 승학1관 비용\"}],\n  \"user_conditions\": [],\n  \"reason\": \"비용에 대한 단일 요구\"}",
+        "checklist_version": "v1-2026-09-28"
+      }
+    },
+    {
+      "id": "X20",
+      "question": "Can I work part-time on a D-2 visa and how many hours per week?",
+      "boundary": true,
+      "label_src": "design_hard",
+      "gold": {
+        "route": "agent",
+        "action": "search",
+        "n_asks": 2,
+        "depends": false
+      },
+      "pred": {
+        "route": "agent",
+        "action": "search",
+        "n_asks": 2,
+        "depends": true
+      },
+      "ok": {
+        "route": true,
+        "action": true,
+        "n_asks": true,
+        "depends": false
+      },
+      "fallback": false,
+      "run": {
+        "calls": [
+          {
+            "purpose": "route",
+            "latency_ms": 8798.838,
+            "prompt_tokens": 1919,
+            "completion_tokens": 201,
+            "cached_prompt_tokens": 1024,
+            "error_type": null
+          }
+        ],
+        "question": "Can I work part-time on a D-2 visa and how many hours per week?",
+        "history": [],
+        "result": {
+          "action": "search",
+          "asks": [
+            {
+              "ask_id": "A1",
+              "text": "D-2 비자 아르바이트 허용 여부",
+              "quote": "Can I work part-time on a D-2 visa",
+              "kind": "T5",
+              "query_ko": "D-2 비자 시간제 취업 허용 기준",
+              "depends_on": [],
+              "only_if": ""
+            },
+            {
+              "ask_id": "A2",
+              "text": "D-2 비자 아르바이트 가능 시간",
+              "quote": "how many hours per week",
+              "kind": "T1",
+              "query_ko": "D-2 비자 시간제 취업 주당 근무 시간",
+              "depends_on": [
+                "A1"
+              ],
+              "only_if": "A1이 허용일 때"
+            }
+          ],
+          "user_conditions": [],
+          "reason": "아르바이트 허용 여부에 따라 근무 시간이 달라짐",
+          "route": "agent",
+          "route_reasons": [
+            "요구 2개 (D-2 비자 아르바이트 허용 여부, D-2 비자 아르바이트 가능 시간)",
+            "의존 관계 A2←A1"
+          ]
+        },
+        "fallback_used": false,
+        "warnings": [],
+        "error": null,
+        "model": "gpt-4o-mini",
+        "latency_ms": 8798,
+        "prompt_tokens": 1919,
+        "completion_tokens": 201,
+        "attempts": 1,
+        "raw_output": "{\"action\": \"search\",\n  \"asks\": [{\"ask_id\": \"A1\", \"text\": \"D-2 비자 아르바이트 허용 여부\", \"quote\": \"Can I work part-time on a D-2 visa\", \"kind\": \"T5\",\n            \"query_ko\": \"D-2 비자 시간제 취업 허용 기준\", \"depends_on\": [], \"only_if\": \"\"},\n           {\"ask_id\": \"A2\", \"text\": \"D-2 비자 아르바이트 가능 시간\", \"quote\": \"how many hours per week\", \"kind\": \"T1\",\n            \"query_ko\": \"D-2 비자 시간제 취업 주당 근무 시간\", \"depends_on\": [\"A1\"], \"only_if\": \"A1이 허용일 때\"}],\n  \"user_conditions\": [],\n  \"reason\": \"아르바이트 허용 여부에 따라 근무 시간이 달라짐\"}",
+        "checklist_version": "v1-2026-09-28"
+      }
+    },
+    {
+      "id": "X21",
+      "question": "What documents do I need for the English track, and is there a TOEFL waiver?",
+      "boundary": true,
+      "label_src": "design_hard",
+      "gold": {
+        "route": "simple",
+        "action": "search",
+        "n_asks": 2,
+        "depends": false
+      },
+      "pred": {
+        "route": "agent",
+        "action": "search",
+        "n_asks": 2,
+        "depends": false
+      },
+      "ok": {
+        "route": false,
+        "action": true,
+        "n_asks": true,
+        "depends": true
+      },
+      "fallback": false,
+      "run": {
+        "calls": [
+          {
+            "purpose": "route",
+            "latency_ms": 2633.672,
+            "prompt_tokens": 1919,
+            "completion_tokens": 165,
+            "cached_prompt_tokens": 0,
+            "error_type": null
+          }
+        ],
+        "question": "What documents do I need for the English track, and is there a TOEFL waiver?",
+        "history": [],
+        "result": {
+          "action": "search",
+          "asks": [
+            {
+              "ask_id": "A1",
+              "text": "영어 트랙 지원 서류",
+              "quote": "What documents do I need for the English track",
+              "kind": "T3",
+              "query_ko": "영어 트랙 지원 서류",
+              "depends_on": [],
+              "only_if": ""
+            },
+            {
+              "ask_id": "A2",
+              "text": "TOEFL 면제 여부",
+              "quote": "is there a TOEFL waiver",
+              "kind": "T5",
+              "query_ko": "영어 트랙 TOEFL 면제 기준",
+              "depends_on": [],
+              "only_if": ""
+            }
+          ],
+          "user_conditions": [],
+          "reason": "서류와 면제 여부에 대한 두 가지 요구",
+          "route": "agent",
+          "route_reasons": [
+            "요구 2개 (영어 트랙 지원 서류, TOEFL 면제 여부)"
+          ]
+        },
+        "fallback_used": false,
+        "warnings": [],
+        "error": null,
+        "model": "gpt-4o-mini",
+        "latency_ms": 2633,
+        "prompt_tokens": 1919,
+        "completion_tokens": 165,
+        "attempts": 1,
+        "raw_output": "{\"action\": \"search\",\n  \"asks\": [{\"ask_id\": \"A1\", \"text\": \"영어 트랙 지원 서류\", \"quote\": \"What documents do I need for the English track\", \"kind\": \"T3\",\n            \"query_ko\": \"영어 트랙 지원 서류\", \"depends_on\": [], \"only_if\": \"\"},\n           {\"ask_id\": \"A2\", \"text\": \"TOEFL 면제 여부\", \"quote\": \"is there a TOEFL waiver\", \"kind\": \"T5\",\n            \"query_ko\": \"영어 트랙 TOEFL 면제 기준\", \"depends_on\": [], \"only_if\": \"\"}],\n  \"user_conditions\": [],\n  \"reason\": \"서류와 면제 여부에 대한 두 가지 요구\"}",
+        "checklist_version": "v1-2026-09-28"
+      }
+    },
+    {
+      "id": "X22",
+      "question": "저는 중국에서 왔고 GKS 신입생인데, 먼저 한국어 연수를 1년 해야 하고 TOPIK 3급을 따야 한다던데 못 따면 어떻게 돼?",
+      "boundary": true,
+      "label_src": "design_hard",
+      "gold": {
+        "route": "simple",
+        "action": "search",
+        "n_asks": 1,
+        "depends": false
+      },
+      "pred": {
+        "route": "simple",
+        "action": "search",
+        "n_asks": 1,
+        "depends": false
+      },
+      "ok": {
+        "route": true,
+        "action": true,
+        "n_asks": true,
+        "depends": true
+      },
+      "fallback": false,
+      "run": {
+        "calls": [
+          {
+            "purpose": "route",
+            "latency_ms": 2954.145,
+            "prompt_tokens": 1943,
+            "completion_tokens": 161,
+            "cached_prompt_tokens": 1024,
+            "error_type": null
+          }
+        ],
+        "question": "저는 중국에서 왔고 GKS 신입생인데, 먼저 한국어 연수를 1년 해야 하고 TOPIK 3급을 따야 한다던데 못 따면 어떻게 돼?",
+        "history": [],
+        "result": {
+          "action": "search",
+          "asks": [
+            {
+              "ask_id": "A1",
+              "text": "TOPIK 3급 미달 시 결과",
+              "quote": "못 따면 어떻게 돼",
+              "kind": "T6",
+              "query_ko": "TOPIK 3급 미달 시 결과",
+              "depends_on": [],
+              "only_if": ""
+            }
+          ],
+          "user_conditions": [
+            {
+              "field_id": "nationality",
+              "value": "중국",
+              "subject": "user_self",
+              "source_message_id": "m1",
+              "quote": "저는 중국에서 왔고 GKS 신입생인데"
+            }
+          ],
+          "reason": "GKS 신입생으로서 TOPIK 3급 미달 시의 결과를 알고 싶음",
+          "route": "simple",
+          "route_reasons": [
+            "단일 요구, 사용자 조건 1개(user_self:저는 중국에서 왔고 GKS 신입생인데)는 기존 경로로 충분"
+          ]
+        },
+        "fallback_used": false,
+        "warnings": [],
+        "error": null,
+        "model": "gpt-4o-mini",
+        "latency_ms": 2954,
+        "prompt_tokens": 1943,
+        "completion_tokens": 161,
+        "attempts": 1,
+        "raw_output": "{\"action\": \"search\",\n  \"asks\": [{\"ask_id\": \"A1\", \"text\": \"TOPIK 3급 미달 시 결과\", \"quote\": \"못 따면 어떻게 돼\", \"kind\": \"T6\",\n            \"query_ko\": \"TOPIK 3급 미달 시 결과\", \"depends_on\": [], \"only_if\": \"\"}],\n  \"user_conditions\": [{\"field_id\": \"nationality\", \"value\": \"중국\", \"subject\": \"user_self\",\n                       \"source_message_id\": \"m1\", \"quote\": \"저는 중국에서 왔고 GKS 신입생인데\"}],\n  \"reason\": \"GKS 신입생으로서 TOPIK 3급 미달 시의 결과를 알고 싶음\"}",
+        "checklist_version": "v1-2026-09-28"
+      }
+    },
+    {
+      "id": "X23",
+      "question": "만약 학기 중에 TOPIK 점수를 못 올리면 장학금 잃어? 그러면 등록금은 내가 내야 해?",
+      "boundary": false,
+      "label_src": "design_hard",
+      "gold": {
+        "route": "agent",
+        "action": "search",
+        "n_asks": 2,
+        "depends": true
+      },
+      "pred": {
+        "route": "agent",
+        "action": "search",
+        "n_asks": 2,
+        "depends": true
+      },
+      "ok": {
+        "route": true,
+        "action": true,
+        "n_asks": true,
+        "depends": true
+      },
+      "fallback": false,
+      "run": {
+        "calls": [
+          {
+            "purpose": "route",
+            "latency_ms": 3785.608,
+            "prompt_tokens": 1932,
+            "completion_tokens": 209,
+            "cached_prompt_tokens": 1024,
+            "error_type": null
+          }
+        ],
+        "question": "만약 학기 중에 TOPIK 점수를 못 올리면 장학금 잃어? 그러면 등록금은 내가 내야 해?",
+        "history": [],
+        "result": {
+          "action": "search",
+          "asks": [
+            {
+              "ask_id": "A1",
+              "text": "TOPIK 점수 미달 시 장학금 상실 여부",
+              "quote": "학기 중에 TOPIK 점수를 못 올리면 장학금 잃어",
+              "kind": "T5",
+              "query_ko": "TOPIK 점수 미달 시 장학금 상실 여부",
+              "depends_on": [],
+              "only_if": ""
+            },
+            {
+              "ask_id": "A2",
+              "text": "장학금 상실 시 등록금 부담 여부",
+              "quote": "등록금은 내가 내야 해",
+              "kind": "T5",
+              "query_ko": "장학금 상실 시 등록금 부담 여부",
+              "depends_on": [
+                "A1"
+              ],
+              "only_if": "A1이 장학금 상실일 때"
+            }
+          ],
+          "user_conditions": [],
+          "reason": "장학금 상실 여부에 따라 등록금 부담이 결정됨",
+          "route": "agent",
+          "route_reasons": [
+            "요구 2개 (TOPIK 점수 미달 시 장학금 상실 여부, 장학금 상실 시 등록금 부담 여부)",
+            "의존 관계 A2←A1"
+          ]
+        },
+        "fallback_used": false,
+        "warnings": [],
+        "error": null,
+        "model": "gpt-4o-mini",
+        "latency_ms": 3785,
+        "prompt_tokens": 1932,
+        "completion_tokens": 209,
+        "attempts": 1,
+        "raw_output": "{\"action\": \"search\",\n  \"asks\": [{\"ask_id\": \"A1\", \"text\": \"TOPIK 점수 미달 시 장학금 상실 여부\", \"quote\": \"학기 중에 TOPIK 점수를 못 올리면 장학금 잃어\", \"kind\": \"T5\",\n            \"query_ko\": \"TOPIK 점수 미달 시 장학금 상실 여부\", \"depends_on\": [], \"only_if\": \"\"},\n           {\"ask_id\": \"A2\", \"text\": \"장학금 상실 시 등록금 부담 여부\", \"quote\": \"등록금은 내가 내야 해\", \"kind\": \"T5\",\n            \"query_ko\": \"장학금 상실 시 등록금 부담 여부\", \"depends_on\": [\"A1\"], \"only_if\": \"A1이 장학금 상실일 때\"}],\n  \"user_conditions\": [],\n  \"reason\": \"장학금 상실 여부에 따라 등록금 부담이 결정됨\"}",
+        "checklist_version": "v1-2026-09-28"
+      }
+    },
+    {
+      "id": "X24",
+      "question": "친구가 3차 모집에 지원하려는데 해외에서 오는 중이래. 그 친구도 되는 거야?",
+      "boundary": true,
+      "label_src": "design_hard",
+      "gold": {
+        "route": "simple",
+        "action": "search",
+        "n_asks": 1,
+        "depends": false
+      },
+      "pred": {
+        "route": "simple",
+        "action": "search",
+        "n_asks": 1,
+        "depends": false
+      },
+      "ok": {
+        "route": true,
+        "action": true,
+        "n_asks": true,
+        "depends": true
+      },
+      "fallback": false,
+      "run": {
+        "calls": [
+          {
+            "purpose": "route",
+            "latency_ms": 3259.919,
+            "prompt_tokens": 1926,
+            "completion_tokens": 144,
+            "cached_prompt_tokens": 1024,
+            "error_type": null
+          }
+        ],
+        "question": "친구가 3차 모집에 지원하려는데 해외에서 오는 중이래. 그 친구도 되는 거야?",
+        "history": [],
+        "result": {
+          "action": "search",
+          "asks": [
+            {
+              "ask_id": "A1",
+              "text": "3차 모집 지원 자격",
+              "quote": "그 친구도 되는 거야",
+              "kind": "T5",
+              "query_ko": "3차 모집 지원 자격",
+              "depends_on": [],
+              "only_if": ""
+            }
+          ],
+          "user_conditions": [
+            {
+              "field_id": "application_term",
+              "value": "3차",
+              "subject": "other_person",
+              "source_message_id": "m1",
+              "quote": "친구가 3차 모집에 지원하려는데"
+            }
+          ],
+          "reason": "3차 모집에 대한 지원 자격을 확인해야 함",
+          "route": "simple",
+          "route_reasons": [
+            "단일 요구, 사용자 조건 1개(other_person:친구가 3차 모집에 지원하려는데)는 기존 경로로 충분"
+          ]
+        },
+        "fallback_used": false,
+        "warnings": [],
+        "error": null,
+        "model": "gpt-4o-mini",
+        "latency_ms": 3260,
+        "prompt_tokens": 1926,
+        "completion_tokens": 144,
+        "attempts": 1,
+        "raw_output": "{\"action\": \"search\",\n  \"asks\": [{\"ask_id\": \"A1\", \"text\": \"3차 모집 지원 자격\", \"quote\": \"그 친구도 되는 거야\", \"kind\": \"T5\",\n            \"query_ko\": \"3차 모집 지원 자격\", \"depends_on\": [], \"only_if\": \"\"}],\n  \"user_conditions\": [{\"field_id\": \"application_term\", \"value\": \"3차\", \"subject\": \"other_person\",\n                       \"source_message_id\": \"m1\", \"quote\": \"친구가 3차 모집에 지원하려는데\"}],\n  \"reason\": \"3차 모집에 대한 지원 자격을 확인해야 함\"}",
+        "checklist_version": "v1-2026-09-28"
+      }
+    }
+  ]
+}

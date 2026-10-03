@@ -65,6 +65,10 @@ class UserSlot(BaseModel):
 class FirstSearch(BaseModel):
     """순차 루프의 첫 번째 하위 질문 (한 바퀴에 하나)."""
     query_ko: str
+    # 사용자 조건(GKS 장학생 등)을 뺀 일반 규정 검색어. 학교 공통 규정이 조건별 문서와 다른 문서에 있을 때를 위함
+    general_query_ko: str = ""
+    # query_ko와 같은 뜻의 영어 검색어. 영어로만 된 문서를 찾기 위함 (③이 한 번 더 검색)
+    query_en: str = ""
     target_slot_ids: List[str] = []
     reason: str = ""
 

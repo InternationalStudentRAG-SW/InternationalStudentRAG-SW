@@ -57,6 +57,8 @@ def model_for(stage: str) -> str:
     from app.config import settings
     if stage == "verify" and (getattr(settings, "verify_model", "") or "").strip():
         return settings.verify_model.strip()
+    if stage == "answer" and (getattr(settings, "answer_model", "") or "").strip():
+        return settings.answer_model.strip()
     return settings.openai_model
 
 

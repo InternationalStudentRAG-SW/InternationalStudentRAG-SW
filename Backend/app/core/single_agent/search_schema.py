@@ -34,6 +34,7 @@ class SearchPlan(BaseModel):
     target_slot_id: Optional[str] = None
     search_type: Optional[str] = None  # "new" / "expand_context"
     query_ko: Optional[str] = None
+    query_en: Optional[str] = None  # 같은 뜻의 영어 검색어 (영어 전용 문서용). 없으면 한국어로만 검색
     reason: str = ""
     is_duplicate: bool = False  # 중복이면 실행하지 않으므로 action=search일 때는 항상 False
     from_first_search: bool = False  # 첫 바퀴에 ①의 first_search를 그대로 썼는지
@@ -47,6 +48,7 @@ class SearchPlan(BaseModel):
 class SearchPlanRun(LLMMetrics):
     """검색 계획 1회 실행 기록 (확인 스크립트·로그용)."""
     plan: Optional[SearchPlan] = None
+    query_en: str = ""  # 검색어 생성 LLM이 함께 만든 영어 검색어 (plan.query_en에 옮김)
     warnings: List[str] = []
     error: Optional[str] = None
     model: str = ""

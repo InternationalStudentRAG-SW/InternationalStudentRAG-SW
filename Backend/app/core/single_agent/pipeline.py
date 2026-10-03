@@ -15,6 +15,7 @@ on_event(stage, info)를 넘기면 단계마다 진행 상황을 알려준다 (�
 """
 from __future__ import annotations
 
+import re
 import time
 from typing import Callable, Dict, List, Optional
 
@@ -27,11 +28,39 @@ from app.core.single_agent.branching import branch_lines
 from app.core.single_agent.evidence_schema import EvidencePool
 from app.core.single_agent.search_planner import check_budget, plan_search
 from app.core.single_agent.search_schema import SearchAttempt, SearchBudget, SearchPlan
+from app.core.single_agent.text_match import normalize
 from app.core.single_agent.searcher import execute_search
 from app.core.single_agent.verifier import decide, verify_evidence
 from app.core.single_agent.verify_schema import VerifyDecision
 
 EventFn = Callable[[str, Dict], None]
+
+
+def general_query_for(analysis: QuestionAnalysis, question: str = "") -> str:
+    """
+    사용자 조건을 뺀 일반 규정 검색어. 첫 검색어에서 사용자 사례 조건(user_self / other_person)의 단어
+    (GENERAL_QUERY_STRIP_WORDS)를 뺀다. 질문의 구체적인 내용(예: '첫 학기')이 그대로 남아서 ①이 따로 적은
+    general_query_ko보다 우선한다(①은 'GKS 장학생 휴학 규정'처럼 조건을 남기거나 핵심어를 빠뜨린 적이 있음, 2026-10-02).
+    첫 검색어로 만들 수 없을 때만 general_query_ko를 같은 방식으로 다듬어 쓴다. 둘 다 안 되면 빈 문자열.
+    """
+    fs = analysis.first_search
+    if fs is None:
+        return ""
+    fields = {c.field_id for c in analysis.conditions if c.subject in ("user_self", "other_person")}
+    words = sorted({w for f in fields for w in cfg.GENERAL_QUERY_STRIP_WORDS.get(f, [])}, key=len, reverse=True)
+    if not words:
+        return ""
+
+    def strip(text: str) -> str:
+        q = text or ""
+        for w in words:
+            q = re.sub(re.escape(w), " ", q, flags=re.IGNORECASE)
+        q = re.sub(r"\s+", " ", q).strip(" ,·의")
+        if len(normalize(q)) < cfg.GENERAL_QUERY_MIN_CHARS or normalize(q) == normalize(fs.query_ko or ""):
+            return ""
+        return q
+
+    return strip(fs.query_ko) or strip(fs.general_query_ko)
 
 
 def finalize_decision(
@@ -66,6 +95,7 @@ def run_pipeline(
     search_fn=None,
     store=None,
     on_event: Optional[EventFn] = None,
+    route_asks=None,
 ) -> PipelineRun:
     """
     질문 1개를 끝까지 처리한다. history: 이전 대화 [{"role": "user"/"assistant", "content": ...}].
@@ -80,14 +110,15 @@ def run_pipeline(
     def finish(mode: str, analysis=None, pool=None, decision=None):
         run.decision = decision
         emit("answer_start", {"mode": mode})
-        run.answer_run = write_answer(question, mode, analysis, pool, decision, model=answer_model, client=client)
+        run.answer_run = write_answer(question, mode, analysis, pool, decision, model=answer_model, client=client,
+                                      asks=route_asks)
         emit("answer", {"mode": run.answer_run.mode, "answer": run.answer_run.answer,
                         "sources": [s.model_dump() for s in run.answer_run.sources]})
         run.latency_ms = int((time.perf_counter() - started) * 1000)
         return run
 
     # ① 질문 분석
-    a_run = analyze_question(question, history, model=model, client=client)
+    a_run = analyze_question(question, history, model=model, client=client, asks=route_asks)
     run.analysis_run = a_run
     if a_run.analysis is None:
         run.stopped = f"analysis_error: {a_run.error}"
@@ -153,6 +184,21 @@ def run_pipeline(
                 round_new_chunks += ex2.new_chunk_ids
             else:
                 run.warnings.append(f"③ 첫 바퀴 확장 실패 [{ex2.error_type}]: {ex2.error}")
+        general = general_query_for(analysis, question) if rnd == 1 else ""
+        if (rnd == 1 and cfg.GENERAL_QUERY_FIRST_ROUND and plan.from_first_search and general
+                and normalize(general) != normalize(plan.query_ko or "")
+                and check_budget(budget, "new") is None):
+            plan3 = SearchPlan(action="search", target_slot_id=plan.target_slot_id, search_type="new",
+                               query_ko=general, reason="첫 바퀴 일반 규정 검색 (사용자 조건 제외)")
+            ex3 = execute_search(plan3, pool, budget, search_fn=search_fn, store=store)
+            run.search_runs.append(ex3)
+            if ex3.ok:
+                budget = ex3.budget
+                attempts.append(ex3.attempt)
+                round_chunks += ex3.chunk_ids
+                round_new_chunks += ex3.new_chunk_ids
+            else:
+                run.warnings.append(f"③ 일반 규정 검색 실패 [{ex3.error_type}]: {ex3.error}")
         emit("search", {"round": rnd, "chunks": len(round_chunks), "pool": len(pool),
                         "new": len(round_new_chunks)})
 

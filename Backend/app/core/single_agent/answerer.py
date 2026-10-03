@@ -26,6 +26,7 @@ from app.core.single_agent.answer_schema import AnswerRun, AnswerSource
 from app.core.single_agent.branching import branch_lines
 from app.core.single_agent.evidence_schema import EvidencePool, make_evidence_id, parse_evidence_id
 from app.core.single_agent.llm import get_client, model_for, run_json_loop
+from app.core.single_agent import prohibition_check as prohibition
 from app.core.single_agent.text_match import list_quote_in_text, normalize, quote_in_text
 from app.core.single_agent.verify_schema import VerifyDecision
 
@@ -442,6 +443,48 @@ def _caveat_pass(run: AnswerRun, client, model: str, messages: List[Dict], evide
     run.warnings.append(f"[단서 확인] 반영 안 된 단서 문장 {len(sents)}개 → 1회 다시 씀")
 
 
+def _prohibition_fix(run: AnswerRun, client, model: str, messages: List[Dict], evidence_ids: List[str],
+                     pool: EvidencePool, parse, allow_rewrite: bool = True) -> None:
+    """
+    '불가' 근거에 다른 문서의 허용 조건을 붙인 문장을 서버가 찾는다 (prohibition_check.py).
+    allow_rewrite면 ⑤를 다시 쓰게 하고, 그래도 남으면(또는 다시 쓰기 없이 부를 때) 그 문장을 빼고 금지 원문을 넣는다.
+    """
+    sources = {n: pool.get(eid).source for n, eid in enumerate(evidence_ids, 1)}
+    texts = {n: pool.get(eid).text for n, eid in enumerate(evidence_ids, 1)}
+    issues = prohibition.find_issues(run.answer, run.facts, sources, texts)
+    if not issues:
+        return
+    if not run.prohibition_issues:
+        run.prohibition_issues = [i.describe() for i in issues]
+    run.warnings.append(f"[금지 검사] '불가' 근거에 다른 허용 조건을 붙인 문장 {len(issues)}개")
+
+    tries = 0
+    while issues and allow_rewrite and tries < cfg.ANSWER_PROHIBITION_MAX_REWRITES:
+        tries += 1
+        run.rewrites += 1
+        retry = messages + [
+            {"role": "assistant", "content": json.dumps({"answer": run.answer}, ensure_ascii=False)},
+            {"role": "user", "content": prohibition.feedback_message(issues)},
+        ]
+        text, ok = run_json_loop(run, client, model, retry, parse=parse, temperature=0.0,
+                                 max_tokens=ANSWER_MAX_TOKENS, purpose="answer_prohibition",
+                                 format_hint='{"answer": "..."} 형식의 JSON만 다시 출력하세요.')
+        if not ok:
+            run.error = None
+            run.warnings.append("[금지 검사] 다시 쓰기 실패 → 서버가 문장을 고침")
+            break
+        run.answer, run.sources = _clean_markers(text, evidence_ids, pool, run.warnings)
+        issues = prohibition.find_issues(run.answer, run.facts, sources, texts)
+        run.warnings.append(f"[금지 검사] {tries}차 다시 쓰기 후 남은 문장 {len(issues)}개")
+
+    if issues:
+        fixed = prohibition.fallback_fix(run.answer, issues)
+        if fixed.strip():
+            run.dropped_sentences = list(run.dropped_sentences) + [i.sentence.strip() for i in issues]
+            run.answer, run.sources = _clean_markers(fixed, evidence_ids, pool, run.warnings)
+            run.warnings.append(f"[금지 검사] 남은 문장 {len(issues)}개를 빼고 금지 원문으로 바꿈")
+
+
 def write_answer(
     question: str,
     mode: str,
@@ -489,10 +532,15 @@ def write_answer(
     run.answer, run.sources = _clean_markers(text, evidence_ids, pool, run.warnings)
     if cfg.ANSWER_CAVEAT_CHECK and mode in ("answer", "answer_by_condition", "partial_answer") and evidence_ids:
         _caveat_pass(run, client, model, messages, evidence_ids, pool, parse)
+    prohibition_on = cfg.ANSWER_PROHIBITION_CHECK and mode in ("answer", "answer_by_condition", "partial_answer") and evidence_ids
+    if prohibition_on:
+        _prohibition_fix(run, client, model, messages, evidence_ids, pool, parse)
     if cfg.ANSWER_QUOTE_FIRST and mode in EVIDENCE_MODES and evidence_ids and not any(f.get("verified") for f in run.facts):
         run.warnings.append("[확인 필요] 인용 먼저 쓰기: 원문과 맞는 인용(facts)이 하나도 없음")
     if cfg.ANSWER_CHECK_ENABLED and mode in EVIDENCE_MODES and evidence_ids:
         _check_and_fix(run, client, model, messages, mode, evidence_ids, pool, parse)
+        if prohibition_on:   # 숫자 검사 다시 쓰기가 섞인 문장을 되살렸을 수 있으므로 한 번 더 (LLM 없이)
+            _prohibition_fix(run, client, model, messages, evidence_ids, pool, parse, allow_rewrite=False)
     if mode in EVIDENCE_MODES and not run.sources and run.facts:
         run.sources = _sources_from_facts(run, evidence_ids, pool)
         if run.sources:

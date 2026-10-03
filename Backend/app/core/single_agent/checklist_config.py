@@ -562,6 +562,11 @@ ANSWER_MAX_EXTRA = 8
 # 그 문장을 짚어 주고 1회 다시 쓰게 한다 (E2: 근거에 '1년 추가 연장'이 있는데 답에서 빠짐). 걸렸을 때만 LLM 1회 추가.
 ANSWER_CAVEAT_CHECK = True
 ANSWER_CAVEAT_MAX_SENTENCES = 3
+# ⑤ 금지 규정 검사 (2026-10-04, prohibition_check.py)
+#   '입학 후 첫 학기 휴학 불가' 같은 금지 근거에 다른 문서의 허용 조건('부득이한 사유가 있으면')을 붙인 문장을 서버가 찾는다.
+#   걸리면 ANSWER_PROHIBITION_MAX_REWRITES번 다시 쓰게 하고, 그래도 남으면 그 문장을 빼고 금지 원문을 넣는다.
+ANSWER_PROHIBITION_CHECK = True
+ANSWER_PROHIBITION_MAX_REWRITES = 1
 ROUTER_SIMPLE_ACTIONS = {"no_retrieval", "out_of_scope"}  # 기존 경로가 안내 문구를 이미 갖고 있음
 ROUTER_AGENT_ACTIONS = {"clarify_scope"}                 # ①의 범위 되묻기 규칙을 쓴다
 # 요구가 하나여도 이 유형이면 에이전트로 보낸다. 기본은 비워 둔다:

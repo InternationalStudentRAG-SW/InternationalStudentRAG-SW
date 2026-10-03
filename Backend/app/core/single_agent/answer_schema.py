@@ -34,6 +34,7 @@ class AnswerRun(LLMMetrics):
     caveat_sentences: List[str] = []   # 단서 확인에서 짚어 준 문장 (있으면 1회 다시 씀)
     rewrites: int = 0                  # 검사에 걸려 다시 쓴 횟수
     dropped_sentences: List[str] = []  # 다시 써도 근거가 없어 뺀 문장
+    prohibition_issues: List[str] = [] # 금지 규정 검사에서 처음 걸린 문장 ('불가' 근거에 다른 문서의 허용 조건을 붙임)
     warnings: List[str] = []
     error: Optional[str] = None
     model: str = ""

@@ -1,0 +1,990 @@
+[
+  {
+    "log": "20261003_233847_cc873c.json",
+    "question": "GKS 장학생으로 동아대 학부에 신입학했는데, 첫 학기에 휴학할 수 있어? 휴학하면 장학금은 어떻게 돼?",
+    "id": "Q7",
+    "old": {
+      "answer": "GKS 장학생은 부득이한 사유가 없으면 첫 학기에 휴학할 수 없습니다[1][2]. 부득이한 사유로 휴학하려면 관련 사유를 증명하는 서류와 함께 휴학 신청서를 제출해야 합니다[1]. 휴학 기간 동안에는 월 생활비가 지급되지 않습니다[4].",
+      "score": {
+        "coverage": 0.3333333333333333,
+        "wrong": 1,
+        "per_fact": [
+          {
+            "status": "wrong",
+            "reason": "첫 학기에는 예외 없이 휴학 불가해야 함."
+          },
+          {
+            "status": "included",
+            "reason": "휴학 기간 동안 월 생활비가 지급되지 않음."
+          },
+          {
+            "status": "missing",
+            "reason": "휴학 기간이 장학 기간에 포함되지 않는다는 언급이 없음."
+          }
+        ],
+        "contradictions": [
+          "GKS 장학생은 부득이한 사유가 없으면 첫 학기에 휴학할 수 없습니다."
+        ],
+        "adjusted": []
+      }
+    },
+    "new": [
+      {
+        "answer": "GKS 장학생은 입학 후 첫 학기에는 휴학할 수 없습니다[2]. 휴학 기간 동안에는 장학금이 지급되지 않습니다[4].",
+        "shown": 8,
+        "caveats": [
+          "[1] In such cases, the recipient must submit an application for a leave of absence along with supporting documents verifying the relevant reason.",
+          "[4] ② The NIIED president may award additional scholarships to GKS recipients for outstanding academic performance.",
+          "[4] Temporary departure of up to 30 days per semester, except as specified in Article 22, Paragrah 5 of the Scholarship Payment Guideline will be considered as days of stay in Korea for GKS recipients."
+        ],
+        "rewrites": 1,
+        "warnings": [
+          "[보완] 추가 근거 4개를 ⑤에 보여줌 (요구별 검색 상위·앞뒤 조각)",
+          "[단서 확인] 반영 안 된 단서 문장 3개 → 1회 다시 씀",
+          "[금지 검사] '불가' 근거에 다른 허용 조건을 붙인 문장 2개",
+          "[금지 검사] 1차 다시 쓰기 후 남은 문장 0개"
+        ],
+        "tokens": 11257,
+        "score": {
+          "coverage": 0.6666666666666666,
+          "wrong": 0,
+          "per_fact": [
+            {
+              "status": "included",
+              "reason": "첫 학기에는 휴학할 수 없다고 명시함."
+            },
+            {
+              "status": "included",
+              "reason": "휴학 기간 동안 장학금이 지급되지 않는다고 명시함."
+            },
+            {
+              "status": "missing",
+              "reason": "휴학 기간이 장학 기간에 포함되지 않는다는 언급이 없음."
+            }
+          ],
+          "contradictions": [],
+          "adjusted": []
+        }
+      }
+    ]
+  },
+  {
+    "log": "20261003_234138_ea8440.json",
+    "question": "GKS 장학생으로 동아대 학부에 신입학했는데, 첫 학기에 휴학할 수 있어? 휴학하면 장학금은 어떻게 돼?",
+    "id": "Q7",
+    "old": {
+      "answer": "GKS 장학생은 입학 후 첫 학기에는 휴학이 불가합니다[1]. 그러나 불가피한 사유가 있을 경우, 예를 들어 본국의 긴급 소환, 긴급 가족 문제, 또는 심각한 개인 질병 등의 경우에는 휴학이 허용될 수 있으며, 이 경우 관련 사유를 증명하는 서류와 함께 휴학 신청서를 제출해야 합니다[2]. 휴학 기간 동안에는 월별 수당이 지급되지 않습니다[4].",
+      "score": {
+        "coverage": 0.3333333333333333,
+        "wrong": 1,
+        "per_fact": [
+          {
+            "status": "wrong",
+            "reason": "예외 조건을 언급하며 휴학이 가능하다고 함"
+          },
+          {
+            "status": "included",
+            "reason": "휴학 기간 동안 월별 수당이 지급되지 않는다고 함"
+          },
+          {
+            "status": "missing",
+            "reason": "휴학 기간이 장학 기간에 포함되지 않는다는 언급이 없음"
+          }
+        ],
+        "contradictions": [
+          "그러나 불가피한 사유가 있을 경우, 예를 들어 본국의 긴급 소환, 긴급 가족 문제, 또는 심각한 개인 질병 등의 경우에는 휴학이 허용될 수 있으며, 이 경우 관련 사유를 증명하는 서류와 함께 휴학 신청서를 제출해야 합니다"
+        ],
+        "adjusted": []
+      }
+    },
+    "new": [
+      {
+        "answer": "GKS 장학생은 입학 후 첫 학기에는 휴학이 불가합니다[1]. 휴학 기간 동안에는 월 생활비가 지급되지 않습니다[4].",
+        "shown": 9,
+        "caveats": [
+          "[2] In such cases, the recipient must submit an application for a leave of absence along with supporting documents verifying the relevant reason.",
+          "[4] ② The NIIED president may award additional scholarships to GKS recipients for outstanding academic performance.",
+          "[4] Temporary departure of up to 30 days per semester, except as specified in Article 22, Paragrah 5 of the Scholarship Payment Guideline will be considered as days of stay in Korea for GKS recipients."
+        ],
+        "rewrites": 1,
+        "warnings": [
+          "[보완] 추가 근거 5개를 ⑤에 보여줌 (요구별 검색 상위·앞뒤 조각)",
+          "[단서 확인] 반영 안 된 단서 문장 3개 → 1회 다시 씀",
+          "[금지 검사] '불가' 근거에 다른 허용 조건을 붙인 문장 1개",
+          "[금지 검사] 1차 다시 쓰기 후 남은 문장 0개"
+        ],
+        "tokens": 11606,
+        "score": {
+          "coverage": 0.6666666666666666,
+          "wrong": 0,
+          "per_fact": [
+            {
+              "status": "included",
+              "reason": "첫 학기에는 휴학할 수 없다고 명시함."
+            },
+            {
+              "status": "included",
+              "reason": "휴학 기간 동안 월 생활비가 지급되지 않는다고 명시함."
+            },
+            {
+              "status": "missing",
+              "reason": "휴학 기간이 장학 기간에 포함되지 않는다는 언급이 없음."
+            }
+          ],
+          "contradictions": [],
+          "adjusted": []
+        }
+      }
+    ]
+  },
+  {
+    "log": "20261003_234359_d8fdb0.json",
+    "question": "GKS 장학생으로 동아대 학부에 신입학했는데, 첫 학기에 휴학할 수 있어? 휴학하면 장학금은 어떻게 돼?",
+    "id": "Q7",
+    "old": {
+      "answer": "GKS 장학생은 부득이한 사유가 없으면 첫 학기에 휴학할 수 없습니다. 부득이한 사유가 있을 경우, 관련 사유를 증명하는 서류와 함께 휴학 신청서를 제출해야 합니다[1]. 휴학 기간 동안에는 장학금 지급이 중단됩니다[4].",
+      "score": {
+        "coverage": 0.3333333333333333,
+        "wrong": 1,
+        "per_fact": [
+          {
+            "status": "wrong",
+            "reason": "첫 학기에는 예외 없이 휴학 불가해야 함."
+          },
+          {
+            "status": "included",
+            "reason": "휴학 기간 동안 장학금 지급이 중단된다고 함."
+          },
+          {
+            "status": "missing",
+            "reason": "휴학 기간이 장학 기간에 포함되지 않는다는 언급이 없음."
+          }
+        ],
+        "contradictions": [
+          "GKS 장학생은 부득이한 사유가 없으면 첫 학기에 휴학할 수 없습니다."
+        ],
+        "adjusted": []
+      }
+    },
+    "new": [
+      {
+        "answer": "GKS 장학생은 입학 후 첫 학기에는 휴학할 수 없습니다[2]. 휴학 기간 동안에는 장학금 지급이 중단됩니다[4].",
+        "shown": 6,
+        "caveats": [
+          "[1] In such cases, the recipient must submit an application for a leave of absence along with supporting documents verifying the relevant reason.",
+          "[4] ② The NIIED president may award additional scholarships to GKS recipients for outstanding academic performance.",
+          "[4] Temporary departure of up to 30 days per semester, except as specified in Article 22, Paragrah 5 of the Scholarship Payment Guideline will be considered as days of stay in Korea for GKS recipients."
+        ],
+        "rewrites": 1,
+        "warnings": [
+          "[보완] 추가 근거 2개를 ⑤에 보여줌 (요구별 검색 상위·앞뒤 조각)",
+          "[단서 확인] 반영 안 된 단서 문장 3개 → 1회 다시 씀",
+          "[금지 검사] '불가' 근거에 다른 허용 조건을 붙인 문장 2개",
+          "[금지 검사] 1차 다시 쓰기 후 남은 문장 0개"
+        ],
+        "tokens": 9625,
+        "score": {
+          "coverage": 0.6666666666666666,
+          "wrong": 0,
+          "per_fact": [
+            {
+              "status": "included",
+              "reason": "첫 학기에는 휴학할 수 없다고 명시함."
+            },
+            {
+              "status": "included",
+              "reason": "휴학 기간 동안 장학금 지급이 중단된다고 명시함."
+            },
+            {
+              "status": "missing",
+              "reason": "휴학 기간이 장학 기간에 포함되지 않는다는 언급이 없음."
+            }
+          ],
+          "contradictions": [],
+          "adjusted": []
+        }
+      }
+    ]
+  },
+  {
+    "log": "20261003_234833_509139.json",
+    "question": "동아대 학부 신입학에 지원하려는데, 한국어 트랙과 영어 트랙의 어학 기준이 각각 뭐야? 영어 트랙에서 어학 성적을 안 내도 되는 경우도 있어?",
+    "id": "LANG",
+    "old": {
+      "answer": "한국어 트랙의 어학 기준은 토픽 2급 이상 또는 이에 상응하는 성적 취득자입니다. 토픽 2급에 상응하는 성적 소지자는 입학 후 1년간 소정의 한국어 교육을 이수해야 합니다[1]. 영어 트랙의 어학 기준은 IELTS 5.5, TOEFL iBT 3.5, New TEPS 202 이상입니다[2]. 영어 트랙에서 어학 성적을 제출하지 않아도 되는 경우는 영어를 모국어로 사용하는 국가에서 고등학교 교육을 마친 경우입니다. 해당 국가는 남아프리카공화국, 뉴질랜드, 미국, 아일랜드, 영국, 캐나다, 호주입니다[3].",
+      "score": {
+        "coverage": 1.0,
+        "wrong": 0,
+        "per_fact": [
+          {
+            "status": "included",
+            "reason": "TOPIK 2급 이상 또는 이에 상응하는 성적이라고 명시함."
+          },
+          {
+            "status": "included",
+            "reason": "IELTS 5.5, TOEFL iBT 3.5, New TEPS 202 이상이라고 명시함."
+          },
+          {
+            "status": "included",
+            "reason": "영어가 모국어인 국가에서 고등학교 과정을 마친 경우 어학 요건이 면제된다고 명시함."
+          }
+        ],
+        "contradictions": [],
+        "adjusted": []
+      }
+    },
+    "new": [
+      {
+        "answer": "한국어 트랙의 어학 기준은 토픽 2급 이상 또는 이에 상응하는 성적을 취득해야 하며, 토픽 2급에 상응하는 성적 소지자는 입학 후 1년간 소정의 한국어 교육을 이수해야 합니다[1]. 영어 트랙의 어학 기준은 IELTS 5.5, TOEFL iBT 3.5, 또는 New TEPS 202 이상의 성적이 필요합니다[2]. 영어 트랙에서 어학 성적을 제출하지 않아도 되는 경우는 영어를 모국어로 사용하는 국가에서 고등학교 교육을 마친 경우입니다. 해당 국가는 남아프리카 공화국, 뉴질랜드, 미국, 아일랜드, 영국, 캐나다, 호주입니다[3].",
+        "shown": 11,
+        "caveats": [],
+        "rewrites": 0,
+        "warnings": [
+          "[보완] 추가 근거 5개를 ⑤에 보여줌 (요구별 검색 상위·앞뒤 조각)"
+        ],
+        "tokens": 4595,
+        "score": {
+          "coverage": 1.0,
+          "wrong": 0,
+          "per_fact": [
+            {
+              "status": "included",
+              "reason": "TOPIK 2급 이상 또는 이에 상응하는 성적이 필요하다고 명시함."
+            },
+            {
+              "status": "included",
+              "reason": "IELTS 5.5, TOEFL iBT 3.5, New TEPS 202 중 하나 이상 필요하다고 명시함."
+            },
+            {
+              "status": "included",
+              "reason": "영어가 모국어인 국가에서 고등학교 과정을 마친 경우 영어 트랙 어학 요건이 면제된다고 명시함."
+            }
+          ],
+          "contradictions": [],
+          "adjusted": []
+        }
+      }
+    ]
+  },
+  {
+    "log": "20261003_235301_61da13.json",
+    "question": "동아대 학부 신입학에 지원하려는데, 한국어 트랙과 영어 트랙의 어학 기준이 각각 뭐야? 영어 트랙에서 어학 성적을 안 내도 되는 경우도 있어?",
+    "id": "LANG",
+    "old": {
+      "answer": "한국어 트랙의 어학 기준은 토픽 2급 이상 또는 이에 상응하는 성적 취득자입니다. 토픽 2급에 상응하는 성적 소지자는 입학 후 1년간 소정의 한국어 교육을 이수해야 합니다. 단, 예체능 계열 입학자는 제외됩니다[1]. 영어 트랙의 어학 기준은 IELTS 5.5, TOEFL iBT 3.5, New TEPS 202입니다[6]. 영어 트랙에서 어학 성적을 제출하지 않아도 되는 경우는 영어가 모국어인 국가에서 고등학교 교육을 마친 지원자입니다. 해당 국가는 남아프리카공화국, 뉴질랜드, 미국, 아일랜드, 영국, 캐나다, 호주입니다[3].",
+      "score": {
+        "coverage": 1.0,
+        "wrong": 0,
+        "per_fact": [
+          {
+            "status": "included",
+            "reason": "한국어 트랙의 어학 기준이 정확히 언급됨."
+          },
+          {
+            "status": "included",
+            "reason": "영어 트랙의 어학 기준이 정확히 언급됨."
+          },
+          {
+            "status": "included",
+            "reason": "영어 트랙에서 어학 성적 면제 조건이 정확히 언급됨."
+          }
+        ],
+        "contradictions": [],
+        "adjusted": []
+      }
+    },
+    "new": [
+      {
+        "answer": "한국어 트랙의 어학 기준은 토픽 2급 이상 또는 이에 상응하는 성적 취득자입니다. 토픽 2급에 상응하는 성적 소지자는 입학 후 1년간 소정의 한국어 교육을 이수해야 합니다. 단, 예체능 계열 입학자는 제외됩니다[1]. 영어 트랙의 어학 기준은 IELTS 5.5, TOEFL iBT 3.5, New TEPS 202입니다. 어학 성적은 원서 접수 마감일 기준 2년 이내에 취득한 성적만 인정됩니다[6]. 영어 트랙에서 어학 성적을 제출하지 않아도 되는 경우는 영어가 모국어인 국가에서 고등학교 교육을 완료한 지원자입니다. 해당 국가는 남아프리카공화국, 뉴질랜드, 미국, 아일랜드, 영국, 캐나다, 호주입니다[3].",
+        "shown": 7,
+        "caveats": [],
+        "rewrites": 0,
+        "warnings": [
+          "[보완] 추가 근거 4개를 ⑤에 보여줌 (요구별 검색 상위·앞뒤 조각)"
+        ],
+        "tokens": 4024,
+        "score": {
+          "coverage": 1.0,
+          "wrong": 0,
+          "per_fact": [
+            {
+              "status": "included",
+              "reason": "한국어 트랙의 어학 기준이 정확히 언급됨."
+            },
+            {
+              "status": "included",
+              "reason": "영어 트랙의 어학 기준이 정확히 언급됨."
+            },
+            {
+              "status": "included",
+              "reason": "영어 트랙에서 어학 성적 면제 조건이 정확히 언급됨."
+            }
+          ],
+          "contradictions": [],
+          "adjusted": []
+        }
+      }
+    ]
+  },
+  {
+    "log": "20261003_235740_cc5960.json",
+    "question": "동아대 학부 신입학에 지원하려는데, 한국어 트랙과 영어 트랙의 어학 기준이 각각 뭐야? 영어 트랙에서 어학 성적을 안 내도 되는 경우도 있어?",
+    "id": "LANG",
+    "old": {
+      "answer": "한국어 트랙의 어학 기준은 신입학의 경우 토픽 2급 이상 또는 이에 상응하는 성적 취득자입니다. 토픽 2급에 상응하는 성적 소지자는 입학 후 1년간 소정의 한국어 교육을 이수해야 합니다. 단, 예체능 계열 입학자는 제외됩니다[1]. 영어 트랙의 경우 별도의 어학 기준이 명시되어 있지 않습니다[3]. 영어 트랙에서 어학 성적을 제출하지 않아도 되는 경우는 영어가 모국어인 국가에서 고등학교를 졸업한 경우입니다. 해당 국가는 남아프리카공화국, 뉴질랜드, 미국, 아일랜드, 영국, 캐나다, 호주입니다[5].",
+      "score": {
+        "coverage": 0.6666666666666666,
+        "wrong": 1,
+        "per_fact": [
+          {
+            "status": "included",
+            "reason": "한국어 트랙의 어학 기준이 정확히 언급됨."
+          },
+          {
+            "status": "wrong",
+            "reason": "영어 트랙의 어학 기준이 명시되어 있지 않다고 잘못 언급됨."
+          },
+          {
+            "status": "included",
+            "reason": "영어가 모국어인 국가에서 고등학교를 졸업한 경우 어학 요건 면제 조건이 정확히 언급됨."
+          }
+        ],
+        "contradictions": [
+          "영어 트랙의 경우 별도의 어학 기준이 명시되어 있지 않습니다."
+        ],
+        "adjusted": []
+      }
+    },
+    "new": [
+      {
+        "answer": "한국어 트랙의 어학 기준은 신입학의 경우 토픽 2급 이상 또는 이에 상응하는 성적을 취득해야 하며, 토픽 2급에 상응하는 성적 소지자는 입학 후 1년간 소정의 한국어 교육을 이수해야 합니다. 단, 예체능 계열 입학자는 제외됩니다[1]. 영어 트랙의 경우 별도의 어학 기준이 명시되어 있지 않습니다[3]. 영어 트랙에서 어학 성적을 제출하지 않아도 되는 경우는 영어가 모국어인 국가에서 고등학교 교육을 마친 지원자입니다. 해당 국가는 남아프리카공화국, 뉴질랜드, 미국, 아일랜드, 영국, 캐나다, 호주입니다[5].",
+        "shown": 10,
+        "caveats": [],
+        "rewrites": 0,
+        "warnings": [
+          "[보완] 추가 근거 5개를 ⑤에 보여줌 (요구별 검색 상위·앞뒤 조각)"
+        ],
+        "tokens": 4468,
+        "score": {
+          "coverage": 0.6666666666666666,
+          "wrong": 1,
+          "per_fact": [
+            {
+              "status": "included",
+              "reason": "TOPIK 2급 이상 또는 이에 상응하는 성적이 필요하다고 명시됨."
+            },
+            {
+              "status": "missing",
+              "reason": "영어 트랙의 어학 기준이 명시되어 있지 않다고 함."
+            },
+            {
+              "status": "included",
+              "reason": "영어가 모국어인 국가에서 고등학교 과정을 마친 경우 어학 요건이 면제된다고 명시됨."
+            }
+          ],
+          "contradictions": [
+            "영어 트랙의 경우 별도의 어학 기준이 명시되어 있지 않습니다"
+          ],
+          "adjusted": []
+        }
+      }
+    ]
+  },
+  {
+    "log": "20261004_000157_f24c8e.json",
+    "question": "동아대 한국어과정을 듣는 GKS 장학생이 있다고 해보자. 무단결석이 몇 번이면 GKS 경고를 받고, 한국어과정 다음 급으로 올라가려면 최소 얼마나 출석해야 해? 경고는 몇 번 받으면 자격을 잃어?",
+    "id": "GKSW",
+    "old": {
+      "answer": "GKS 장학생은 한국어연수 기간 중 무단결석일이 연속하여 3일 이상이거나 월 누계 5일 이상인 경우 경고를 받습니다. 다만, 위반 사유가 부득이하다고 교육원장이 인정하는 경우에는 예외로 할 수 있습니다[1][2]. 한국어과정에서 다음 급으로 올라가려면 최소 80% 출석해야 합니다[5]. GKS 장학생은 경고를 3회 이상 받으면 자격을 잃습니다. 다만, 교육원장이 그 행위에 부득이한 사유가 있다고 인정하는 경우는 예외로 합니다[11].",
+      "score": {
+        "coverage": 1.0,
+        "wrong": 0,
+        "per_fact": [
+          {
+            "status": "included",
+            "reason": "무단결석이 연속 3일 이상이거나 월 누계 5일 이상이면 경고를 받는다고 명시함."
+          },
+          {
+            "status": "included",
+            "reason": "다음 급으로 올라가려면 최소 80% 출석해야 한다고 명시함."
+          },
+          {
+            "status": "included",
+            "reason": "경고를 3회 이상 받으면 자격을 잃는다고 명시함."
+          }
+        ],
+        "contradictions": [],
+        "adjusted": []
+      }
+    },
+    "new": [
+      {
+        "answer": "GKS 장학생은 한국어연수 기간 중 무단결석일이 연속하여 3일 이상이거나 월 누계 5일 이상인 경우 경고를 받습니다. 다만, 위반 사유가 부득이하다고 교육원장이 인정하는 경우에는 예외로 할 수 있습니다[1]. 한국어과정에서 다음 급으로 올라가려면 최소 80% 출석해야 합니다[5]. GKS 장학생은 경고를 3회 이상 받으면 자격을 상실합니다. 다만, 교육원장이 그 행위에 부득이한 사유가 있다고 인정하는 경우는 예외로 합니다[11].",
+        "shown": 11,
+        "caveats": [
+          "[1] 다만, 위반 사유가 부득이하다고 교육원장이 인정하는 경우에는 예외로 할 수 있다.",
+          "[11] 다만, 교육원장이 그 행위에 부득이한 사유가 있다고 인정하는 경우는 예외로 한다.",
+          "[6] 다만, 다음 각 목의 어느 하나에 해당하는 경우는 제외한다."
+        ],
+        "rewrites": 0,
+        "warnings": [
+          "[보완] 추가 근거 6개를 ⑤에 보여줌 (요구별 검색 상위·앞뒤 조각)",
+          "[답변 인용 불일치] [1] '제18조(경고) 다음 각 호의 어느 하나에 해당하는 경우, 교육원장은 해당 장학생을 경고 조치한다. 1. 한'이 원문에 없음 (요약·번역 의심)",
+          "[답변 인용 불일치] [11] '9. 제18조에 따른 경고를 3회 이상 받은 경우 다만, 교육원장이 그 행위에 부득이한 사유가 있다고 인정하'이 원문에 없음 (요약·번역 의심)",
+          "[단서 확인] 반영 안 된 단서 문장 3개 → 1회 다시 씀"
+        ],
+        "tokens": 9893,
+        "score": {
+          "coverage": 1.0,
+          "wrong": 0,
+          "per_fact": [
+            {
+              "status": "included",
+              "reason": "무단결석이 연속 3일 이상이거나 월 누계 5일 이상이면 경고를 받는다고 명시함."
+            },
+            {
+              "status": "included",
+              "reason": "다음 급으로 올라가려면 출석률 80% 이상이 필요하다고 명시함."
+            },
+            {
+              "status": "included",
+              "reason": "경고를 3회 이상 받으면 자격을 잃는다고 명시함."
+            }
+          ],
+          "contradictions": [],
+          "adjusted": []
+        }
+      }
+    ]
+  },
+  {
+    "log": "20261004_000604_935e79.json",
+    "question": "동아대 한국어과정을 듣는 GKS 장학생이 있다고 해보자. 무단결석이 몇 번이면 GKS 경고를 받고, 한국어과정 다음 급으로 올라가려면 최소 얼마나 출석해야 해? 경고는 몇 번 받으면 자격을 잃어?",
+    "id": "GKSW",
+    "old": {
+      "answer": "GKS 장학생은 한국어연수 기간 중 무단결석일이 연속하여 3일 이상이거나 월 누계 5일 이상인 경우 경고를 받습니다. 다만, 위반 사유가 부득이하다고 교육원장이 인정하는 경우에는 예외로 할 수 있습니다[1]. 한국어과정에서 다음 급으로 올라가려면 최소 80% 이상의 출석률이 필요합니다[2]. GKS 장학생은 경고를 3회 이상 받으면 자격을 상실합니다[1].",
+      "score": {
+        "coverage": 1.0,
+        "wrong": 0,
+        "per_fact": [
+          {
+            "status": "included",
+            "reason": "무단결석이 연속 3일 이상이거나 월 누계 5일 이상이면 경고를 받는다고 명시함."
+          },
+          {
+            "status": "included",
+            "reason": "다음 급으로 올라가려면 출석률 80% 이상이 필요하다고 명시함."
+          },
+          {
+            "status": "included",
+            "reason": "경고를 3회 이상 받으면 자격을 잃는다고 명시함."
+          }
+        ],
+        "contradictions": [],
+        "adjusted": []
+      }
+    },
+    "new": [
+      {
+        "answer": "GKS 장학생은 한국어연수 기간 중 무단결석일이 연속하여 3일 이상이거나 월 누계 5일 이상인 경우 경고를 받습니다. 다만, 위반 사유가 부득이하다고 교육원장이 인정하는 경우에는 예외로 할 수 있습니다[1]. 한국어과정에서 다음 급으로 올라가려면 70점 이상의 성적과 최소 80%의 출석률을 충족해야 합니다[2]. GKS 장학생은 경고를 3회 이상 받으면 자격을 상실합니다. 다만, 교육원장이 그 행위에 부득이한 사유가 있다고 인정하는 경우는 예외로 합니다[10].",
+        "shown": 10,
+        "caveats": [
+          "[1] 다만, 위반 사유가 부득이하다고 교육원장이 인정하는 경우에는 예외로 할 수 있다.",
+          "[10] 다만, 교육원장이 그 행위에 부득이한 사유가 있다고 인정하는 경우는 예외로 한다.",
+          "[5] 다만, 다음 각 목의 어느 하나에 해당하는 경우는 제외한다."
+        ],
+        "rewrites": 0,
+        "warnings": [
+          "[보완] 추가 근거 6개를 ⑤에 보여줌 (요구별 검색 상위·앞뒤 조각)",
+          "[답변 인용 불일치] [1] '제18조(경고) 다음 각 호의 어느 하나에 해당하는 경우, 교육원장은 해당 장학생을 경고 조치한다. 1. 한'이 원문에 없음 (요약·번역 의심)",
+          "[답변 인용 불일치] [10] '9. 제18조에 따른 경고를 3회 이상 받은 경우. 다만, 교육원장이 그 행위에 부득이한 사유가 있다고 인정'이 원문에 없음 (요약·번역 의심)",
+          "[단서 확인] 반영 안 된 단서 문장 3개 → 1회 다시 씀"
+        ],
+        "tokens": 9878,
+        "score": {
+          "coverage": 1.0,
+          "wrong": 0,
+          "per_fact": [
+            {
+              "status": "included",
+              "reason": "무단결석이 연속 3일 이상이거나 월 누계 5일 이상이면 경고를 받는다고 명시함."
+            },
+            {
+              "status": "included",
+              "reason": "다음 급으로 올라가려면 출석률 80% 이상이 필요하다고 명시함."
+            },
+            {
+              "status": "included",
+              "reason": "경고를 3회 이상 받으면 자격을 잃는다고 명시함."
+            }
+          ],
+          "contradictions": [],
+          "adjusted": []
+        }
+      }
+    ]
+  },
+  {
+    "log": "20261004_001011_021bdb.json",
+    "question": "동아대 한국어과정을 듣는 GKS 장학생이 있다고 해보자. 무단결석이 몇 번이면 GKS 경고를 받고, 한국어과정 다음 급으로 올라가려면 최소 얼마나 출석해야 해? 경고는 몇 번 받으면 자격을 잃어?",
+    "id": "GKSW",
+    "old": {
+      "answer": "GKS 장학생은 한국어연수 기간 중 무단결석일이 연속하여 3일 이상이거나 월 누계 5일 이상이면 경고를 받습니다. 다만, 위반 사유가 부득이하다고 교육원장이 인정하는 경우에는 예외로 할 수 있습니다[1]. 한국어과정 다음 급으로 올라가려면 출석률이 80% 이상이어야 합니다[4]. GKS 장학생은 경고를 3회 이상 받으면 자격을 잃습니다. 다만, 교육원장이 그 행위에 부득이한 사유가 있다고 인정하는 경우는 예외로 합니다[14].",
+      "score": {
+        "coverage": 1.0,
+        "wrong": 0,
+        "per_fact": [
+          {
+            "status": "included",
+            "reason": "무단결석이 연속 3일 이상이거나 월 누계 5일 이상이면 경고를 받는다고 명시함."
+          },
+          {
+            "status": "included",
+            "reason": "다음 급으로 올라가려면 출석률 80% 이상이 필요하다고 명시함."
+          },
+          {
+            "status": "included",
+            "reason": "경고를 3회 이상 받으면 자격을 잃는다고 명시함."
+          }
+        ],
+        "contradictions": [],
+        "adjusted": []
+      }
+    },
+    "new": [
+      {
+        "answer": "GKS 장학생은 한국어연수 기간 중 무단결석일이 연속하여 3일 이상이거나 월 누계 5일 이상인 경우 경고를 받습니다. 다만, 위반 사유가 부득이하다고 교육원장이 인정하는 경우에는 예외로 할 수 있습니다[1]. 한국어과정에서 다음 급으로 올라가려면 출석률이 최소 80% 이상이어야 합니다[4]. GKS 장학생은 경고를 3회 이상 받으면 자격을 잃습니다. 다만, 교육원장이 그 행위에 부득이한 사유가 있다고 인정하는 경우는 예외로 할 수 있습니다[14].",
+        "shown": 15,
+        "caveats": [
+          "[1] 다만, 위반 사유가 부득이하다고 교육원장이 인정하는 경우에는 예외로 할 수 있다.",
+          "[14] 다만, 교육원장이 그 행위에 부득이한 사유가 있다고 인정하는 경우는 예외로 한다.",
+          "[8] 다만, 다음 각 목의 어느 하나에 해당하는 경우는 제외한다."
+        ],
+        "rewrites": 0,
+        "warnings": [
+          "[보완] 추가 근거 8개를 ⑤에 보여줌 (요구별 검색 상위·앞뒤 조각)",
+          "[답변 인용 불일치] [1] '제18조(경고) 다음 각 호의 어느 하나에 해당하는 경우, 교육원장은 해당 장학생을 경고 조치한다. 1. 한'이 원문에 없음 (요약·번역 의심)",
+          "[답변 인용 불일치] [14] '9. 제18조에 따른 경고를 3회 이상 받은 경우 다만, 교육원장이 그 행위에 부득이한 사유가 있다고 인정하'이 원문에 없음 (요약·번역 의심)",
+          "[단서 확인] 반영 안 된 단서 문장 3개 → 1회 다시 씀"
+        ],
+        "tokens": 11411,
+        "score": {
+          "coverage": 1.0,
+          "wrong": 0,
+          "per_fact": [
+            {
+              "status": "included",
+              "reason": "무단결석이 연속 3일 이상이거나 월 누계 5일 이상이면 경고를 받는다고 명시함."
+            },
+            {
+              "status": "included",
+              "reason": "다음 급으로 올라가려면 출석률 80% 이상이 필요하다고 명시함."
+            },
+            {
+              "status": "included",
+              "reason": "경고를 3회 이상 받으면 자격을 잃는다고 명시함."
+            }
+          ],
+          "contradictions": [],
+          "adjusted": []
+        }
+      }
+    ]
+  },
+  {
+    "log": "20261004_001331_41659e.json",
+    "question": "GKS 학위과정 장학생이 학기 중간에 휴학하려면 어떤 경우에만 가능해? 휴학은 최대 얼마나 할 수 있어?",
+    "id": "E2",
+    "old": {
+      "answer": "GKS 학위과정 장학생은 학기 중간에 부득이한 사유, 예를 들어 본국의 긴급 소환, 긴급한 가정 사정, 또는 본인의 중대한 질병이 있을 때만 휴학할 수 있습니다[1]. 휴학은 학기 단위로 신청해야 하며, 총 휴학 기간은 1년을 초과할 수 없습니다[1]. 다만, 특별한 사정이 인정될 경우 기관장의 승인을 받아 추가로 최대 1년 연장할 수 있습니다[2].",
+      "score": {
+        "coverage": 0.75,
+        "wrong": 0,
+        "per_fact": [
+          {
+            "status": "included",
+            "reason": "부득이한 사유로만 가능함을 명시하고 예시를 포함함."
+          },
+          {
+            "status": "missing",
+            "reason": "휴학 신청서와 증빙 자료 제출에 대한 언급이 없음."
+          },
+          {
+            "status": "included",
+            "reason": "휴학은 학기 단위로 신청하며 총 1년을 넘을 수 없다고 명시함."
+          },
+          {
+            "status": "included",
+            "reason": "수학기관장의 특별한 사유 인정 시 최대 1년 연장 가능함을 언급함."
+          }
+        ],
+        "contradictions": [],
+        "adjusted": []
+      }
+    },
+    "new": [
+      {
+        "answer": "GKS 학위과정 장학생은 학기 중간에 휴학하려면 본국의 긴급 소환, 긴급한 가정 사정, 본인의 중대한 질병 등 부득이한 사유가 있어야 하며, 관련 서류를 제출해야 합니다[1]. 휴학은 학기 단위로 신청해야 하며, 총 휴학 기간은 최대 1년을 초과할 수 없습니다[1]. 다만, 특별한 사정이 인정될 경우 기관장의 승인을 받아 추가로 최대 1년 연장이 가능합니다[2].",
+        "shown": 6,
+        "caveats": [
+          "[2] However, the president of the institution may grant an additional extension of up to one (1) year if special circumstances are recognized.",
+          "[2] ① A GKS recipient must submit an application for re-enrollment according to the university’s regulations at least one (1) month before the end of the leave of absence."
+        ],
+        "rewrites": 0,
+        "warnings": [
+          "[보완] 추가 근거 2개를 ⑤에 보여줌 (요구별 검색 상위·앞뒤 조각)",
+          "[단서 확인] 반영 안 된 단서 문장 2개 → 1회 다시 씀"
+        ],
+        "tokens": 7053,
+        "score": {
+          "coverage": 1.0,
+          "wrong": 0,
+          "per_fact": [
+            {
+              "status": "included",
+              "reason": "부득이한 사유가 있을 때만 가능하다고 명시함."
+            },
+            {
+              "status": "included",
+              "reason": "관련 서류 제출 필요성을 언급함."
+            },
+            {
+              "status": "included",
+              "reason": "휴학은 학기 단위로 신청하며 총 1년을 넘을 수 없다고 명시함."
+            },
+            {
+              "status": "included",
+              "reason": "기관장의 승인을 받아 최대 1년 연장 가능하다고 설명함."
+            }
+          ],
+          "contradictions": [],
+          "adjusted": []
+        }
+      }
+    ]
+  },
+  {
+    "log": "20261004_001706_73b395.json",
+    "question": "GKS 학위과정 장학생이 학기 중간에 휴학하려면 어떤 경우에만 가능해? 휴학은 최대 얼마나 할 수 있어?",
+    "id": "E2",
+    "old": {
+      "answer": "GKS 학위과정 장학생은 본국의 긴급 소환, 긴급한 가정 사정, 중대한 질병 등의 부득이한 경우에만 학기 중간에 휴학할 수 있으며, 이 경우 관련 사유를 증명하는 서류와 함께 휴학 신청서를 제출해야 합니다[1]. 휴학은 학기 단위로 신청해야 하며, 총 휴학 기간은 1년을 초과할 수 없습니다[1]. 다만, 특별한 사정이 인정될 경우 기관장의 승인을 받아 추가로 최대 1년까지 연장할 수 있습니다[2].",
+      "score": {
+        "coverage": 1.0,
+        "wrong": 0,
+        "per_fact": [
+          {
+            "status": "included",
+            "reason": "부득이한 사유에 대해서 정확히 언급함."
+          },
+          {
+            "status": "included",
+            "reason": "휴학 신청서와 증빙 자료 제출에 대해 언급함."
+          },
+          {
+            "status": "included",
+            "reason": "휴학은 학기 단위로 신청하며 총 1년을 넘을 수 없다고 언급함."
+          },
+          {
+            "status": "included",
+            "reason": "수학기관장의 특별한 사유 인정 시 최대 1년 연장 가능하다고 언급함."
+          }
+        ],
+        "contradictions": [],
+        "adjusted": []
+      }
+    },
+    "new": [
+      {
+        "answer": "GKS 학위과정 장학생은 본국의 긴급 소환, 긴급한 가정 사정, 중대한 질병 등의 부득이한 경우에만 학기 중간에 휴학할 수 있으며, 이 경우 관련 사유를 증명하는 서류와 함께 휴학 신청서를 제출해야 합니다[1]. 휴학은 학기 단위로 신청해야 하며, 총 휴학 기간은 1년을 초과할 수 없습니다. 다만, 특별한 사정이 인정될 경우 기관장의 승인을 받아 추가로 최대 1년 연장할 수 있습니다[1][2].",
+        "shown": 7,
+        "caveats": [
+          "[1] In such cases, the recipient must submit an application for a leave of absence along with supporting documents verifying the relevant reason.",
+          "[2] However, the president of the institution may grant an additional extension of up to one (1) year if special circumstances are recognized.",
+          "[2] ① A GKS recipient must submit an application for re-enrollment according to the university’s regulations at least one (1) month before the end of the leave of absence."
+        ],
+        "rewrites": 0,
+        "warnings": [
+          "[보완] 추가 근거 3개를 ⑤에 보여줌 (요구별 검색 상위·앞뒤 조각)",
+          "[단서 확인] 반영 안 된 단서 문장 3개 → 1회 다시 씀"
+        ],
+        "tokens": 7026,
+        "score": {
+          "coverage": 1.0,
+          "wrong": 0,
+          "per_fact": [
+            {
+              "status": "included",
+              "reason": "부득이한 사유에 해당하는 경우에만 가능함을 명시함."
+            },
+            {
+              "status": "included",
+              "reason": "휴학 신청서와 증빙 자료 제출 필요성을 언급함."
+            },
+            {
+              "status": "included",
+              "reason": "휴학은 학기 단위로 신청하며 총 1년을 넘을 수 없음을 명시함."
+            },
+            {
+              "status": "included",
+              "reason": "수학기관장의 특별한 사유 인정 시 최대 1년 연장 가능함을 언급함."
+            }
+          ],
+          "contradictions": [],
+          "adjusted": []
+        }
+      }
+    ]
+  },
+  {
+    "log": "20261004_002021_6709a1.json",
+    "question": "GKS 학위과정 장학생이 학기 중간에 휴학하려면 어떤 경우에만 가능해? 휴학은 최대 얼마나 할 수 있어?",
+    "id": "E2",
+    "old": {
+      "answer": "GKS 학위과정 장학생은 학기 중간에 불가피한 사유가 있을 때만 휴학이 가능합니다. 예를 들어, 본국의 긴급 소환, 긴급 가족 문제, 심각한 개인 질병 등이 해당됩니다[1]. 휴학은 학기 단위로 신청해야 하며, 최대 1년까지 가능합니다. 다만, 특별한 사정이 인정될 경우, 기관장의 승인을 받아 추가로 1년 연장이 가능합니다[1][2]. 휴학 종료 최소 1개월 전에 복학 신청을 해야 합니다[2].",
+      "score": {
+        "coverage": 0.75,
+        "wrong": 0,
+        "per_fact": [
+          {
+            "status": "included",
+            "reason": "불가피한 사유로 본국의 긴급 소환, 긴급 가족 문제, 심각한 개인 질병을 언급함."
+          },
+          {
+            "status": "missing",
+            "reason": "휴학 신청서와 증빙 자료 제출에 대한 언급이 없음."
+          },
+          {
+            "status": "included",
+            "reason": "휴학은 학기 단위로 신청하며 최대 1년까지 가능하다고 언급함."
+          },
+          {
+            "status": "included",
+            "reason": "기관장의 승인을 받아 추가로 1년 연장이 가능하다고 언급함."
+          }
+        ],
+        "contradictions": [],
+        "adjusted": []
+      }
+    },
+    "new": [
+      {
+        "answer": "GKS 학위과정 장학생은 불가피한 사유가 있을 때만 학기 중간에 휴학할 수 있습니다. 예를 들어, 본국의 긴급 소환, 긴급 가족 문제, 심각한 개인 질병 등이 해당됩니다[1]. 휴학은 학기 단위로 신청해야 하며, 최대 1년까지 가능합니다. 특별한 사정이 인정되면 기관장이 추가로 최대 1년 연장을 허가할 수 있습니다[2].",
+        "shown": 5,
+        "caveats": [
+          "[2] ① A GKS recipient must submit an application for re-enrollment according to the university’s regulations at least one (1) month before the end of the leave of absence."
+        ],
+        "rewrites": 0,
+        "warnings": [
+          "[보완] 추가 근거 2개를 ⑤에 보여줌 (요구별 검색 상위·앞뒤 조각)",
+          "[단서 확인] 반영 안 된 단서 문장 1개 → 1회 다시 씀"
+        ],
+        "tokens": 6370,
+        "score": {
+          "coverage": 0.75,
+          "wrong": 0,
+          "per_fact": [
+            {
+              "status": "included",
+              "reason": "불가피한 사유로 본국의 긴급 소환, 긴급 가족 문제, 심각한 개인 질병 등이 언급됨."
+            },
+            {
+              "status": "missing",
+              "reason": "휴학 신청서와 증빙 자료 제출에 대한 언급이 없음."
+            },
+            {
+              "status": "included",
+              "reason": "휴학은 학기 단위로 신청하며 최대 1년까지 가능하다고 언급됨."
+            },
+            {
+              "status": "included",
+              "reason": "기관장이 특별한 사정이 인정되면 추가로 최대 1년 연장 가능하다고 언급됨."
+            }
+          ],
+          "contradictions": [],
+          "adjusted": []
+        }
+      }
+    ]
+  },
+  {
+    "log": "20261004_002413_8d4982.json",
+    "question": "동아대 한국어과정에서 다음 급으로 올라가려면 성적이랑 출석률이 각각 얼마 이상이어야 해? 지각은 어떻게 계산돼?",
+    "id": "E3",
+    "old": {
+      "answer": "동아대 한국어 과정에서 다음 급으로 올라가려면 성적이 70점 이상, 출석률이 80% 이상이어야 합니다[1]. 지각은 두 번이 결석 한 번으로 계산됩니다[1].",
+      "score": {
+        "coverage": 1.0,
+        "wrong": 0,
+        "per_fact": [
+          {
+            "status": "included",
+            "reason": "성적 70점 이상이어야 한다고 명시함."
+          },
+          {
+            "status": "included",
+            "reason": "출석률 80% 이상이어야 한다고 명시함."
+          },
+          {
+            "status": "included",
+            "reason": "지각 2번이 결석 1번으로 계산된다고 명시함."
+          }
+        ],
+        "contradictions": [],
+        "adjusted": []
+      }
+    },
+    "new": [
+      {
+        "answer": "동아대 한국어 과정에서 다음 급으로 올라가려면 성적이 70점 이상이고 출석률이 80% 이상이어야 합니다[1]. 지각은 두 번이 결석 한 번으로 계산됩니다[1].",
+        "shown": 4,
+        "caveats": [],
+        "rewrites": 0,
+        "warnings": [
+          "[보완] 추가 근거 2개를 ⑤에 보여줌 (요구별 검색 상위·앞뒤 조각)"
+        ],
+        "tokens": 2580,
+        "score": {
+          "coverage": 1.0,
+          "wrong": 0,
+          "per_fact": [
+            {
+              "status": "included",
+              "reason": "성적 70점 이상이어야 한다고 명시함."
+            },
+            {
+              "status": "included",
+              "reason": "출석률 80% 이상이어야 한다고 명시함."
+            },
+            {
+              "status": "included",
+              "reason": "지각 2번이 결석 1번으로 계산된다고 명시함."
+            }
+          ],
+          "contradictions": [],
+          "adjusted": []
+        }
+      }
+    ]
+  },
+  {
+    "log": "20261004_002810_103da5.json",
+    "question": "동아대 한국어과정에서 다음 급으로 올라가려면 성적이랑 출석률이 각각 얼마 이상이어야 해? 지각은 어떻게 계산돼?",
+    "id": "E3",
+    "old": {
+      "answer": "동아대 한국어 과정에서 다음 급으로 올라가려면 성적 70점 이상, 출석률 80% 이상이어야 합니다[1]. 지각은 두 번 지각하면 결석 한 번으로 계산됩니다[1].",
+      "score": {
+        "coverage": 1.0,
+        "wrong": 0,
+        "per_fact": [
+          {
+            "status": "included",
+            "reason": "성적 70점 이상이어야 한다고 명시함."
+          },
+          {
+            "status": "included",
+            "reason": "출석률 80% 이상이어야 한다고 명시함."
+          },
+          {
+            "status": "included",
+            "reason": "지각 2번은 결석 1번으로 계산한다고 명시함."
+          }
+        ],
+        "contradictions": [],
+        "adjusted": []
+      }
+    },
+    "new": [
+      {
+        "answer": "다음 급으로 올라가려면 성적 70점 이상, 출석률 80% 이상이어야 합니다[1]. 지각은 두 번이 결석 한 번으로 계산됩니다[1].",
+        "shown": 7,
+        "caveats": [],
+        "rewrites": 0,
+        "warnings": [
+          "[보완] 추가 근거 2개를 ⑤에 보여줌 (요구별 검색 상위·앞뒤 조각)"
+        ],
+        "tokens": 3569,
+        "score": {
+          "coverage": 1.0,
+          "wrong": 0,
+          "per_fact": [
+            {
+              "status": "included",
+              "reason": "성적 70점 이상이어야 한다고 명시함."
+            },
+            {
+              "status": "included",
+              "reason": "출석률 80% 이상이어야 한다고 명시함."
+            },
+            {
+              "status": "included",
+              "reason": "지각 2번이 결석 1번으로 계산된다고 명시함."
+            }
+          ],
+          "contradictions": [],
+          "adjusted": []
+        }
+      }
+    ]
+  },
+  {
+    "log": "20261004_003209_d0bc79.json",
+    "question": "동아대 한국어과정에서 다음 급으로 올라가려면 성적이랑 출석률이 각각 얼마 이상이어야 해? 지각은 어떻게 계산돼?",
+    "id": "E3",
+    "old": {
+      "answer": "한국어 과정에서 다음 급으로 올라가려면 성적이 70점 이상이고 출석률이 80% 이상이어야 합니다[1]. 지각은 두 번이 1회 결석으로 환산됩니다[1].",
+      "score": {
+        "coverage": 1.0,
+        "wrong": 0,
+        "per_fact": [
+          {
+            "status": "included",
+            "reason": "성적 70점 이상이어야 한다고 명시함."
+          },
+          {
+            "status": "included",
+            "reason": "출석률 80% 이상이어야 한다고 명시함."
+          },
+          {
+            "status": "included",
+            "reason": "지각 2번이 결석 1번으로 계산된다고 명시함."
+          }
+        ],
+        "contradictions": [],
+        "adjusted": []
+      }
+    },
+    "new": [
+      {
+        "answer": "한국어 과정에서 다음 급으로 올라가려면 성적이 70점 이상이고 출석률이 80% 이상이어야 합니다[1]. 지각은 두 번이 1회 결석으로 환산됩니다[1].",
+        "shown": 5,
+        "caveats": [],
+        "rewrites": 0,
+        "warnings": [
+          "[보완] 추가 근거 2개를 ⑤에 보여줌 (요구별 검색 상위·앞뒤 조각)"
+        ],
+        "tokens": 3528,
+        "score": {
+          "coverage": 1.0,
+          "wrong": 0,
+          "per_fact": [
+            {
+              "status": "included",
+              "reason": "성적 70점 이상이어야 한다고 명시함."
+            },
+            {
+              "status": "included",
+              "reason": "출석률 80% 이상이어야 한다고 명시함."
+            },
+            {
+              "status": "included",
+              "reason": "지각 2번이 결석 1번으로 계산된다고 명시함."
+            }
+          ],
+          "contradictions": [],
+          "adjusted": []
+        }
+      }
+    ]
+  }
+]

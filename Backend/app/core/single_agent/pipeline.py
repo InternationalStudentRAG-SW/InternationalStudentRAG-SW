@@ -24,7 +24,7 @@ from app.core.single_agent.analyzer import analyze_question
 from app.core.single_agent.answer_schema import PipelineRun
 from app.core.single_agent.answerer import write_answer
 from app.core.single_agent.branching import branch_lines
-from app.core.single_agent.evidence_schema import EvidencePool
+from app.core.single_agent.evidence_schema import EvidencePool, RetrievalTag
 from app.core.single_agent.search_planner import check_budget, plan_search
 from app.core.single_agent.search_schema import SearchAttempt, SearchBudget, SearchPlan
 from app.core.single_agent.searcher import execute_search
@@ -32,6 +32,48 @@ from app.core.single_agent.verifier import decide, verify_evidence
 from app.core.single_agent.verify_schema import VerifyDecision
 
 EventFn = Callable[[str, Dict], None]
+
+
+def _kg_presearch(
+    analysis: "QuestionAnalysis",
+    pool: EvidencePool,
+    run: "PipelineRun",
+    emit: EventFn,
+) -> None:
+    """KG 사전 검색: 메인 루프 전에 지식그래프에서 관련 청크를 pool에 추가한다 (예산 차감 없음).
+    실패해도 예외를 밖으로 던지지 않는다."""
+    if not analysis.first_search:
+        return
+    query_ko = analysis.first_search.query_ko
+    try:
+        from app.core.knowledge_graph import knowledge_graph
+        from app.core.single_agent.searcher import ChromaChunkStore
+
+        kg_result = knowledge_graph.search_by_embedding(query_ko)
+        refs = kg_result.get("chunks", [])
+        if not refs:
+            return
+
+        store = ChromaChunkStore()
+        first_slot = next(
+            (s.slot_id for s in analysis.document_slots if s.active and s.requirement == "required"),
+            "applicable_scope",
+        )
+        tag = RetrievalTag(
+            target_slot_id=first_slot,
+            search_type="new",
+            query_ko=query_ko,
+            round_no=0,
+        )
+        added = 0
+        for ref in refs:
+            chunk = store.get_chunk(ref["source"], ref["page"], ref["chunk_index"])
+            if chunk:
+                if pool.add(chunk, tag):
+                    added += 1
+        emit("kg_search", {"pool": len(pool), "added": added})
+    except Exception as e:
+        run.warnings.append(f"KG 사전 검색 실패: {type(e).__name__}: {e}")
 
 
 def finalize_decision(
@@ -62,6 +104,7 @@ def run_pipeline(
     verify_model: Optional[str] = None,
     answer_model: Optional[str] = None,
     max_rounds: Optional[int] = None,
+    lang_instruction: Optional[str] = None,
     client=None,
     search_fn=None,
     store=None,
@@ -80,7 +123,8 @@ def run_pipeline(
     def finish(mode: str, analysis=None, pool=None, decision=None):
         run.decision = decision
         emit("answer_start", {"mode": mode})
-        run.answer_run = write_answer(question, mode, analysis, pool, decision, model=answer_model, client=client)
+        run.answer_run = write_answer(question, mode, analysis, pool, decision,
+                                     model=answer_model, client=client, lang_instruction=lang_instruction)
         emit("answer", {"mode": run.answer_run.mode, "answer": run.answer_run.answer,
                         "sources": [s.model_dump() for s in run.answer_run.sources]})
         run.latency_ms = int((time.perf_counter() - started) * 1000)
@@ -106,6 +150,9 @@ def run_pipeline(
     decision: Optional[VerifyDecision] = None
     anchors_by_slot: Dict[str, List[str]] = {}
     completed_expansions = set()
+
+    # KG 사전 검색 (루프 전, 예산 차감 없음)
+    _kg_presearch(analysis, pool, run, emit)
 
     for rnd in range(1, max_rounds + 1):
         # ② 검색 계획

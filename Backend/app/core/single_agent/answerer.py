@@ -175,6 +175,7 @@ def write_answer(
     decision: Optional[VerifyDecision] = None,
     model: Optional[str] = None,
     client=None,
+    lang_instruction: Optional[str] = None,
 ) -> AnswerRun:
     """최종 답변을 만든다. 실패해도 예외 대신 run.error에 이유를 담고 안내 문구를 answer에 넣는다."""
     run = AnswerRun(mode=mode)
@@ -188,8 +189,12 @@ def write_answer(
 
     run.model = model = model or model_for("answer")
     client = client or get_client()
+    # lang_instruction이 있으면 시스템 프롬프트 앞에 명시적 언어 지시 추가
+    system_content = SYSTEM_PROMPT
+    if lang_instruction:
+        system_content = f"[언어 지시] {lang_instruction}\n\n{SYSTEM_PROMPT}"
     messages = [
-        {"role": "system", "content": SYSTEM_PROMPT},
+        {"role": "system", "content": system_content},
         {"role": "user", "content": build_user_prompt(question, mode, analysis, decision, pool, evidence_ids)},
     ]
 

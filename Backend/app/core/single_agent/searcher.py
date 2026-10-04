@@ -97,14 +97,8 @@ class ChromaChunkStore:
 
 def _default_search_fn(query: str, k: int, metrics: Optional[dict] = None) -> List[Any]:
     """실제 하이브리드 + rerank 검색. import 시점에 무거운 초기화가 일어나므로 호출 때 import한다."""
-    stats = metrics if metrics is not None else {}
-    stats["retriever_already_imported"] = "app.core.retriever" in sys.modules
-    started = time.perf_counter()
-    try:
-        from app.core.retriever import retriever
-    finally:
-        stats["import_init_ms"] = (time.perf_counter() - started) * 1000
-    return retriever.retrieve(query, k=k, metrics=stats)
+    from app.core.retriever import retriever
+    return retriever.retrieve(query, k=k)
 
 
 # ── 변환 ─────────────────────────────────────────────────────────────────

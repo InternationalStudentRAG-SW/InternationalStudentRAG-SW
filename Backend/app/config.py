@@ -33,7 +33,7 @@ class Settings(BaseSettings):
 
     # Redis 시맨틱 캐시
     upstash_redis_url: str = ""
-    semantic_cache_threshold: float = 0.70
+    semantic_cache_threshold: float = 0.75
     semantic_cache_ttl: int = 86400
 
     # CORS
@@ -43,6 +43,9 @@ class Settings(BaseSettings):
     neo4j_uri: str = ""
     neo4j_user: str = ""
     neo4j_password: str = ""
+
+    # single_agent 충분성 검증 모델 (비어있으면 openai_model 사용)
+    verify_model: str = ""
 
     class Config:
         env_file = ".env"

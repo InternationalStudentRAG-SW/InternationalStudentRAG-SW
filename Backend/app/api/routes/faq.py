@@ -12,10 +12,10 @@ _openai = AsyncOpenAI(api_key=settings.openai_api_key)
 
 
 async def _translate_faq(question_ko: str, answer_ko: str) -> dict:
-    """GPT로 question/answer를 en/zh/es로 번역해 dict로 반환."""
+    """GPT로 question/answer를 en/zh/es/vi로 번역해 dict로 반환."""
     prompt = (
-        "Translate the following Korean question and answer into English, Chinese (Simplified), and Spanish.\n"
-        "Return ONLY valid JSON with keys: question_en, question_zh, question_es, answer_en, answer_zh, answer_es.\n\n"
+        "Translate the following Korean question and answer into English, Chinese (Simplified), Spanish, and Vietnamese.\n"
+        "Return ONLY valid JSON with keys: question_en, question_zh, question_es, question_vi, answer_en, answer_zh, answer_es, answer_vi.\n\n"
         f"question_ko: {question_ko}\n"
         f"answer_ko: {answer_ko}"
     )
@@ -66,10 +66,12 @@ async def create_faq(data: FaqCreateRequest, user: dict = Depends(get_admin_user
             "question_en": translations.get("question_en", ""),
             "question_zh": translations.get("question_zh", ""),
             "question_es": translations.get("question_es", ""),
+            "question_vi": translations.get("question_vi", ""),
             "answer_ko": data.answer_ko,
             "answer_en": translations.get("answer_en", ""),
             "answer_zh": translations.get("answer_zh", ""),
             "answer_es": translations.get("answer_es", ""),
+            "answer_vi": translations.get("answer_vi", ""),
         }
         res = await asyncio.to_thread(
             lambda: supabase.table("faqs").insert(row).execute()
@@ -91,10 +93,12 @@ async def bulk_create_faqs(data: FaqBulkCreateRequest, user: dict = Depends(get_
                 "question_en": translations.get("question_en", ""),
                 "question_zh": translations.get("question_zh", ""),
                 "question_es": translations.get("question_es", ""),
+                "question_vi": translations.get("question_vi", ""),
                 "answer_ko": item.answer_ko,
                 "answer_en": translations.get("answer_en", ""),
                 "answer_zh": translations.get("answer_zh", ""),
                 "answer_es": translations.get("answer_es", ""),
+                "answer_vi": translations.get("answer_vi", ""),
             })
         await asyncio.to_thread(
             lambda: supabase.table("faqs").insert(rows).execute()
@@ -119,10 +123,15 @@ async def update_faq(faq_id: str, data: FaqUpdateRequest, user: dict = Depends(g
             current_q = check.data[0]["question_ko"]
             translations = await _translate_faq(current_q, data.answer_ko)
             updates.update({
+                "question_en": translations.get("question_en", ""),
+                "question_zh": translations.get("question_zh", ""),
+                "question_es": translations.get("question_es", ""),
+                "question_vi": translations.get("question_vi", ""),
                 "answer_ko": data.answer_ko,
                 "answer_en": translations.get("answer_en", ""),
                 "answer_zh": translations.get("answer_zh", ""),
                 "answer_es": translations.get("answer_es", ""),
+                "answer_vi": translations.get("answer_vi", ""),
             })
         if data.is_active is not None:
             updates["is_active"] = data.is_active

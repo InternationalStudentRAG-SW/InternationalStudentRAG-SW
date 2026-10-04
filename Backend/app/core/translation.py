@@ -29,10 +29,15 @@ class QueryTranslator:
 
     def translate_to_ko(self, user_query: str) -> str:
         """
-        한글 문자(가-힣)가 포함되어 있으면 원문 반환 (번역 API 스킵).
+        한글 비율이 70% 이상이면 원문 반환 (GKS·TOPIK 같은 영어 약어 포함 한국어 질문 처리).
         그 외 언어(영어, 중국어, 일본어 등)는 OpenAI로 한국어 번역.
         BM25 키워드 검색 및 CrossEncoder 리랭킹에 사용.
         """
+        alpha_chars = [c for c in user_query if c.isalpha()]
+        if alpha_chars:
+            ko_ratio = sum(1 for c in alpha_chars if '가' <= c <= '힣') / len(alpha_chars)
+            if ko_ratio >= 0.7:
+                return user_query
         if not re.search(r'[a-zA-Z一-鿿぀-ヿ]', user_query):
             return user_query
         try:

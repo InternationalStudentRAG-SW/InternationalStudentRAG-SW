@@ -31,7 +31,10 @@
 from __future__ import annotations
 
 import json
+import os
+import re
 import time
+from contextvars import ContextVar
 from typing import Dict, List, Optional, Set, Tuple
 
 from app.core.single_agent import checklist_config as cfg
@@ -133,6 +136,7 @@ SYSTEM_PROMPT = """당신은 동아대학교 유학생 챗봇의 '충분성 검�
 ## 규칙
 1. 오직 아래 청크의 내용만 근거로 씁니다. 일반 지식·상식·추측으로 칸을 채우지 않습니다.
 2. evidence_refs의 quote는 해당 청크 본문에서 한 글자도 바꾸지 않고 그대로 옮긴 짧은 구절(한 문장 이내)입니다.
+   청크 본문이 영어면 영어 원문 그대로 인용합니다. 한국어로 번역해 인용하면 원문과 대조되지 않아 근거가 버려집니다.
    요약·번역·말 바꾸기를 하지 않습니다. evidence_id는 아래 "### 청크 ID:" 뒤의 문자열을 앞뒤에 아무것도 붙이지 않고 그대로 씁니다.
    표·목록에서 여러 항목을 근거로 쓸 때는 항목마다 evidence_refs를 따로 적습니다. 여러 칸·행을 이어 붙여 새 문장을 만들지 않습니다.
 3. 주제만 언급하는 청크는 근거가 아닙니다. 칸에 필요한 값·규정을 실제로 제공해야 합니다.
@@ -160,7 +164,7 @@ SYSTEM_PROMPT = """당신은 동아대학교 유학생 챗봇의 '충분성 검�
 17. chunk_notes: 판정에 앞서 보여준 청크마다 메모를 하나씩 적습니다.
     - applies_to: 그 청크의 규정이 특정 대상에게만 적용되면 그 대상을 사용자 칸 ID와 값으로 적습니다
       (예: {"field_id": "gks_status", "value": "GKS 장학생"}, {"field_id": "track", "value": "영어트랙"}).
-      청크 ID의 문서 이름, 표·조항 제목, 본문 문구로 판단합니다. 모든 유학생에게 적용되면 빈 목록입니다.
+      청크의 출처(문서 이름), 표·조항 제목, 본문 문구로 판단합니다. 모든 유학생에게 적용되면 빈 목록입니다.
       field_id는 아래 '사용자 칸 후보'의 ID만 씁니다. 추측으로 대상을 붙이지 않습니다.
     - relevant_slots: 이 청크가 근거가 될 수 있는 판정 대상 칸 ID. 관련 없으면 빈 목록입니다.
     - conflicting_slots: 이 청크의 값·조건·적용 범위가 현재 supported인 칸의 기존 내용과 실제로 모순될 때만 그 칸 ID를 적습니다.
@@ -171,18 +175,18 @@ SYSTEM_PROMPT = """당신은 동아대학교 유학생 챗봇의 '충분성 검�
 ## 출력 JSON 형식
 {
   "chunk_notes": [
-    {"evidence_id": "문서.pdf#p11#c0", "applies_to": [{"field_id": "gks_stage", "value": "학위과정"}],
+    {"evidence_id": "E3", "applies_to": [{"field_id": "gks_stage", "value": "학위과정"}],
      "relevant_slots": ["rule", "applicable_scope"], "conflicting_slots": []},
-    {"evidence_id": "문서.pdf#p3#c2", "applies_to": [], "relevant_slots": [], "conflicting_slots": []}
+    {"evidence_id": "E7", "applies_to": [], "relevant_slots": [], "conflicting_slots": []}
   ],
   "slot_verdicts": [
     {"slot_id": "rule", "status": "supported",
-     "evidence_refs": [{"evidence_id": "문서.pdf#p11#c0", "quote": "청크 본문에서 그대로 옮긴 구절"}],
+     "evidence_refs": [{"evidence_id": "E3", "quote": "청크 본문에서 그대로 옮긴 구절"}],
       "value": "학위과정 GKS 장학생은 총장 승인 시에만 시간제 취업 가능", "missing_detail": "", "missing_kind": null,
      "activation_state": null, "reason": "판정 이유 한 줄"}
   ],
   "user_field_needs": [
-    {"field_id": "gks_stage", "evidence_ids": ["문서.pdf#p11#c0", "문서.pdf#p10#c3"],
+    {"field_id": "gks_stage", "evidence_ids": ["E3", "E5"],
      "branches": ["학위과정: 총장 승인 시 가능", "한국어연수: 6개월 이후 방학 중에만"],
      "reason": "단계별로 규정이 다름"}
   ]
@@ -200,7 +204,7 @@ def _slot_block(slot: DocSlot) -> str:
     if slot.requirement == "conditional":
         lines.append(f"  발동 여부: {slot.activation_state or 'unresolved'}")
     if slot.evidence_refs:
-        lines.append("  기존 근거: " + ", ".join(r.evidence_id for r in slot.evidence_refs))
+        lines.append("  기존 근거: " + ", ".join(alias_of(r.evidence_id) for r in slot.evidence_refs))
     if slot.missing_detail:
         lines.append(f"  이전 판정에서 부족했던 점: {slot.missing_detail}")
     if slot.missing_kind:
@@ -230,7 +234,7 @@ def build_user_prompt(
     ) or "(확인된 조건 없음)"
     new_set = new_chunk_ids or set()
     chunks = "\n\n".join(
-        f"### {'신규 ' if cid in new_set else ''}청크 ID: {cid}\n{pool.get(cid).text.strip()}" for cid in chunk_ids
+        f"{_chunk_header(cid, pool, '신규 ' if cid in new_set else '')}\n{pool.get(cid).text.strip()}" for cid in chunk_ids
     )
     return (
         (f"## 사용자 질문\n{question}\n\n" if question else "")
@@ -246,12 +250,51 @@ def build_user_prompt(
 
 # ── 서버 검증: 칸 판정 ──────────────────────────────────────────────────────
 
+# 근거 ID 짧은 별칭 (E1, E2 ...)
+# 실제 ID('(KO)정부초청+…+지침(2026.3.1.개정).pdf#p5#c2')가 길고 서로 비슷해서 LLM이 KO/EN·괄호를 섞어 적는다
+# (2026-10-02 실서비스 기록: 맞는 근거를 '보여준 청크가 아님'으로 여러 번 버림). 프롬프트에는 별칭만 보여주고
+# 서버가 실제 ID로 되돌린다. 번호는 근거 풀에 들어온 순서라서 같은 질문의 라운드·재판정 사이에 바뀌지 않는다.
+_ALIAS_KEYS: ContextVar[Optional[List[str]]] = ContextVar("verify_alias_keys", default=None)
+_ALIAS_RE = re.compile(r"^\s*(?:청크\s*ID\s*:\s*)?\[?\s*E(\d+)\s*\]?\s*$", re.IGNORECASE)
+
+
+def alias_of(evidence_id: str) -> str:
+    keys = _ALIAS_KEYS.get()
+    if keys and evidence_id in keys:
+        return f"E{keys.index(evidence_id) + 1}"
+    return evidence_id
+
+
+def _from_alias(text: str) -> Optional[str]:
+    keys = _ALIAS_KEYS.get()
+    m = _ALIAS_RE.match(text or "")
+    if not keys or not m:
+        return None
+    i = int(m.group(1)) - 1
+    return keys[i] if 0 <= i < len(keys) else None
+
+
+def _chunk_header(cid: str, pool: EvidencePool, prefix: str = "") -> str:
+    c = pool.get(cid)
+    src = f"\n(출처: {os.path.basename(c.source)} p.{c.page})" if c else ""
+    return f"### {prefix}청크 ID: {alias_of(cid)}{src}"
+
+
 def _id_key(evidence_id: str) -> str:
     """ID 비교용 키: 앞뒤 공백·대괄호·'청크 ID:' 접두어 제거. (파일 이름이 '[동아대]…'로 시작해 LLM이 괄호를 더 붙이는 경우)"""
     s = (evidence_id or "").strip()
     if s.startswith("청크 ID:"):
         s = s[len("청크 ID:"):]
     return s.strip().strip("[]").strip()
+
+
+def _loose_key(evidence_id: str) -> str:
+    """느슨한 비교 키: 파일 이름의 괄호·기호·공백을 모두 빼고 #p·#c 번호만 남긴다.
+    LLM이 '(KO)정부초청…'을 'KO)정부초청…'처럼 괄호 하나를 빠뜨리는 경우 (2026-10-02 기록)."""
+    m = re.match(r"^(.*)#p(\d+)#c(\d+)\s*$", _id_key(evidence_id))
+    if not m:
+        return ""
+    return f"{normalize(m.group(1))}#p{int(m.group(2))}#c{int(m.group(3))}"
 
 
 def resolve_evidence_id(evidence_id: str, shown: Set[str], w: List[str], where: str) -> Optional[str]:
@@ -261,10 +304,18 @@ def resolve_evidence_id(evidence_id: str, shown: Set[str], w: List[str], where: 
     """
     if evidence_id in shown:
         return evidence_id
+    real = _from_alias(evidence_id)
+    if real is not None:
+        return real if real in shown else None
     key = _id_key(evidence_id)
     cands = [s for s in shown if _id_key(s) == key] if key else []
     if len(cands) == 1:
         w.append(f"[수정] {where}: 근거 ID '{evidence_id}' → '{cands[0]}' (괄호·공백 보정)")
+        return cands[0]
+    loose = _loose_key(evidence_id)
+    cands = [s for s in shown if _loose_key(s) == loose] if loose else []
+    if len(cands) == 1:
+        w.append(f"[수정] {where}: 근거 ID '{evidence_id}' → '{cands[0]}' (파일 이름 기호 보정)")
         return cands[0]
     return None
 
@@ -581,6 +632,7 @@ RECHECK_SYSTEM_PROMPT = """당신은 문서 칸의 누락·모순 근거만 재�
 3. evidence_id는 '### 청크 ID:' 뒤의 전체 문자열을 그대로 씁니다. source/page/chunk 객체로 나누거나
    reference, source, page 같은 다른 필드 이름을 만들지 않습니다.
 4. quote는 해당 청크에서 그대로 옮긴 짧은 구절입니다. 요약·번역하지 않습니다.
+   영어 청크는 영어 원문 그대로 인용합니다.
 5. 현재 근거를 유지해야 하면 evidence_refs에 다시 적습니다. 후보가 관련 없으면 기존 상태·근거를 유지합니다.
 6. 결과는 아래 JSON 객체 하나로만 출력합니다. chunk_notes나 user_field_needs는 출력하지 않습니다.
 
@@ -589,7 +641,7 @@ RECHECK_SYSTEM_PROMPT = """당신은 문서 칸의 누락·모순 근거만 재�
     {
       "slot_id": "rule",
       "status": "partial",
-      "evidence_refs": [{"evidence_id": "문서.pdf#p1#c0", "quote": "본문의 정확한 구절"}],
+      "evidence_refs": [{"evidence_id": "E1", "quote": "본문의 정확한 구절"}],
       "value": "현재까지 확인된 내용",
       "missing_detail": "아직 부족한 내용",
       "missing_kind": "different_section",
@@ -601,7 +653,7 @@ RECHECK_SYSTEM_PROMPT = """당신은 문서 칸의 누락·모순 근거만 재�
 
 RECHECK_FORMAT_HINT = (
     '반드시 {"slot_verdicts":[{"slot_id":"...","status":"supported|partial|conflicting",'
-    '"evidence_refs":[{"evidence_id":"문서.pdf#p1#c0","quote":"본문 그대로"}],'
+    '"evidence_refs":[{"evidence_id":"E1","quote":"본문 그대로"}],'
     '"value":"...","missing_detail":"...","missing_kind":"unknown","reason":"..."}]} 형식으로 출력하세요.'
 )
 
@@ -617,15 +669,15 @@ def build_recheck_prompt(
         definition = cfg.DOC_SLOTS.get(sid, {})
         evidence_ids = list(dict.fromkeys([r.evidence_id for r in slot.evidence_refs] + ids))
         chunks = "\n\n".join(
-            f"### 청크 ID: {eid}\n{pool.get(eid).text.strip()}" for eid in evidence_ids if pool.get(eid)
+            f"{_chunk_header(eid, pool)}\n{pool.get(eid).text.strip()}" for eid in evidence_ids if pool.get(eid)
         )
-        refs = "\n".join(f"- {r.evidence_id}: {r.quote}" for r in slot.evidence_refs) or "- 없음"
+        refs = "\n".join(f"- {alias_of(r.evidence_id)}: {r.quote}" for r in slot.evidence_refs) or "- 없음"
         blocks.append(
             f"## 칸 {sid} ({definition.get('label', sid)})\n"
             f"충족 기준: {definition.get('criterion', '')}\n"
             f"현재 상태: {slot.status}\n현재 값: {slot.value or '-'}\n"
             f"현재 근거:\n{refs}\n"
-            f"재확인할 청크: {', '.join(ids)}\n\n{chunks}"
+            f"재확인할 청크: {', '.join(alias_of(i) for i in ids)}\n\n{chunks}"
         )
     return (
         f"## 사용자 질문\n{question or analysis.intent_summary}\n"
@@ -673,7 +725,7 @@ def apply_recheck(
             w.append(f"[재확인] {sid}: 재판정 결과에 없음 (상태 유지)")
 
 
-def verify_evidence(
+def _verify_evidence_impl(
     analysis: QuestionAnalysis,
     pool: EvidencePool,
     budget: Optional[SearchBudget] = None,
@@ -801,3 +853,12 @@ def verify_evidence(
     run.decision = decide(a, budget, history)
     run.latency_ms = int((time.perf_counter() - started) * 1000)
     return run
+
+
+def verify_evidence(analysis: QuestionAnalysis, pool: EvidencePool, *args, **kwargs) -> VerificationRun:
+    """④ 진입점. 프롬프트의 근거 ID를 짧은 별칭(E1, E2 ...)으로 보여주고 응답의 별칭을 실제 ID로 되돌린다."""
+    token = _ALIAS_KEYS.set(list(pool.chunks.keys()))
+    try:
+        return _verify_evidence_impl(analysis, pool, *args, **kwargs)
+    finally:
+        _ALIAS_KEYS.reset(token)

@@ -97,8 +97,14 @@ class ChromaChunkStore:
 
 def _default_search_fn(query: str, k: int, metrics: Optional[dict] = None) -> List[Any]:
     """실제 하이브리드 + rerank 검색. import 시점에 무거운 초기화가 일어나므로 호출 때 import한다."""
-    from app.core.retriever import retriever
-    return retriever.retrieve(query, k=k)
+    stats = metrics if metrics is not None else {}
+    stats["retriever_already_imported"] = "app.core.retriever" in sys.modules
+    started = time.perf_counter()
+    try:
+        from app.core.retriever import retriever
+    finally:
+        stats["import_init_ms"] = (time.perf_counter() - started) * 1000
+    return retriever.retrieve(query, k=k, metrics=stats)
 
 
 # ── 변환 ─────────────────────────────────────────────────────────────────
@@ -132,6 +138,28 @@ def _docs_to_chunks(docs: List[Any], warnings: List[str]) -> List[EvidenceChunk]
             score=float(score) if score is not None else None,
         ))
     return chunks
+
+
+def merge_results(ko: List[EvidenceChunk], en: List[EvidenceChunk], k: int) -> List[EvidenceChunk]:
+    """
+    한국어·영어 검색 결과를 합친다. 각 결과의 상위 SEARCH_EN_RESERVE개는 먼저 남기고(영어 전용 문서가
+    점수 경쟁에서 밀리지 않게), 나머지는 리랭커 점수 순으로 채워 k개를 넘기지 않는다.
+    """
+    out: List[EvidenceChunk] = []
+    seen = set()
+
+    def take(c: EvidenceChunk) -> None:
+        if c.evidence_id not in seen and len(out) < k:
+            seen.add(c.evidence_id)
+            out.append(c)
+
+    r = cfg.SEARCH_EN_RESERVE
+    for c in ko[:r] + en[:r]:
+        take(c)
+    rest = sorted(ko[r:] + en[r:], key=lambda c: c.score if c.score is not None else float("-inf"), reverse=True)
+    for c in rest:
+        take(c)
+    return out
 
 
 # ── 원문 확장 ─────────────────────────────────────────────────────────────
@@ -267,6 +295,24 @@ def _execute(
         if not ok:
             return
         chunks = _docs_to_chunks(list(docs or []), run.warnings)
+        query_en = (plan.query_en or "").strip()
+        if cfg.SEARCH_WITH_ENGLISH_QUERY and query_en and query_en.lower() != tag.query_ko.lower():
+            def search_en():
+                if search_fn is not None:
+                    return search_fn(query_en, cfg.SEARCH_TOP_K)
+                stats = {"query": "en"}
+                run.retrieval_calls.append(stats)
+                return _default_search_fn(query_en, cfg.SEARCH_TOP_K, metrics=stats)
+
+            try:
+                en_chunks = _docs_to_chunks(list(search_en() or []), run.warnings)
+            except Exception as e:  # 영어 검색이 실패해도 한국어 결과로 계속한다
+                en_chunks = []
+                run.warnings.append(f"[영어 검색 실패] '{query_en}': {type(e).__name__}: {e}")
+            before = {c.evidence_id for c in chunks}
+            chunks = merge_results(chunks, en_chunks, cfg.SEARCH_TOP_K)
+            added = [c.evidence_id for c in chunks if c.evidence_id not in before]
+            run.warnings.append(f"[영어 검색] '{query_en}' → 결과 {len(en_chunks)}개 중 {len(added)}개 반영")
         if not chunks:
             run.warnings.append(f"[결과 없음] '{tag.query_ko}' 검색 결과가 없음 (미확보이지 자료 부재 확정은 아님)")
     else:

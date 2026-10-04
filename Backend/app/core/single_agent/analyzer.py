@@ -114,6 +114,11 @@ SYSTEM_PROMPT_TEMPLATE = """당신은 동아대학교 유학생 생활·행정 �
    - 절대 하지 말 것: "서류 알려줘"를 보고 가장 흔해 보이는 목적(예: 입학 지원 서류)을 임의로 짐작해 그 유형으로 검색하는 것. 실제로 수업료 서류일 수도, 아르바이트 서류일 수도, 비자 서류일 수도 있으므로 짐작이 아니라 반드시 되묻습니다.
    - clarification_question은 요청 대상만 좁히는 짧은 질문이며, 사용자의 질문 언어로 씁니다.
 16. search이면 first_search에 첫 검색어 1개를 적습니다. 한국어로 쓰고 GKS, D-4, TOPIK 같은 공식 명칭·코드는 그대로 둡니다. 가장 먼저 확인할 필수 칸을 target_slot_ids에 적습니다(active인 문서 칸만). 확인된 조건은 검색어에 반영할 수 있습니다.
+   검색어에 사용자 조건(GKS 장학생, 영어트랙, 어학연수생 등)을 넣었다면, 그 조건을 뺀 일반 규정 검색어를 general_query_ko에 적습니다.
+   학교 공통 규정(입학·학사 등)은 조건별 문서와 다른 문서에 있을 수 있기 때문입니다.
+   예: "GKS 장학생 첫 학기 휴학 가능 여부" → general_query_ko "학부 신입생 입학 후 첫 학기 휴학". 조건을 넣지 않았으면 빈 문자열.
+   query_en에는 query_ko와 같은 뜻의 영어 검색어를 적습니다. 영어로만 된 문서(영어트랙 모집요강, 한국어과정 안내 등)를 찾기 위함입니다.
+   공식 명칭·코드(GKS, D-2, TOPIK, IELTS)는 그대로 둡니다. 예: "GKS scholarship recipient leave of absence first semester".
 
 ## 출력 JSON 형식
 {{
@@ -136,7 +141,9 @@ SYSTEM_PROMPT_TEMPLATE = """당신은 동아대학교 유학생 생활·행정 �
     {{"field_id": "gks_stage", "status": "unknown", "active": false, "reason": "단계별 규정 차이 여부는 검색 후 판단",
       "required_by_evidence": []}}
   ],
-  "first_search": {{"query_ko": "GKS 장학생 시간제 취업 허용 기준", "target_slot_ids": ["rule", "applicable_scope"],
+  "first_search": {{"query_ko": "GKS 장학생 시간제 취업 허용 기준", "general_query_ko": "외국인 유학생 시간제 취업 허용 기준",
+    "query_en": "GKS scholarship part-time employment permission criteria",
+    "target_slot_ids": ["rule", "applicable_scope"],
     "reason": "허용 원칙과 적용 범위부터 확인"}},
   "next_action": "search",
   "next_action_reason": "일반 규정으로 먼저 안내 가능",
@@ -184,19 +191,44 @@ def number_messages(question: str, history: Optional[List[Dict]]) -> List[Dict]:
     return numbered
 
 
-def build_user_prompt(numbered: List[Dict]) -> str:
+def _ask_dicts(asks) -> List[Dict]:
+    """⓪ 라우터의 Ask(객체 또는 dict) 목록을 dict로 맞춘다."""
+    out = []
+    for a in asks or []:
+        d = a.model_dump() if hasattr(a, "model_dump") else dict(a)
+        if d.get("text"):
+            out.append(d)
+    return out
+
+
+def build_user_prompt(numbered: List[Dict], asks=None) -> str:
     convo = "\n".join(f"[{m['id']}] {m['role']}: {m['content']}" for m in numbered[:-1]) or "(없음)"
     current = numbered[-1]
+    hint = ""
+    ask_list = _ask_dicts(asks)
+    if ask_list:
+        lines = []
+        for a in ask_list:
+            dep = f" (← {', '.join(a.get('depends_on') or [])}의 답에 따라 달라짐)" if a.get("depends_on") else ""
+            lines.append(f"- {a.get('ask_id', '')} [{a.get('kind') or '?'}] {a['text']}{dep}")
+        hint = (
+            "## 접수 단계에서 나눈 요구 (참고)\n" + "\n".join(lines) + "\n"
+            "사용자는 위 요구를 모두 알고 싶어 합니다. 어느 하나도 빠지지 않게 유형과 문서 칸을 정하세요. "
+            "요구마다 답의 모양이 다르면 대표 유형 1개 + 나머지는 additional_types에 넣습니다.\n\n"
+        )
     return (
         f"## 이전 대화\n{convo}\n\n"
         f"## 현재 질문 [{current['id']}]\n{current['content']}\n\n"
+        + hint +
         "위 규칙에 따라 분석 JSON을 출력하세요."
     )
 
 
 # ── 서버 검증 ─────────────────────────────────────────────────────────────
 
-def validate_analysis(a: QuestionAnalysis, numbered: List[Dict]) -> Tuple[QuestionAnalysis, List[str]]:
+def validate_analysis(
+    a: QuestionAnalysis, numbered: List[Dict], ask_kinds: Optional[List[str]] = None,
+) -> Tuple[QuestionAnalysis, List[str]]:
     """
     LLM 출력을 체크리스트 규칙에 맞게 검사·보정한다.
     다음 단계로 넘길 수 없는 오류는 AnalysisFormatError (재시도 대상).
@@ -231,6 +263,11 @@ def validate_analysis(a: QuestionAnalysis, numbered: List[Dict]) -> Tuple[Questi
                 w.append(f"[제거] 추가 유형 '{t}' (T1~T6 아님)")
             elif t != a.primary_type and t not in extra:
                 extra.append(t)
+        # ⓪ 라우터가 나눈 요구의 유형이 빠졌으면 추가 유형으로 보완 (요구 하나가 통째로 사라지는 것을 막음)
+        for t in ask_kinds or []:
+            if t in cfg.PROFILES and t != a.primary_type and t not in extra:
+                extra.append(t)
+                w.append(f"[보완] 접수 단계 요구의 유형 {t}가 빠짐 → 추가 유형에 넣음")
         a.additional_types = extra
 
     types = [a.primary_type] + a.additional_types if a.primary_type else []
@@ -292,6 +329,15 @@ def validate_analysis(a: QuestionAnalysis, numbered: List[Dict]) -> Tuple[Questi
             activation_reason="(서버 보완) 분석 결과에 없어 기본값으로 추가",
         )
         w.append(f"[보완] 문서 칸 {slot_id} 누락 → 기본값({default}, {'활성' if active else '비활성'})")
+
+    # ⓪ 라우터가 나눈 요구의 유형에 속한 필수 칸은 끄지 않는다 ("앞 요구 확인 후 필요"라며 꺼 버리면 그 요구를 검색하지 않음)
+    if ask_kinds:
+        must = cfg.slots_for_types([t for t in ask_kinds if t in cfg.PROFILES])
+        for sid, req in must.items():
+            s = seen.get(sid)
+            if s is not None and req == "required" and not s.active:
+                s.active = True
+                w.append(f"[수정] 필수 칸 {sid}: 접수 단계 요구의 칸이라 활성 유지 ({s.activation_reason[:40]})")
 
     order = list(allowed.keys())
     a.document_slots = sorted(seen.values(), key=lambda s: order.index(s.slot_id))
@@ -388,8 +434,10 @@ def analyze_question(
     history: Optional[List[Dict]] = None,
     model: Optional[str] = None,
     client=None,
+    asks=None,
 ) -> AnalysisRun:
     """
+    asks: ⓪ 라우터가 나눈 요구(Ask 또는 dict). 있으면 프롬프트에 참고로 넣고, 그 유형이 빠지면 서버가 보완한다.
     질문 하나를 분석한다. 실패해도 예외 대신 AnalysisRun.error에 이유를 담아 돌려준다.
     client: 테스트용으로 OpenAI 클라이언트를 바꿔 끼울 때 사용.
     """
@@ -399,7 +447,7 @@ def analyze_question(
     numbered = number_messages(question, history)
     messages = [
         {"role": "system", "content": build_system_prompt()},
-        {"role": "user", "content": build_user_prompt(numbered)},
+        {"role": "user", "content": build_user_prompt(numbered, asks)},
     ]
     run = AnalysisRun(
         question=question,
@@ -411,7 +459,8 @@ def analyze_question(
     started = time.perf_counter()
     value, ok = run_json_loop(
         run, client, model, messages,
-        parse=lambda raw: validate_analysis(QuestionAnalysis.model_validate(json.loads(raw)), numbered),
+        parse=lambda raw: validate_analysis(QuestionAnalysis.model_validate(json.loads(raw)), numbered,
+                                            ask_kinds=[d.get("kind") for d in _ask_dicts(asks) if d.get("kind")]),
         temperature=0, max_tokens=2000,
         format_hint="규칙과 JSON 형식을 지켜 JSON만 다시 출력하세요.",
     )

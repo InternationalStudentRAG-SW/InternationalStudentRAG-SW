@@ -85,6 +85,10 @@ MAX_EXPANSIONS_PER_SLOT = 2    # 원문 확장 2번에도 partial이면 더 확�
 # ③ 근거 검색 (초기값이며 평가로 조정한다)
 SEARCH_TOP_K = 7          # 신규 검색 1회당 돌려받을 청크 수 (기본 top_k 10보다 줄여 ④ 입력을 제한)
 EXPAND_WINDOW = 1         # 원문 확장 때 앵커 앞·뒤로 가져올 청크 수
+# 영어 검색어 함께 검색 (2026-10-03): 영어로만 된 문서(영어트랙 모집요강, 한국어과정 안내)는 한국어 검색어로 잘 안 잡힌다.
+# ①·②가 만든 query_en으로 한 번 더 검색하고, 두 결과를 합쳐 SEARCH_TOP_K개만 남긴다(④ 입력 크기는 그대로).
+SEARCH_WITH_ENGLISH_QUERY = True
+SEARCH_EN_RESERVE = 2     # 합칠 때 한국어·영어 결과 각각 상위 몇 개는 점수와 관계없이 남긴다
 TOOL_MAX_RETRIES = 1      # 검색 도구 오류 시 재시도 횟수. 끝내 실패하면 예산·칸별 상한에서 차감하지 않는다
 
 # ④ 충분성 검증 (초기값이며 평가로 조정한다)
@@ -92,10 +96,33 @@ VERIFY_MAX_CHUNKS = 20      # 판정 프롬프트에 넣을 청크 상한 (이�
 MAX_CLARIFY_FIELDS = 2      # 한 번에 되물을 사용자 칸 최대 수 (체크리스트 4.2절)
 MAX_NO_PROGRESS_ROUNDS = 2  # 연속으로 새 근거가 없던 검색이 이만큼이면 더 검색하지 않음 (체크리스트 7절)
 # 전체 흐름 (pipeline.py, 초기값이며 평가로 조정한다)
-MAX_VERIFY_ROUNDS = 2        # ②③④ 라운드 최대 횟수 (④ LLM 호출 비용이 커서 검색 예산보다 먼저 제한)
-AUTO_EXPAND_FIRST_ROUND = True  # 첫 바퀴 신규 검색 뒤 1순위 청크 앞뒤를 바로 확장 (LLM 없음, dev 풀 수집과 같은 방식)
+MAX_VERIFY_ROUNDS = 3        # ②③④ 라운드 최대 횟수 (④ LLM 호출 비용이 커서 검색 예산보다 먼저 제한)
+AUTO_EXPAND_FIRST_ROUND = True
+# 첫 바퀴에 ①의 general_query_ko(사용자 조건을 뺀 일반 규정 검색어)로 신규 검색을 1회 더 한다 (LLM 없음).
+# 예: 'GKS 장학생 첫 학기 휴학'만 검색하면 GKS 지침만 나오고 모집요강의 '입학 후 첫 학기 휴학 불가'를 놓친다 (2026-10-02 기록)
+GENERAL_QUERY_FIRST_ROUND = True
+# ①이 general_query_ko를 비우면 서버가 첫 검색어에서 아래 단어를 빼서 만든다 (LLM이 지시를 빠뜨려도 실행되게).
+# 사용자 본인·다른 사람의 사례 조건(user_self / other_person)에 해당하는 칸의 단어만 뺀다.
+GENERAL_QUERY_STRIP_WORDS = {
+    "gks_status": ["Global Korea Scholarship", "정부초청 외국인 장학생", "정부초청외국인장학생", "정부초청",
+                   "GKS", "장학생의", "장학생은", "장학생이", "장학생"],
+    "track": ["한국어트랙", "한국어 트랙", "영어트랙", "영어 트랙", "English track", "Korean track"],
+    "program": ["어학연수생", "어학연수", "한국어연수", "어학당"],
+}
+GENERAL_QUERY_MIN_CHARS = 4   # 단어를 뺀 뒤 이보다 짧으면(정규화 기준) 일반 검색을 하지 않음  # 첫 바퀴 신규 검색 뒤 1순위 청크 앞뒤를 바로 확장 (LLM 없음, dev 풀 수집과 같은 방식)
 ANSWER_MAX_EVIDENCE = 12     # ⑤ 프롬프트에 넣을 근거 청크 상한
 ANSWER_CHUNK_CHARS = 900     # ⑤ 프롬프트에 넣을 청크 본문 길이 상한
+# ⑤ 답변 검사 (answer_check.py, 2026-10-03): 숫자·서류명이 인용 근거에 없으면 다시 쓰게 하고, 그래도 없으면 그 문장을 뺀다.
+# LLM은 검사에 걸렸을 때만 1회 더 부른다(추천 방식: 질문당 +0~2.5k 토큰).
+ANSWER_CHECK_ENABLED = True
+ANSWER_CHECK_MAX_REWRITES = 1
+ANSWER_CHECK_DROP_UNSUPPORTED = True
+# 근거가 하나도 없는 문서 칸은 ⑤ 프롬프트에서 뺀다. 라우터 요구가 있으면 칸의 '확인 필요' 메모도 뺀다
+# (쉬운 복합 질문 E1~E3에서 묻지 않은 칸 때문에 "확인하지 못한 내용…"이 붙고, 근거에 있는 지각 계산까지 '확인 못 함'이라 함)
+ANSWER_HIDE_EMPTY_SLOTS = True
+# 인용 먼저 쓰기: ⑤가 같은 호출 안에서 요구마다 근거 원문을 그대로 옮긴 뒤(facts) 답을 쓴다. 서버가 인용을 원문과 대조한다.
+# gpt-4o-mini가 표의 비고·괄호, 조항 단서, 영어 원문 세부를 건너뛰는 문제 대응 (E1~E3, 2026-10-03). 출력 +0.2k 토큰 정도
+ANSWER_QUOTE_FIRST = True
 MIN_QUOTE_CHARS = 4         # 근거 인용의 최소 길이 (text_match 정규화 후 글자 수). 너무 짧은 인용은 아무 청크에나 맞으므로 거부
 
 # ④가 LLM에게 허용하는 칸 상태. unavailable_in_corpus는 자료 범위표로만 정하므로 ④가 쓰지 않는다(2.1절).
@@ -490,3 +517,66 @@ DOC_SCOPES = [
      "aliases": ["어학당", "어학연수", "한국어 연수", "한국어연수", "언어교육원", "Korean Language Course",
                  "language course", "language program", "language institute"]},
 ]
+
+
+# ── ⓪ 라우터 (router.py) ────────────────────────────────────────────────
+# 질문을 요구 단위(ask)로 나눈 뒤 서버 규칙으로 경로를 정한다.
+#   simple: 기존 경로 (chat.py → agent.py: 하이브리드+리랭커)
+#   agent : 단일 에이전트 (pipeline.run_pipeline)
+# 질문에 이 표현이 있으면 사용자가 그 칸의 대상을 이미 밝힌 것으로 본다 (DOC_SCOPES 별칭과 같은 용도).
+# 예: "학부 신입학한 GKS 장학생" → gks_stage=학위과정. 이 칸은 갈래·대상 한정 판정에서 뺀다.
+# (2026-10-02 실서비스 기록: '학부'를 몰라 gks_stage=학위과정 대상 한정으로 라운드 2개를 낭비)
+QUESTION_FIELD_ALIASES = [
+    {"field_id": "gks_stage", "value": "학위과정",
+     "aliases": ["학위과정", "학위 과정", "학부", "학사", "석사", "박사", "대학원",
+                 "undergraduate", "bachelor", "master's", "doctoral", "degree program"]},
+    {"field_id": "gks_stage", "value": "한국어연수",
+     "aliases": ["한국어연수 중", "어학연수 중", "언어연수 중"]},
+]
+
+ROUTER_ACTIONS = {
+    "search": "문서 검색이 필요한 질문",
+    "clarify_scope": "요청 대상 자체가 불분명함 (예: '서류 알려줘')",
+    "out_of_scope": "서비스 범위 밖",
+    "no_retrieval": "검색이 필요 없는 발화 (인사, 감사 등)",
+}
+ROUTER_CONDITION_SUBJECTS = {"user_self": "사용자 본인", "other_person": "다른 사람 사례"}
+ROUTER_MAX_ASKS = 3                # 요구 단위 최대 개수 (넘으면 앞에서부터 자름). MAX_SUBQUERIES와 같은 값으로 시작
+# 첫 라운드 요구별 검색 (2026-10-03): 요구가 2개 이상이면 ①의 합친 검색어와 별도로 요구마다 따로 검색한다.
+# 합친 검색어("한국어 트랙 영어 트랙 어학 기준 및 면제 조건")는 한쪽 문서만 상위에 올라 다른 요구의 근거를 놓쳤다(LANG).
+# 이 검색은 신규 검색 예산(MAX_SUBQUERIES)에 넣지 않아 뒤 라운드의 보충 검색 여유를 남긴다. 상한은 요구 수(최대 ROUTER_MAX_ASKS).
+PER_ASK_FIRST_ROUND = True
+# 요구별 검색의 상위 청크를 ④가 칸에 연결하지 않았어도 ⑤에 보여준다. 요구 하나당 상위 몇 개 (0이면 끔).
+# 로그 확인 결과 정답 청크가 상위 2개 밖(5위)이라 효과가 없어 끔 (2026-10-03). 아래 '이어지는 조각'으로 대신한다.
+ANSWER_ASK_EXTRA = 0
+# 이어지는 조각: ⑤에 보여주는 근거 조각 바로 뒤 조각(같은 문서, 이미 검색으로 찾아 둔 것만)을 같이 보여준다.
+# GKSW: 제19조(자격상실) 목록이 p6#c1에서 시작해 p7#c1의 '9. 경고 3회 이상'까지 이어지는데 ⑤는 p6#c1만 봐서
+# 목록 첫 항목(제적)을 답으로 씀. 근거 조각 하나당 뒤로 몇 개까지.
+ANSWER_NEXT_CHUNKS = 2
+# 앞 조각: 같은 페이지에서 바로 앞 조각도 같이 보여준다 (LANG: 면제 조건 조각 p6#c4만 연결되고, 바로 앞 p6#c3의
+# 'IELTS 5.5 / TOEFL iBT 3.5 / New TEPS 202' 표가 빠져 "영어 트랙 기준은 제공되지 않았다"고 답함, 10-03 23시)
+ANSWER_PREV_CHUNKS = 1
+# 이어지는·앞 조각과 요구별 상위 조각을 합쳐 칸 근거 외에 더 보여줄 최대 개수 (칸 근거는 덜어내지 않는다)
+ANSWER_MAX_EXTRA = 8
+# 단서·연장·예외 확인: ⑤가 인용·출처로 쓴 근거에 '다만/연장/제출/However' 같은 문장이 있는데 옮기지 않았으면
+# 그 문장을 짚어 주고 1회 다시 쓰게 한다 (E2: 근거에 '1년 추가 연장'이 있는데 답에서 빠짐). 걸렸을 때만 LLM 1회 추가.
+ANSWER_CAVEAT_CHECK = True
+ANSWER_CAVEAT_MAX_SENTENCES = 3
+# ⑤ 금지 규정 검사 (2026-10-04, prohibition_check.py)
+#   '입학 후 첫 학기 휴학 불가' 같은 금지 근거에 다른 문서의 허용 조건('부득이한 사유가 있으면')을 붙인 문장을 서버가 찾는다.
+#   걸리면 ANSWER_PROHIBITION_MAX_REWRITES번 다시 쓰게 하고, 그래도 남으면 그 문장을 빼고 금지 원문을 넣는다.
+ANSWER_PROHIBITION_CHECK = True
+ANSWER_PROHIBITION_MAX_REWRITES = 1
+ROUTER_SIMPLE_ACTIONS = {"no_retrieval", "out_of_scope"}  # 기존 경로가 안내 문구를 이미 갖고 있음
+ROUTER_AGENT_ACTIONS = {"clarify_scope"}                 # ①의 범위 되묻기 규칙을 쓴다
+# 요구가 하나여도 이 유형이면 에이전트로 보낸다. 기본은 비워 둔다:
+# 9/30 비교(compare_20260930_214543)에서 단일 요구인 D6(T5)·D7(T6)은 기존 경로가 이겼고,
+# 에이전트가 이긴 것은 요구가 여러 개인 D8뿐이었다. 시도 1회라 평가로 다시 정한다.
+ROUTER_AGENT_KINDS: set = set()
+# 사용자 조건이 이 개수 이상이면 agent. 2로 올리면 과잉 라우팅은 줄지만 H02·H06·R16·R17을 놓친다(실험 20261002) → 1 유지
+ROUTER_MIN_CONDITIONS_FOR_AGENT = 1
+ROUTER_FAIL_ROUTE = "agent"        # 라우터가 실패하면 안전한 쪽(놓침보다 비용 증가가 낫다)
+
+# ── 안전장치 (escalation.py): simple로 보낸 질문의 검색 결과를 보고 agent로 올림 ──
+ESCALATE_MIN_SCORE = 0.7           # app/core/llm.py의 _RELEVANCE_THRESHOLD와 같은 값으로 유지
+ESCALATE_SCOPE_MIN_SCORE = 0.55    # 갈래 판단에 쓸 출처의 최소 점수 (retriever의 context_min_score와 같음)

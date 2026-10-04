@@ -121,8 +121,10 @@ SEARCH_QUERY_SYSTEM_PROMPT = """당신은 동아대학교 유학생 챗봇의 '�
    이어지는 부분(다음 페이지, 관련 조항, 표의 나머지)을 좁혀서 확인하는 문구로 만듭니다.
 4. 이미 시도한 검색어 목록과 같은 문구를 반복하지 않습니다. 이전 시도가 있다면 관점을 바꿉니다
    (다른 표현, 더 구체적인 범위, 다른 조항 명칭 등).
-5. 결과는 반드시 JSON 객체 하나로만 출력합니다: {"query_ko": "...", "reason": "..."}
-   reason에는 이 칸을 왜 이 검색어로 확인하려는지 한 줄로 적습니다."""
+5. 결과는 반드시 JSON 객체 하나로만 출력합니다: {"query_ko": "...", "query_en": "...", "reason": "..."}
+   reason에는 이 칸을 왜 이 검색어로 확인하려는지 한 줄로 적습니다.
+6. query_en은 query_ko와 같은 뜻의 영어 검색어입니다. 영어로만 된 문서(영어트랙 모집요강, 한국어과정 안내 등)를
+   찾을 때 씁니다. 공식 명칭·코드(GKS, D-2, TOPIK, IELTS)는 그대로 둡니다."""
 
 
 def _build_query_user_prompt(
@@ -191,16 +193,18 @@ def _generate_query(
         if not q:
             raise SearchPlanFormatError("query_ko가 비어 있음")
         r = str(data.get("reason", "")).strip()
+        en = str(data.get("query_en", "") or "").strip()
         if _norm(q) in tried_all:
             raise RetryWith(
                 "이미 시도한 검색어와 같습니다. 표현·범위·조항 명칭을 바꿔 다른 검색어를 JSON으로 다시 출력하세요.",
-                value=(q, r),
+                value=(q, r, en),
                 warning=f"[재시도] 검색어 '{q}'는 이미 시도한 문구 → 다른 표현으로 다시 생성",
             )
-        return q, r
+        return q, r, en
 
     value, ok = run_json_loop(run, client, model, messages, parse=parse,
                               temperature=0.3, max_tokens=300, format_hint="JSON만 다시 출력하세요.")
+    run.query_en = value[2] if value is not None else ""
     if ok:
         return value[0], value[1], False
     if value is not None:          # 두 번 다 이미 시도한 문구
@@ -261,6 +265,7 @@ def plan_search(
                 target_slot_id=first_slot.slot_id,
                 search_type="new",
                 query_ko=analysis.first_search.query_ko.strip(),
+                query_en=(analysis.first_search.query_en or "").strip() or None,
                 reason=analysis.first_search.reason or "(①의 첫 검색 사용)",
                 from_first_search=True,
             )
@@ -336,6 +341,7 @@ def plan_search(
             target_slot_id=slot.slot_id,
             search_type=search_type,
             query_ko=query_ko,
+            query_en=(run.query_en or "").strip() or None,
             reason=reason,
             exhausted_slot_ids=exhausted,
             skipped=skipped,

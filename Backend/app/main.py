@@ -31,6 +31,20 @@ app.include_router(document.router)
 app.include_router(faq_router)
 
 
+_ROUTING_DESC = {
+    "off": "모든 질문 → 기존 검색 (하이브리드+리랭커)",
+    "auto": "라우터가 분류 → 단순: 기존 검색 / 복합: 단일 에이전트",
+    "always": "모든 질문 → 단일 에이전트",
+}
+
+
+@app.on_event("startup")
+def print_agent_routing_mode():
+    mode = (settings.agent_routing or "off").strip().lower()
+    desc = _ROUTING_DESC.get(mode, "알 수 없는 값 → off로 처리")
+    print(f"[AGENT_ROUTING] {mode} | {desc}", flush=True)
+
+
 @app.get("/")
 def read_root():
     return {"name": "International Student RAG API", "status": "running"}

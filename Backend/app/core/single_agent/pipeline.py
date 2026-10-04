@@ -15,6 +15,7 @@ on_event(stage, info)를 넘기면 단계마다 진행 상황을 알려준다 (�
 """
 from __future__ import annotations
 
+import re
 import time
 from typing import Callable, Dict, List, Optional
 
@@ -24,9 +25,10 @@ from app.core.single_agent.analyzer import analyze_question
 from app.core.single_agent.answer_schema import PipelineRun
 from app.core.single_agent.answerer import write_answer
 from app.core.single_agent.branching import branch_lines
-from app.core.single_agent.evidence_schema import EvidencePool, RetrievalTag
+from app.core.single_agent.evidence_schema import EvidencePool
 from app.core.single_agent.search_planner import check_budget, plan_search
 from app.core.single_agent.search_schema import SearchAttempt, SearchBudget, SearchPlan
+from app.core.single_agent.text_match import normalize
 from app.core.single_agent.searcher import execute_search
 from app.core.single_agent.verifier import decide, verify_evidence
 from app.core.single_agent.verify_schema import VerifyDecision
@@ -34,46 +36,74 @@ from app.core.single_agent.verify_schema import VerifyDecision
 EventFn = Callable[[str, Dict], None]
 
 
-def _kg_presearch(
-    analysis: "QuestionAnalysis",
-    pool: EvidencePool,
-    run: "PipelineRun",
-    emit: EventFn,
-) -> None:
-    """KG 사전 검색: 메인 루프 전에 지식그래프에서 관련 청크를 pool에 추가한다 (예산 차감 없음).
-    실패해도 예외를 밖으로 던지지 않는다."""
-    if not analysis.first_search:
-        return
-    query_ko = analysis.first_search.query_ko
-    try:
-        from app.core.knowledge_graph import knowledge_graph
-        from app.core.single_agent.searcher import ChromaChunkStore
+_ASK_REF_RE = re.compile(r"#A\d+")
 
-        kg_result = knowledge_graph.search_by_embedding(query_ko)
-        refs = kg_result.get("chunks", [])
-        if not refs:
-            return
 
-        store = ChromaChunkStore()
-        first_slot = next(
-            (s.slot_id for s in analysis.document_slots if s.active and s.requirement == "required"),
-            "applicable_scope",
-        )
-        tag = RetrievalTag(
-            target_slot_id=first_slot,
-            search_type="new",
-            query_ko=query_ko,
-            round_no=0,
-        )
-        added = 0
-        for ref in refs:
-            chunk = store.get_chunk(ref["source"], ref["page"], ref["chunk_index"])
-            if chunk:
-                if pool.add(chunk, tag):
-                    added += 1
-        emit("kg_search", {"pool": len(pool), "added": added})
-    except Exception as e:
-        run.warnings.append(f"KG 사전 검색 실패: {type(e).__name__}: {e}")
+def ask_seed_plans(route_asks, target_slot_id: str, tried: List[str]) -> List[SearchPlan]:
+    """
+    ⓪ 라우터 요구마다 첫 라운드 검색 계획을 만든다. 요구가 2개 미만이면 만들지 않는다.
+    의존 요구의 '#A1' 자리 표시는 지우고, 이미 시도한 검색어와 같으면 건너뛴다.
+    """
+    asks = []
+    for a in route_asks or []:
+        d = a.model_dump() if hasattr(a, "model_dump") else dict(a)
+        q = " ".join(_ASK_REF_RE.sub(" ", str(d.get("query_ko") or d.get("text") or "")).split())
+        if q:
+            asks.append((d.get("ask_id", ""), q, " ".join(_ASK_REF_RE.sub(" ", str(d.get("query_en") or "")).split())))
+    if len(asks) < 2:
+        return []
+    seen = {normalize(t) for t in tried}
+    plans = []
+    for ask_id, q, en in asks[: cfg.ROUTER_MAX_ASKS]:
+        if normalize(q) in seen:
+            continue
+        seen.add(normalize(q))
+        plans.append(SearchPlan(action="search", target_slot_id=target_slot_id, search_type="new",
+                                query_ko=q, query_en=en or None, reason=f"{ASK_SEED_REASON} ({ask_id})"))
+    return plans
+
+
+ASK_SEED_REASON = "첫 라운드 요구별 검색"
+
+
+def ask_extra_evidence(search_runs) -> List[str]:
+    """요구별 검색(첫 라운드)마다 상위 ANSWER_ASK_EXTRA개 청크. ⑤에 추가로 보여줄 근거 (중복 제거, 순서 유지)."""
+    out: List[str] = []
+    for s in search_runs or []:
+        plan = getattr(s, "plan", None)
+        if not getattr(s, "ok", False) or plan is None or not (plan.reason or "").startswith(ASK_SEED_REASON):
+            continue
+        for cid in list(s.chunk_ids)[: cfg.ANSWER_ASK_EXTRA]:
+            if cid not in out:
+                out.append(cid)
+    return out
+
+
+def general_query_for(analysis: QuestionAnalysis, question: str = "") -> str:
+    """
+    사용자 조건을 뺀 일반 규정 검색어. 첫 검색어에서 사용자 사례 조건(user_self / other_person)의 단어
+    (GENERAL_QUERY_STRIP_WORDS)를 뺀다. 질문의 구체적인 내용(예: '첫 학기')이 그대로 남아서 ①이 따로 적은
+    general_query_ko보다 우선한다(①은 'GKS 장학생 휴학 규정'처럼 조건을 남기거나 핵심어를 빠뜨린 적이 있음, 2026-10-02).
+    첫 검색어로 만들 수 없을 때만 general_query_ko를 같은 방식으로 다듬어 쓴다. 둘 다 안 되면 빈 문자열.
+    """
+    fs = analysis.first_search
+    if fs is None:
+        return ""
+    fields = {c.field_id for c in analysis.conditions if c.subject in ("user_self", "other_person")}
+    words = sorted({w for f in fields for w in cfg.GENERAL_QUERY_STRIP_WORDS.get(f, [])}, key=len, reverse=True)
+    if not words:
+        return ""
+
+    def strip(text: str) -> str:
+        q = text or ""
+        for w in words:
+            q = re.sub(re.escape(w), " ", q, flags=re.IGNORECASE)
+        q = re.sub(r"\s+", " ", q).strip(" ,·의")
+        if len(normalize(q)) < cfg.GENERAL_QUERY_MIN_CHARS or normalize(q) == normalize(fs.query_ko or ""):
+            return ""
+        return q
+
+    return strip(fs.query_ko) or strip(fs.general_query_ko)
 
 
 def finalize_decision(
@@ -104,11 +134,11 @@ def run_pipeline(
     verify_model: Optional[str] = None,
     answer_model: Optional[str] = None,
     max_rounds: Optional[int] = None,
-    lang_instruction: Optional[str] = None,
     client=None,
     search_fn=None,
     store=None,
     on_event: Optional[EventFn] = None,
+    route_asks=None,
 ) -> PipelineRun:
     """
     질문 1개를 끝까지 처리한다. history: 이전 대화 [{"role": "user"/"assistant", "content": ...}].
@@ -123,15 +153,15 @@ def run_pipeline(
     def finish(mode: str, analysis=None, pool=None, decision=None):
         run.decision = decision
         emit("answer_start", {"mode": mode})
-        run.answer_run = write_answer(question, mode, analysis, pool, decision,
-                                     model=answer_model, client=client, lang_instruction=lang_instruction)
+        run.answer_run = write_answer(question, mode, analysis, pool, decision, model=answer_model, client=client,
+                                      asks=route_asks, extra_evidence_ids=ask_extra_evidence(run.search_runs))
         emit("answer", {"mode": run.answer_run.mode, "answer": run.answer_run.answer,
                         "sources": [s.model_dump() for s in run.answer_run.sources]})
         run.latency_ms = int((time.perf_counter() - started) * 1000)
         return run
 
     # ① 질문 분석
-    a_run = analyze_question(question, history, model=model, client=client)
+    a_run = analyze_question(question, history, model=model, client=client, asks=route_asks)
     run.analysis_run = a_run
     if a_run.analysis is None:
         run.stopped = f"analysis_error: {a_run.error}"
@@ -150,9 +180,6 @@ def run_pipeline(
     decision: Optional[VerifyDecision] = None
     anchors_by_slot: Dict[str, List[str]] = {}
     completed_expansions = set()
-
-    # KG 사전 검색 (루프 전, 예산 차감 없음)
-    _kg_presearch(analysis, pool, run, emit)
 
     for rnd in range(1, max_rounds + 1):
         # ② 검색 계획
@@ -184,6 +211,17 @@ def run_pipeline(
             completed_expansions.add((tuple(sorted(set(ex.anchor_ids))), cfg.EXPAND_WINDOW))
         round_chunks += ex.chunk_ids
         round_new_chunks = list(ex.new_chunk_ids)
+        if rnd == 1 and cfg.PER_ASK_FIRST_ROUND and plan.search_type == "new":
+            # 요구별 검색: 예산 계산에 넣지 않도록 복사본 예산으로 실행하고 결과 예산은 버린다 (상한은 요구 수)
+            for seed in ask_seed_plans(route_asks, plan.target_slot_id, [h.query_ko for h in attempts]):
+                exs = execute_search(seed, pool, SearchBudget(), search_fn=search_fn, store=store)
+                run.search_runs.append(exs)
+                if exs.ok:
+                    # 검색 기록(attempts)에는 넣지 않는다: 칸별 시도 상한을 쓰면 ②가 그 칸을 더 못 찾는다
+                    round_chunks += exs.chunk_ids
+                    round_new_chunks += exs.new_chunk_ids
+                else:
+                    run.warnings.append(f"③ 요구별 검색 실패 [{exs.error_type}]: {exs.error}")
         if (rnd == 1 and cfg.AUTO_EXPAND_FIRST_ROUND and plan.search_type == "new" and ex.chunk_ids
                 and check_budget(budget, "expand_context") is None):
             plan2 = SearchPlan(action="search", target_slot_id=plan.target_slot_id, search_type="expand_context",
@@ -200,6 +238,21 @@ def run_pipeline(
                 round_new_chunks += ex2.new_chunk_ids
             else:
                 run.warnings.append(f"③ 첫 바퀴 확장 실패 [{ex2.error_type}]: {ex2.error}")
+        general = general_query_for(analysis, question) if rnd == 1 else ""
+        if (rnd == 1 and cfg.GENERAL_QUERY_FIRST_ROUND and plan.from_first_search and general
+                and normalize(general) != normalize(plan.query_ko or "")
+                and check_budget(budget, "new") is None):
+            plan3 = SearchPlan(action="search", target_slot_id=plan.target_slot_id, search_type="new",
+                               query_ko=general, reason="첫 바퀴 일반 규정 검색 (사용자 조건 제외)")
+            ex3 = execute_search(plan3, pool, budget, search_fn=search_fn, store=store)
+            run.search_runs.append(ex3)
+            if ex3.ok:
+                budget = ex3.budget
+                attempts.append(ex3.attempt)
+                round_chunks += ex3.chunk_ids
+                round_new_chunks += ex3.new_chunk_ids
+            else:
+                run.warnings.append(f"③ 일반 규정 검색 실패 [{ex3.error_type}]: {ex3.error}")
         emit("search", {"round": rnd, "chunks": len(round_chunks), "pool": len(pool),
                         "new": len(round_new_chunks)})
 

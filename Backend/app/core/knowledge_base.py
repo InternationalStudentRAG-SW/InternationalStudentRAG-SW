@@ -81,6 +81,9 @@ class MultilingualSentenceSplitter:
                     print(f"  p{page_num + 1}: 텍스트 부족 — OCR 미지원 (스킵)")
                     continue
                 normalized = self.normalize_text(md_text)
+                if getattr(settings, "pdf_spacing_fix", True):
+                    from app.core.spacing import restore_spacing
+                    normalized, _ = restore_spacing(normalized)
                 lang = self.detect_language(normalized)
                 documents.append({
                     "content": normalized,

@@ -14,6 +14,7 @@ SSE 이벤트 형식(status / token / meta / done)은 프론트가 쓰던 형식
 import os
 import json
 import asyncio
+import logging
 from typing import AsyncGenerator, Dict, List, Optional
 
 from openai import AsyncOpenAI
@@ -28,6 +29,7 @@ from app.core.llm import (
 )
 
 _async_client = AsyncOpenAI(api_key=settings.openai_api_key)
+logger = logging.getLogger(__name__)
 
 SOURCE_MIN_SCORE = 0.7  # done 이벤트에 보낼 출처의 최소 점수
 
@@ -180,10 +182,13 @@ async def run_rag_stream(
     await asyncio.sleep(0)
 
     # 1. 하이브리드 + 리랭커 검색
+    logger.info("[RAG] 검색 시작 query='%s'", (ko_query or question)[:60])
     context, sources = await asyncio.to_thread(
         retriever.retrieve_with_sources, query=question, ko_query=ko_query or question,
     )
     sources = sources or []
+    max_score = _get_max_relevance_score(sources)
+    logger.info("[RAG] 검색 완료 chunks=%d max_score=%.3f", len(sources), max_score)
 
     if sources:
         top_name = os.path.basename(sources[0].get("source", "문서"))
@@ -196,7 +201,8 @@ async def run_rag_stream(
     await asyncio.sleep(0)
 
     # 2. 관련 문서가 없으면 안내 문구로 끝냄
-    if _get_max_relevance_score(sources) < _RELEVANCE_THRESHOLD:
+    if max_score < _RELEVANCE_THRESHOLD:
+        logger.info("[RAG] 관련 문서 없음(max_score=%.3f < %.1f) → fallback", max_score, _RELEVANCE_THRESHOLD)
         fallback_msg = await _classify_and_get_fallback(question, language)
         yield _sse({"type": "token", "content": fallback_msg})
         yield _sse({"type": "done", "sources": [], "suggestions": []})
@@ -219,6 +225,7 @@ async def run_rag_stream(
     else:
         suggestion_task = asyncio.create_task(_no_suggestions())
     full_answer = ""
+    logger.info("[RAG] 답변 생성 시작")
     try:
         async for token in stream_answer(
             question=question, context=context, lang_instruction=lang_inst, session_history=history_text,
@@ -234,7 +241,9 @@ async def run_rag_stream(
          "similarity_score": s.get("similarity_score", 0.0)}
         for s in sources if s.get("similarity_score", 0.0) >= SOURCE_MIN_SCORE
     ]
+    logger.info("[RAG] 답변 완료 len=%d sources=%d", len(full_answer), len(formatted_sources))
     if _is_no_result_answer(full_answer) or not formatted_sources:
+        logger.info("[RAG] 답변 내용 없음 또는 출처 없음 → done(빈 출처)")
         suggestion_task.cancel()
         yield _sse({"type": "done", "sources": [], "suggestions": []})
         return
@@ -246,4 +255,5 @@ async def run_rag_stream(
         suggestions = await asyncio.wait_for(suggestion_task, timeout=30.0)
     except Exception:
         suggestions = []
+    logger.info("[RAG] done suggestions=%d", len(suggestions))
     yield _sse({"type": "done", "sources": formatted_sources, "suggestions": suggestions})

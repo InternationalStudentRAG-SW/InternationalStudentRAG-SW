@@ -141,9 +141,8 @@ async def _save_streaming_results(
                 ko_query, "ko",
                 {"answer": full_answer, "sources": sources, "suggestions": suggestions or []},
             )
+            logger.info("[Cache] SET ko '%s'", ko_query[:50])
         else:
-            # 비-한국어 답변: 한국어로 번역해 캐시 기준값(answer_ko)으로 저장
-            # → 이후 한국어 질문이 캐시 히트할 때 answer_ko를 바로 반환 가능
             ko_answer = await asyncio.to_thread(translator.translate_to_ko, full_answer)
             ko_suggestions = [
                 await asyncio.to_thread(translator.translate_to_ko, s)
@@ -159,6 +158,7 @@ async def _save_streaming_results(
                     semantic_cache.add_language,
                     cache_key, language, full_answer, suggestions or [],
                 )
+            logger.info("[Cache] SET ko(번역) + %s '%s'", language, ko_query[:50])
     await asyncio.to_thread(
         _insert_chat_log,
         query=question,
@@ -176,11 +176,14 @@ async def chat_stream(request: ChatRequest, background_tasks: BackgroundTasks):
         ko_query = await asyncio.to_thread(translator.translate_to_ko, request.question)
         history = [{"role": m.role, "content": m.content} for m in (request.history or [])]
         is_first_message = len(history) == 0
+        logger.info("[Chat] 질문='%s' lang=%s ko_query='%s' first=%s",
+                    request.question[:60], language, ko_query[:60], is_first_message)
 
         # ── 캐시 조회 (첫 질문만) ─────────────────────────────────────────
         if is_first_message:
             cached = await _get_cached_response(ko_query, language, request.question, background_tasks)
             if cached:
+                logger.info("[Cache] HIT lang=%s", language)
                 async def cached_generator():
                     chunk_size = 15
                     answer = cached.answer
@@ -207,6 +210,7 @@ async def chat_stream(request: ChatRequest, background_tasks: BackgroundTasks):
                 labels = _STATUS_LABELS.get(language, _STATUS_LABELS["en"])
                 yield f"data: {json.dumps({'type': 'status', 'content': labels['analyzing']}, ensure_ascii=False)}\n\n"
             route, route_meta = await _choose_route(request.question, history)
+            logger.info("[Route] %s (routing_mode=%s)", route, route_meta.get("routing_mode"))
             if route == "agent":
                 stream = run_agent_stream(question=request.question, language=language,
                                           ko_query=ko_query, history=history, log_meta=route_meta)

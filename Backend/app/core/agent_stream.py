@@ -93,6 +93,8 @@ async def run_agent_stream(
     """에이전트 경로 SSE 생성기. pipeline_fn/translate_fn/suggest_fn은 테스트용 가짜를 끼울 때만 쓴다."""
     labels = {**_STATUS_LABELS.get(language, _STATUS_LABELS["en"])}
     labels.setdefault("verifying", _VERIFYING.get(language, _VERIFYING["en"]))
+    logger.info("[Agent] 시작 question='%s' lang=%s ko_query='%s'",
+                question[:60], language, (ko_query or question)[:60])
     yield _sse({"type": "status", "content": labels["analyzing"]})
 
     if pipeline_fn is None:
@@ -138,8 +140,13 @@ async def run_agent_stream(
 
     answer_run = run.answer_run
     mode = answer_run.mode if answer_run else "error"
+    logger.info("[Agent] pipeline 완료 mode=%s rounds=%s pool_size=%s",
+                mode,
+                getattr(run, "verify_rounds", "?"),
+                len(run.pool) if getattr(run, "pool", None) else "?")
     answer = (answer_run.answer if answer_run else "") or ""
     if not answer:
+        logger.info("[Agent] 답변 없음 → fallback 메시지 사용")
         fb = _FALLBACK_MESSAGES["in_scope"]
         answer = fb.get(language, fb["en"])
     if language not in ("ko", "auto"):
@@ -147,7 +154,9 @@ async def run_agent_stream(
             if translate_fn is None:
                 from app.core.translation import translator
                 translate_fn = translator.translate_from_ko
+            logger.info("[Agent] 번역 시작 lang=%s answer_len=%d", language, len(answer))
             answer = await asyncio.to_thread(translate_fn, answer, language)
+            logger.info("[Agent] 번역 완료 translated_len=%d", len(answer))
         except Exception as e:
             logger.warning("agent answer translation failed: %s", e)
 
@@ -164,11 +173,13 @@ async def run_agent_stream(
         await asyncio.to_thread(run_log.save_agent_run, record)
 
     if mode in ("ask_clarification", "clarify_scope"):
+        logger.info("[Agent] clarify 모드 → 되묻기 응답")
         yield _sse({"type": "clarify", "content": answer})
         yield _sse({"type": "done", "sources": [], "suggestions": []})
         await save_log([], [])
         return
 
+    logger.info("[Agent] 답변 전송 시작 len=%d", len(answer))
     for i in range(0, len(answer), TOKEN_CHUNK):
         yield _sse({"type": "token", "content": answer[i:i + TOKEN_CHUNK]})
         await asyncio.sleep(0)
@@ -179,6 +190,7 @@ async def run_agent_stream(
         yield _sse({"type": "meta", "content": labels["meta"]})
         if getattr(_settings(), "suggestions_enabled", False):
             suggestions = await _suggest(question, answer, language, suggest_fn)
+    logger.info("[Agent] done mode=%s sources=%d suggestions=%d", mode, len(sources), len(suggestions))
     yield _sse({"type": "done", "sources": sources, "suggestions": suggestions})
     await save_log(sources, suggestions)
 

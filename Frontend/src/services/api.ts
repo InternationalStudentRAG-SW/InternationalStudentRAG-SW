@@ -1,5 +1,6 @@
 import axios from 'axios'
 import type { ChatRequest, ChatResponse, HealthResponse, UserProfile, FaqItem } from '../types'
+import { supabase } from '../lib/supabaseClient'
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8000'
 
@@ -15,17 +16,60 @@ client.interceptors.request.use((config) => {
   return config
 })
 
-// 토큰 만료(401) 시 자동 로그아웃
+// 토큰 갱신 중 동시에 실패한 요청들을 대기시키는 큐
+let _isRefreshing = false
+let _pendingQueue: Array<{ resolve: (token: string) => void; reject: (err: unknown) => void }> = []
+
+function _drainQueue(err: unknown, token?: string) {
+  _pendingQueue.forEach(p => (err ? p.reject(err) : p.resolve(token!)))
+  _pendingQueue = []
+}
+
+function _logout() {
+  localStorage.removeItem('token')
+  localStorage.removeItem('role')
+  localStorage.removeItem('userEmail')
+  window.location.href = '/login'
+}
+
+// 토큰 만료(401) 시 갱신 후 재요청, 갱신 실패 시 로그아웃
 client.interceptors.response.use(
   (response) => response,
-  (error) => {
-    if (error.response?.status === 401) {
-      localStorage.removeItem('token')
-      localStorage.removeItem('role')
-      localStorage.removeItem('userEmail')
-      window.location.href = '/login'
+  async (error) => {
+    const original = error.config
+    if (error.response?.status !== 401 || original._retry) {
+      return Promise.reject(error)
     }
-    return Promise.reject(error)
+
+    // 이미 갱신 중이면 큐에 대기
+    if (_isRefreshing) {
+      return new Promise<string>((resolve, reject) => {
+        _pendingQueue.push({ resolve, reject })
+      }).then(token => {
+        original.headers.Authorization = `Bearer ${token}`
+        return client(original)
+      })
+    }
+
+    original._retry = true
+    _isRefreshing = true
+
+    try {
+      const { data, error: refreshError } = await supabase.auth.refreshSession()
+      if (refreshError || !data.session) throw refreshError ?? new Error('no session')
+
+      const token = data.session.access_token
+      localStorage.setItem('token', token)
+      _drainQueue(null, token)
+      original.headers.Authorization = `Bearer ${token}`
+      return client(original)
+    } catch (err) {
+      _drainQueue(err)
+      _logout()
+      return Promise.reject(err)
+    } finally {
+      _isRefreshing = false
+    }
   }
 )
 
@@ -45,8 +89,11 @@ export async function sendMessageStream(
   if (history && history.length > 0) body.history = history
 
   const controller = new AbortController()
-  // 60초 안에 응답이 완전히 끝나지 않으면 연결 강제 종료
-  const timeoutId = setTimeout(() => controller.abort(), 120_000)
+  // 60초 동안 서버에서 아무 이벤트도 오지 않으면 연결 강제 종료
+  // (복합 질문은 에이전트가 1~2분 걸리지만, 서버가 처리 중에는 10초마다 ping을 보내므로 전체 시간으로 자르지 않는다.
+  //  이 타이머는 서버가 죽거나 연결이 끊겼을 때 무한 대기를 막는 용도다)
+  const IDLE_TIMEOUT_MS = 60_000
+  let timeoutId = setTimeout(() => controller.abort(), IDLE_TIMEOUT_MS)
 
   try {
     const response = await fetch(`${BASE_URL}/chat/stream`, {
@@ -78,6 +125,8 @@ export async function sendMessageStream(
     while (true) {
       const { done, value } = await reader.read()
       if (done) break
+      clearTimeout(timeoutId)
+      timeoutId = setTimeout(() => controller.abort(), IDLE_TIMEOUT_MS)
 
       buffer += decoder.decode(value, { stream: true })
       const lines = buffer.split('\n\n')
@@ -184,7 +233,6 @@ export async function uploadPDF(file: File): Promise<{ message: string }> {
   form.append('file', file)
   const { data } = await client.post<{ message: string }>('/admin/upload', form, {
     headers: { 'Content-Type': 'multipart/form-data' },
-    timeout: 180_000,
   })
   return data
 }

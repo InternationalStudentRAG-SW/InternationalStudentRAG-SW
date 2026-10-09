@@ -358,6 +358,13 @@ _STATUS_LABELS = {
         "search_many":      "[{name}] 외 {n}건 검색 완료",
         "generating":       "답변을 작성하는 중",
         "meta":             "출처와 추천 질문을 정리하는 중",
+        # single_agent 단계
+        "analysis":         "질문 분석 중...",
+        "kg_search":        "지식 그래프 검색 중...",
+        "plan":             "검색 계획 중...",
+        "search_ev":        "근거 검색 중...",
+        "verify":           "근거 검증 중...",
+        "answer_start":     "답변 생성 중...",
     },
     "en": {
         "analyzing":        "Understanding your question",
@@ -367,6 +374,13 @@ _STATUS_LABELS = {
         "search_many":      "[{name}] and {n} more found",
         "generating":       "Writing your answer",
         "meta":             "Preparing sources and suggestions",
+        # single_agent stages
+        "analysis":         "Analyzing your question...",
+        "kg_search":        "Searching knowledge graph...",
+        "plan":             "Planning search...",
+        "search_ev":        "Searching for evidence...",
+        "verify":           "Verifying evidence...",
+        "answer_start":     "Generating answer...",
     },
     "zh": {
         "analyzing":        "正在理解您的问题",
@@ -376,6 +390,13 @@ _STATUS_LABELS = {
         "search_many":      "已找到 [{name}] 等 {n} 份文档",
         "generating":       "正在撰写答案",
         "meta":             "正在整理来源和推荐问题",
+        # single_agent 단계
+        "analysis":         "正在分析问题...",
+        "kg_search":        "正在搜索知识图谱...",
+        "plan":             "正在制定搜索计划...",
+        "search_ev":        "正在搜索证据...",
+        "verify":           "正在验证证据...",
+        "answer_start":     "正在生成回答...",
     },
     "es": {
         "analyzing":        "Entendiendo tu pregunta",
@@ -385,6 +406,13 @@ _STATUS_LABELS = {
         "search_many":      "[{name}] y {n} más encontrados",
         "generating":       "Escribiendo tu respuesta",
         "meta":             "Preparando fuentes y sugerencias",
+        # single_agent etapas
+        "analysis":         "Analizando tu pregunta...",
+        "kg_search":        "Buscando en el grafo de conocimiento...",
+        "plan":             "Planificando la búsqueda...",
+        "search_ev":        "Buscando evidencia...",
+        "verify":           "Verificando evidencia...",
+        "answer_start":     "Generando respuesta...",
     },
     "vi": {
         "analyzing":        "Đang phân tích câu hỏi",
@@ -394,6 +422,13 @@ _STATUS_LABELS = {
         "search_many":      "Đã tìm thấy [{name}] và {n} tài liệu khác",
         "generating":       "Đang soạn câu trả lời",
         "meta":             "Đang chuẩn bị nguồn và gợi ý",
+        # single_agent các giai đoạn
+        "analysis":         "Đang phân tích câu hỏi...",
+        "kg_search":        "Đang tìm kiếm đồ thị tri thức...",
+        "plan":             "Đang lên kế hoạch tìm kiếm...",
+        "search_ev":        "Đang tìm kiếm bằng chứng...",
+        "verify":           "Đang xác minh bằng chứng...",
+        "answer_start":     "Đang tạo câu trả lời...",
     },
 }
 

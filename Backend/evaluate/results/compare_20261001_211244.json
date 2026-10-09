@@ -1,0 +1,1101 @@
+{
+  "meta": {
+    "started_at": "2026-10-01T12:04:45.363957+00:00",
+    "label": "complex-screen-current",
+    "metrics_version": "single-agent-v2",
+    "code_sha256": "d50cd6795347ce682158d0b60b0dbcbf70219025acf5aa9e4b40b93ecfcefe39",
+    "source_sha256": {
+      "app/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "app/api/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "app/api/routes/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "app/api/routes/admin.py": "0affb6b7bc3838b9c710908e8c656ed2ca29df91555a97604b5e1a963cc96edd",
+      "app/api/routes/auth.py": "7d742435372e02dab662bf2b5abcb2190c38e0f8439f47555bff4f3353e905e4",
+      "app/api/routes/chat.py": "dc0706c5a543587ea334cac7bee1ebbd62bea5567878a9b7de940cdbe9fd37d5",
+      "app/api/routes/document.py": "bcb288bbeb6f6bbe8a414e13be599c9ffdb4250dd5b597a19b235039d07bec4b",
+      "app/api/routes/faq.py": "9eff351a682aa062cc83cd57629524ddf7c13e7acd58e9af766a9493032109ce",
+      "app/config.py": "cd480ca0ac5bca54500f400b579ee51d8f08cc319e8adbdb7d1785f2e765a53d",
+      "app/core/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "app/core/agent.py": "fd3c041ff03a1146100a5a28a07a01362fa0e9fb1a80593bfc6b0a32e934018d",
+      "app/core/auth_middleware.py": "a25f8439aefe05ee2bce46b70ee9f616c22879a60a7cba4f61dff0f10d3019b4",
+      "app/core/build_graph.py": "4c59b66e69f2ba084e971ef5fc2d80ec7c06a5eeba62eda8d0087fe56df0345f",
+      "app/core/cache.py": "a1ea05e216c419a27bbbc342e645aed16aa62bdd76356cfdc9f60d9fecb3539d",
+      "app/core/data_preprocessing.py": "f8a0da3fe1f061c5c06adf0c1f10bc73e7c4af30415a039dd992d98d987d8b36",
+      "app/core/few_shot_qas.py": "47b869516f84daafa9ed22d20194ddecd2a2e06b48ada59d3db7dc2fd3aa1059",
+      "app/core/ingestion.py": "ca9063f4b61ee4956727e1659775a8c6e0f1b12e05351f73c5e48d97f21dc5fa",
+      "app/core/knowledge_base.py": "a283e29eaa1a8569a9aa8f9ec9223da7b3367cf8005670a14b4a24a465e328fc",
+      "app/core/knowledge_graph.py": "065154353bb46f7c362bead944d496ebeb905fc2741c1dec4d027d3f0c25d34d",
+      "app/core/llm.py": "b7445b081b38f46253f529869b5804c7f9aa2b780caa5baab8c8da651b1b3ec2",
+      "app/core/retriever.py": "86b7c30cf2c5ccc48641055c1d0110036e878542a102ec2bd5cac0e363a63e4b",
+      "app/core/single_agent/__init__.py": "92940b6930231a12f8586eb5fdeb54c8a0fc5dccba224bbfeeea0a41e6412405",
+      "app/core/single_agent/analysis_schema.py": "7224d7f69cefb94884e4bd75336a21abb4f38ff8fa9806c9657fdec94f676739",
+      "app/core/single_agent/analyzer.py": "0b5dea7b6309510e0dbf725eb23e30ee9fd023b8aa58ebc9f42d3d09aac0732e",
+      "app/core/single_agent/answer_schema.py": "2bf398c064ea51c3fe4975b7bb24b25333eadee6b262146798e7f64f3ed2d654",
+      "app/core/single_agent/answerer.py": "e66fb370c13692544be42a200bc0737c0f36099c14ee45e5f399c7b82a0c6301",
+      "app/core/single_agent/branching.py": "12d1e4f1a9e14822f01c5ec8c71d423c187c2afc44f67f0db65cad53a33fccc6",
+      "app/core/single_agent/checklist_config.py": "800f9b9f8778b1ac48fc9380ee9867a019235c3e5d833b85efae2240a3ee6b32",
+      "app/core/single_agent/evidence_schema.py": "1dc1b5d50564d6fda1059b4eb0d67b1aac2f0c64aa94a46b36c66b6d94cd6199",
+      "app/core/single_agent/llm.py": "671206477c91cda0baa70b3dff8b0e3a493da21310751ea981a80e8b8189bd0d",
+      "app/core/single_agent/metrics.py": "9232de62dea86648d8f6f2a41b193ec77709307041f00b26a850959df6fe1372",
+      "app/core/single_agent/pipeline.py": "92db54b7da17554c2d66f05c1e136f213d76032af39612d9e68af93fee5554ed",
+      "app/core/single_agent/search_planner.py": "af363ccaee71708acb7518d853a22292d3e2b3f6b8ea6c31ae2aad89135431e0",
+      "app/core/single_agent/search_schema.py": "b62cdac17ac4780bf0c949dce16c868d44591a0f397eae6efde840d5eb304e5e",
+      "app/core/single_agent/searcher.py": "aced9b67d094521771b3a6cecab8008d5dc4e37e69b6cb7d2b64d2bd5de68a2f",
+      "app/core/single_agent/text_match.py": "9de61c01472398240475915328a02a323d591d57c31f6eb1e788291bb5942398",
+      "app/core/single_agent/verifier.py": "6812278023a20340820665753a28317fb00bcc85a3ff8dc41f2819162967f2d1",
+      "app/core/single_agent/verify_schema.py": "f97d9b567954807a8eb35df8453fbb92f5916973b8c235ea5bde72c89cdde403",
+      "app/core/test_ingestor.py": "55554d9ca8ef7795a2c77f756adf9a69051723ee5e2b0cf144149d31a522da4d",
+      "app/core/translation.py": "18dee5f3d49535c93bef1753c74877c9b6c98712b248ae8954b9f22de3560973",
+      "app/db/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "app/db/database.py": "a45b9fdcc5495ad4f1462bf8d1cae63420dcc3dd9db3ea6023f9fd2117f25385",
+      "app/main.py": "03c2653d31aa7b4f7f1e98f899b6589b163f2dec9eaa23c3536146b62cb30034",
+      "app/models/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "app/models/schemas.py": "714c22588a208b3c5fa237c1c3ad482e662ecd9cd677964316ec4e3175a22e81",
+      "evaluate/audit_single_agent_offline.py": "cfe386bd332d298815129cfd665996792eff51929b475c3071f6d3315cd527d0",
+      "evaluate/benchmark_rerank_candidates.py": "e853520c783e76841b315b31d608d4e63307b80e1c17bbd0531c90398a59ea5e",
+      "evaluate/check_chunk.py": "6b73f4785e61695edfa61172abe5805cc02883e8577e58893b82e329fc35164e",
+      "evaluate/check_pipeline.py": "a5e255479093edee6c230becd5f35d4b8ebdb3835287f0542a2a8008bade22cf",
+      "evaluate/check_question_analysis.py": "57e0a66d28c5e2c7ce69a44dda76cc5e5567abbea01da5198984ad6eae43d239",
+      "evaluate/check_search_execution.py": "6544bc07aee25ca072a901cce22e36bee7502583dd7f94e374f22a86a38a0e70",
+      "evaluate/check_search_plan.py": "bfe632dc94a37452189e1731174b24738be47d2b5ff813852995a0e8c8ae3234",
+      "evaluate/check_verification.py": "6c0dc6135a212aae6907102405ebce22a5537ac4ef1f193acb11566a92d8dcdc",
+      "evaluate/collect_dev_pools.py": "575a76464301f0c740c9af3d7c853720dc19808766d4fdc367d90d1eb8a22182",
+      "evaluate/compare_answers.py": "f3e34326b795f7853ae49003d3968255c298cf7ca730390423bd012c88fc94d3",
+      "evaluate/dev_questions.py": "370abc783bee3217a9dfc4ba680aafb6658533ddf7d809b258c75e082e04124f",
+      "evaluate/dev_scoring.py": "3092b249bc512140e6ab55de56984e02910cd3f5062d66383a7acc81fb783ffc",
+      "evaluate/experiment_metadata.py": "525220f8b8d74ddd290da4edf0c8ed07519acc3d2237d06522a0b678a58fdcea",
+      "evaluate/export_dev_gold.py": "722ff558b491b6e980881248761601698da18841a15b75b8e81d10f298476ceb",
+      "evaluate/generate_multilingual_qa.py": "972ed86577c21471acd2e97617e8edd5281da034a90d68679d879941c1ab3b15",
+      "evaluate/generate_qa.py": "42fbf869ed6f5ef69a73e8911d5e340b90e8595d6c346cc63812d7a968d2c3f9",
+      "evaluate/multilingual_eval.py": "1a1cecc2b848ec2dd1cb597e2614ed0827f0aaeeb70562a8141a1ea70781922f",
+      "evaluate/question_analysis_scenarios.py": "a61c30ae7e082b48e2c29fef7db676b4312f9a326c25afbf1147069a27998378",
+      "evaluate/ragas_eval.py": "dfc8c17901648f967802aa7fca9a8ea047316eea7bc303410cc65373aee1b620",
+      "evaluate/replay_expansion_plans.py": "3e03baa74cfc00d2b0909bca1c5f6ae12b31c67dc9b6253d39c753fd5644fb10",
+      "evaluate/run_eval.py": "2b6cbe35d9eb733895d762f559dd7871e8b0a175ad9d75b936b6cbdd9c31bb7a",
+      "evaluate/run_multilingual_eval.py": "b765f1d1181f969875ad324d243d5fadbae843a78ec370eef5ccac4c1f4c2e5f",
+      "evaluate/search_exec_scenarios.py": "e00e752f2bac9d170018e8434b92d5050ef617c18b549457c24b8a73d485ba13",
+      "evaluate/search_plan_scenarios.py": "ca742bc6b968cb31c4c59e0a161c920cc5fadb7c60163145de3c5c2e140c1344",
+      "evaluate/verify_scenarios.py": "a1d2903647079e9aebfc7a86e703157a759af524892b5b542e1862bb176041fe"
+    },
+    "corpus_version": null,
+    "python": "3.14.3",
+    "packages": {
+      "openai": "2.30.0",
+      "sentence-transformers": "5.3.0",
+      "torch": "2.11.0",
+      "langchain-community": "0.4.1",
+      "chromadb": "1.5.5"
+    },
+    "retrieval": {
+      "top_k_results": 7,
+      "initial_fetch_k": 25,
+      "rerank_candidate_limit": 40,
+      "chunk_size": 600,
+      "chunk_overlap": 150
+    },
+    "policy": {
+      "CHECKLIST_VERSION": "v1-2026-09-28",
+      "SEARCH_TOP_K": 7,
+      "EXPAND_WINDOW": 1,
+      "MAX_VERIFY_ROUNDS": 3,
+      "AUTO_EXPAND_FIRST_ROUND": true,
+      "EARLY_STOP_ON_CORE": true,
+      "VERIFY_MAX_CHUNKS": 20
+    },
+    "notes": [
+      "Vector timing includes embedding; embedding token usage is not measured.",
+      "SDK calls exclude SDK-internal HTTP retries; cached prompt tokens are a subset of input tokens.",
+      "First retriever import is not equivalent to hardware/cache warmup."
+    ],
+    "model": "gpt-4o-mini",
+    "repeat": 1,
+    "k": null,
+    "only": "D4,D6,D8,D9",
+    "judge": true
+  },
+  "summary": {
+    "baseline": {
+      "recall_ctx": 0.47916666666666663,
+      "recall_cited": 0.3958333333333333,
+      "bad_cited": 1,
+      "facts": 0.3125,
+      "condition": 2.75,
+      "unsupported": 0,
+      "overall": 2.75,
+      "wins": 1,
+      "latency_s": 19.768250000000002,
+      "tokens": 1569.0,
+      "llm_calls": 1.0,
+      "errors": 0
+    },
+    "single_agent": {
+      "recall_ctx": 0.8333333333333334,
+      "recall_cited": 0.625,
+      "bad_cited": 0,
+      "facts": 0.375,
+      "condition": 2.75,
+      "unsupported": 1,
+      "overall": 3.0,
+      "wins": 1,
+      "latency_s": 98.231,
+      "tokens": 25269.75,
+      "llm_calls": 9.25,
+      "errors": 0
+    },
+    "ties": 2
+  },
+  "rows": [
+    {
+      "id": "D4",
+      "try": 1,
+      "question": "입학 지원할 때 필요한 서류가 뭐예요?",
+      "results": {
+        "baseline": {
+          "answer": "입학 지원할 때 필요한 필수 제출 서류는 다음과 같습니다:\n\n1. 입학지원서\n2. 자기소개서 (양식1)\n3. 학력조회동의서 (양식2)\n4. 고등학교 졸업(예정) 증명서\n\n이 서류들은 신입학과 편입학 모두에 해당합니다[1].",
+          "mode": "baseline",
+          "context_ids": [
+            "[동아대]2026학년도+후기+학부+외국인+신(편)입학+특별전형+모집요강_한국어트랙.pdf#p13#c1",
+            "English_2026-2027+Korean+Language+Course.pdf#p4#c1",
+            "[동아대]2026학년도+후기+학부+외국인+신(편)입학+특별전형+모집요강_한국어트랙.pdf#p16#c0",
+            "[Dong-A+univ]2026+FALL+Admission+Guidelines_English+track+for+the+Undergraduates_English+Track.pdf#p7#c1",
+            "[동아대]2026학년도+후기+학부+외국인+신(편)입학+특별전형+모집요강_한국어트랙.pdf#p26#c0",
+            "[동아대]2026학년도+후기+학부+외국인+신(편)입학+특별전형+모집요강_한국어트랙.pdf#p5#c2",
+            "[동아대]2026학년도+후기+학부+외국인+신(편)입학+특별전형+모집요강_한국어트랙.pdf#p14#c0"
+          ],
+          "cited_ids": [
+            "[동아대]2026학년도+후기+학부+외국인+신(편)입학+특별전형+모집요강_한국어트랙.pdf#p13#c1"
+          ],
+          "search_ms": 29142,
+          "latency_ms": 31155,
+          "tokens": 1760,
+          "llm_calls": 1,
+          "recall_ctx": 0.25,
+          "recall_cited": 0.25,
+          "bad_cited": 0
+        },
+        "single_agent": {
+          "answer": "입학 지원 시 필요한 서류는 다음과 같습니다:\n\n- 필수 제출 서류:\n  - 입학지원서\n  - 자기소개서\n  - 학력조회동의서\n  - 고등학교졸업(예정)증명서\n\n- 선택 제출 서류:\n  - 출신고등학교 관련 자료\n  - 교내 활동 자료\n  - 표준 학력 시험 결과\n\n서류의 형식 및 유효기간에 대한 정보는 일부 확인되었으나, 모든 서류에 대한 정보는 확인하지 못했습니다. 자세한 사항은 학교 담당 부서에 문의하시기 바랍니다.",
+          "mode": "partial_answer",
+          "context_ids": [
+            "[동아대]2026학년도+후기+학부+외국인+신(편)입학+특별전형+모집요강_한국어트랙.pdf#p13#c1",
+            "[동아대]2026학년도+후기+학부+외국인+신(편)입학+특별전형+모집요강_한국어트랙.pdf#p14#c0",
+            "Study in KOREA! 한국 유학 가이드.pdf#p12#c5",
+            "[동아대]2026학년도+후기+학부+외국인+신(편)입학+특별전형+모집요강_한국어트랙.pdf#p13#c3"
+          ],
+          "pool_ids": [
+            "[동아대]2026학년도+후기+학부+외국인+신(편)입학+특별전형+모집요강_한국어트랙.pdf#p13#c1",
+            "[동아대]2026학년도+후기+학부+외국인+신(편)입학+특별전형+모집요강_한국어트랙.pdf#p26#c0",
+            "[동아대]2026학년도+후기+학부+외국인+신(편)입학+특별전형+모집요강_한국어트랙.pdf#p3#c1",
+            "Study in KOREA! 한국 유학 가이드.pdf#p3#c5",
+            "[동아대]2026학년도+후기+학부+외국인+신(편)입학+특별전형+모집요강_한국어트랙.pdf#p14#c0",
+            "[동아대]2026학년도+후기+학부+외국인+신(편)입학+특별전형+모집요강_한국어트랙.pdf#p5#c2",
+            "Study in KOREA! 한국 유학 가이드.pdf#p5#c5",
+            "[동아대]2026학년도+후기+학부+외국인+신(편)입학+특별전형+모집요강_한국어트랙.pdf#p13#c0",
+            "[동아대]2026학년도+후기+학부+외국인+신(편)입학+특별전형+모집요강_한국어트랙.pdf#p13#c2",
+            "[동아대]2026학년도+후기+학부+외국인+신(편)입학+특별전형+모집요강_한국어트랙.pdf#p13#c3",
+            "Study in KOREA! 한국 유학 가이드.pdf#p12#c5",
+            "Study in KOREA! 한국 유학 가이드.pdf#p14#c5",
+            "[동아대]2026학년도+후기+학부+외국인+신(편)입학+특별전형+모집요강_한국어트랙.pdf#p4#c1"
+          ],
+          "cited_ids": [],
+          "latency_ms": 96168,
+          "tokens": 25290,
+          "llm_calls": 10,
+          "telemetry": {
+            "mode": "partial_answer",
+            "rounds": 3,
+            "stopped": "decided: partial_answer",
+            "verification_skips": 0,
+            "metrics_version": "single-agent-v2",
+            "stage_usage": {
+              "analyze": {
+                "prompt_tokens": 3569,
+                "completion_tokens": 551,
+                "sdk_calls": 1,
+                "usage_complete": true,
+                "cached_prompt_tokens": 0
+              },
+              "plan": {
+                "prompt_tokens": 1060,
+                "completion_tokens": 93,
+                "sdk_calls": 2,
+                "usage_complete": true,
+                "cached_prompt_tokens": 0
+              },
+              "verify": {
+                "prompt_tokens": 15474,
+                "completion_tokens": 2593,
+                "sdk_calls": 6,
+                "usage_complete": true,
+                "cached_prompt_tokens": 3712
+              },
+              "answer": {
+                "prompt_tokens": 1804,
+                "completion_tokens": 146,
+                "sdk_calls": 1,
+                "usage_complete": true,
+                "cached_prompt_tokens": 0
+              }
+            },
+            "sdk_calls": 10,
+            "usage_complete": true,
+            "recheck": {
+              "sdk_calls": 3,
+              "latency_ms": 9208.216,
+              "tokens": 5153
+            },
+            "searches": [
+              {
+                "type": "new",
+                "ok": true,
+                "returned_chunks": 7,
+                "new_chunks": 7,
+                "latency_ms": 16073,
+                "retrieval_calls": [
+                  {
+                    "retriever_already_imported": true,
+                    "import_init_ms": 0.0018999999156221747,
+                    "bm25_ms": 0.5789999995613471,
+                    "vector_with_embedding_ms": 189.24369999967894,
+                    "rrf_ms": 0.07519999962823931,
+                    "bm25_candidates": 25,
+                    "vector_candidates": 25,
+                    "vector_prefetched": false,
+                    "merged_candidates": 45,
+                    "rerank_candidate_limit": 40,
+                    "rerank_effective_limit": 40,
+                    "rerank_dropped_candidates": 5,
+                    "rerank_pairs": 40,
+                    "reranker_device": "cpu",
+                    "rerank_ms": 15882.912999999462,
+                    "returned_chunks": 7
+                  }
+                ]
+              },
+              {
+                "type": "expand_context",
+                "ok": true,
+                "returned_chunks": 2,
+                "new_chunks": 2,
+                "latency_ms": 3,
+                "retrieval_calls": []
+              },
+              {
+                "type": "new",
+                "ok": true,
+                "returned_chunks": 7,
+                "new_chunks": 3,
+                "latency_ms": 18714,
+                "retrieval_calls": [
+                  {
+                    "retriever_already_imported": true,
+                    "import_init_ms": 0.0021999994714860804,
+                    "bm25_ms": 0.641399999949499,
+                    "vector_with_embedding_ms": 992.3502999999982,
+                    "rrf_ms": 0.06669999947916949,
+                    "bm25_candidates": 25,
+                    "vector_candidates": 25,
+                    "vector_prefetched": false,
+                    "merged_candidates": 46,
+                    "rerank_candidate_limit": 40,
+                    "rerank_effective_limit": 40,
+                    "rerank_dropped_candidates": 6,
+                    "rerank_pairs": 40,
+                    "reranker_device": "cpu",
+                    "rerank_ms": 17721.524099999442,
+                    "returned_chunks": 7
+                  }
+                ]
+              },
+              {
+                "type": "new",
+                "ok": true,
+                "returned_chunks": 7,
+                "new_chunks": 1,
+                "latency_ms": 17527,
+                "retrieval_calls": [
+                  {
+                    "retriever_already_imported": true,
+                    "import_init_ms": 0.00199999976757681,
+                    "bm25_ms": 0.7577999995191931,
+                    "vector_with_embedding_ms": 174.9560999996902,
+                    "rrf_ms": 0.07559999994555255,
+                    "bm25_candidates": 25,
+                    "vector_candidates": 25,
+                    "vector_prefetched": false,
+                    "merged_candidates": 44,
+                    "rerank_candidate_limit": 40,
+                    "rerank_effective_limit": 40,
+                    "rerank_dropped_candidates": 4,
+                    "rerank_pairs": 40,
+                    "reranker_device": "cpu",
+                    "rerank_ms": 17351.26350000064,
+                    "returned_chunks": 7
+                  }
+                ]
+              }
+            ],
+            "adopted_evidence_count": 4,
+            "latency_ms": 96168,
+            "stage_ms": {
+              "①": 5440,
+              "②": 2557,
+              "③": 52317,
+              "④": 32783,
+              "⑤": 3064
+            },
+            "tokens": 25290,
+            "llm_calls": 10,
+            "sources": 0
+          },
+          "rounds": 3,
+          "stopped": "decided: partial_answer",
+          "recall_ctx": 0.5,
+          "recall_cited": 0.0,
+          "bad_cited": 0
+        }
+      },
+      "judge": {
+        "order": {
+          "A": "baseline",
+          "B": "single_agent"
+        },
+        "reason": "두 답변 모두 핵심 사실을 포함하지 않아 정확성이 낮음.",
+        "winner": "tie",
+        "baseline": {
+          "facts": 0.0,
+          "condition": 1,
+          "unsupported": 0,
+          "unsupported_list": [],
+          "overall": 1
+        },
+        "single_agent": {
+          "facts": 0.0,
+          "condition": 1,
+          "unsupported": 0,
+          "unsupported_list": [],
+          "overall": 1
+        }
+      }
+    },
+    {
+      "id": "D6",
+      "try": 1,
+      "question": "GKS 장학생은 아르바이트할 수 있어?",
+      "results": {
+        "baseline": {
+          "answer": "GKS 장학생은 아르바이트를 할 수 있지만, 대학 총장의 승인을 받아야 하며, 그 승인은 아르바이트가 학업에 크게 방해되지 않는다고 판단될 때만 가능합니다. 이 판단을 내릴 때 총장은 학업 성취도, 출석 기록, 학업 지도 교수의 의견 등을 종합적으로 고려해야 합니다[1]. \n\n또한, 한국어 프로그램에 있는 GKS 장학생은 프로그램을 최소 6개월 이상 이수한 후에만 아르바이트를 할 수 있으며, 아르바이트는 방학 기간에만 허용됩니다[2].",
+          "mode": "baseline",
+          "context_ids": [
+            "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c0",
+            "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c3",
+            "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c4",
+            "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c2",
+            "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c2",
+            "(KO)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c1",
+            "(KO)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c0"
+          ],
+          "cited_ids": [
+            "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c0",
+            "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c3"
+          ],
+          "search_ms": 15361,
+          "latency_ms": 18247,
+          "tokens": 1675,
+          "llm_calls": 1,
+          "recall_ctx": 0.6666666666666666,
+          "recall_cited": 0.3333333333333333,
+          "bad_cited": 0
+        },
+        "single_agent": {
+          "answer": "GKS 장학생은 총장 승인 시에만 아르바이트가 가능합니다[1]. 학업을 우선시해야 하며, 방학 중에만 아르바이트가 허용됩니다[3], [4]. 아르바이트를 하기 위해서는 사전 승인이 필요합니다[4]. 구체적인 예외 조건에 대해서는 확인이 필요하므로, 학교 담당 부서에 문의하시기 바랍니다.",
+          "mode": "partial_answer",
+          "context_ids": [
+            "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c0",
+            "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p12#c2",
+            "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c3",
+            "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c4",
+            "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c3"
+          ],
+          "pool_ids": [
+            "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c3",
+            "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c0",
+            "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c4",
+            "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c2",
+            "(KO)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c1",
+            "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c3",
+            "(KO)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c0",
+            "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c4",
+            "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c2",
+            "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p7#c4",
+            "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p7#c3",
+            "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p3#c0",
+            "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p12#c2"
+          ],
+          "cited_ids": [
+            "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c0",
+            "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c3",
+            "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c4"
+          ],
+          "latency_ms": 105580,
+          "tokens": 28439,
+          "llm_calls": 10,
+          "telemetry": {
+            "mode": "partial_answer",
+            "rounds": 3,
+            "stopped": "decided: partial_answer",
+            "verification_skips": 0,
+            "metrics_version": "single-agent-v2",
+            "stage_usage": {
+              "analyze": {
+                "prompt_tokens": 3569,
+                "completion_tokens": 325,
+                "sdk_calls": 1,
+                "usage_complete": true,
+                "cached_prompt_tokens": 3456
+              },
+              "plan": {
+                "prompt_tokens": 1115,
+                "completion_tokens": 93,
+                "sdk_calls": 2,
+                "usage_complete": true,
+                "cached_prompt_tokens": 0
+              },
+              "verify": {
+                "prompt_tokens": 16615,
+                "completion_tokens": 5259,
+                "sdk_calls": 6,
+                "usage_complete": true,
+                "cached_prompt_tokens": 3072
+              },
+              "answer": {
+                "prompt_tokens": 1367,
+                "completion_tokens": 96,
+                "sdk_calls": 1,
+                "usage_complete": true,
+                "cached_prompt_tokens": 0
+              }
+            },
+            "sdk_calls": 10,
+            "usage_complete": true,
+            "recheck": {
+              "sdk_calls": 3,
+              "latency_ms": 12415.978,
+              "tokens": 6272
+            },
+            "searches": [
+              {
+                "type": "new",
+                "ok": true,
+                "returned_chunks": 7,
+                "new_chunks": 7,
+                "latency_ms": 14822,
+                "retrieval_calls": [
+                  {
+                    "retriever_already_imported": true,
+                    "import_init_ms": 0.0018999999156221747,
+                    "bm25_ms": 0.623500000074273,
+                    "vector_with_embedding_ms": 219.47169999930338,
+                    "rrf_ms": 0.06920000032550888,
+                    "bm25_candidates": 25,
+                    "vector_candidates": 25,
+                    "vector_prefetched": false,
+                    "merged_candidates": 45,
+                    "rerank_candidate_limit": 40,
+                    "rerank_effective_limit": 40,
+                    "rerank_dropped_candidates": 5,
+                    "rerank_pairs": 40,
+                    "reranker_device": "cpu",
+                    "rerank_ms": 14602.315099999942,
+                    "returned_chunks": 7
+                  }
+                ]
+              },
+              {
+                "type": "expand_context",
+                "ok": true,
+                "returned_chunks": 2,
+                "new_chunks": 1,
+                "latency_ms": 3,
+                "retrieval_calls": []
+              },
+              {
+                "type": "new",
+                "ok": true,
+                "returned_chunks": 7,
+                "new_chunks": 3,
+                "latency_ms": 12827,
+                "retrieval_calls": [
+                  {
+                    "retriever_already_imported": true,
+                    "import_init_ms": 0.0016999993022182025,
+                    "bm25_ms": 0.6180999998832704,
+                    "vector_with_embedding_ms": 178.8050999994084,
+                    "rrf_ms": 0.06780000057915458,
+                    "bm25_candidates": 25,
+                    "vector_candidates": 25,
+                    "vector_prefetched": false,
+                    "merged_candidates": 37,
+                    "rerank_candidate_limit": 40,
+                    "rerank_effective_limit": 40,
+                    "rerank_dropped_candidates": 0,
+                    "rerank_pairs": 37,
+                    "reranker_device": "cpu",
+                    "rerank_ms": 12648.024600000099,
+                    "returned_chunks": 7
+                  }
+                ]
+              },
+              {
+                "type": "new",
+                "ok": true,
+                "returned_chunks": 7,
+                "new_chunks": 2,
+                "latency_ms": 14540,
+                "retrieval_calls": [
+                  {
+                    "retriever_already_imported": true,
+                    "import_init_ms": 0.0014000006558489986,
+                    "bm25_ms": 0.6327999999484746,
+                    "vector_with_embedding_ms": 205.6925000006231,
+                    "rrf_ms": 0.06900000062159961,
+                    "bm25_candidates": 25,
+                    "vector_candidates": 25,
+                    "vector_prefetched": false,
+                    "merged_candidates": 38,
+                    "rerank_candidate_limit": 40,
+                    "rerank_effective_limit": 40,
+                    "rerank_dropped_candidates": 0,
+                    "rerank_pairs": 38,
+                    "reranker_device": "cpu",
+                    "rerank_ms": 14333.651699999791,
+                    "returned_chunks": 7
+                  }
+                ]
+              }
+            ],
+            "adopted_evidence_count": 5,
+            "latency_ms": 105580,
+            "stage_ms": {
+              "①": 5645,
+              "②": 1965,
+              "③": 42192,
+              "④": 54576,
+              "⑤": 1195
+            },
+            "tokens": 28439,
+            "llm_calls": 10,
+            "sources": 3
+          },
+          "rounds": 3,
+          "stopped": "decided: partial_answer",
+          "recall_ctx": 0.8333333333333334,
+          "recall_cited": 0.5,
+          "bad_cited": 0
+        }
+      },
+      "judge": {
+        "order": {
+          "A": "baseline",
+          "B": "single_agent"
+        },
+        "reason": "답변 A가 더 많은 핵심 사실을 포함하고 있으며, 조건 처리도 명확하게 이루어졌습니다.",
+        "winner": "baseline",
+        "baseline": {
+          "facts": 0.75,
+          "condition": 5,
+          "unsupported": 0,
+          "unsupported_list": [],
+          "overall": 5
+        },
+        "single_agent": {
+          "facts": 0.5,
+          "condition": 4,
+          "unsupported": 1,
+          "unsupported_list": [
+            3
+          ],
+          "overall": 4
+        }
+      }
+    },
+    {
+      "id": "D8",
+      "try": 1,
+      "question": "저 GKS 장학생인데 아르바이트 해도 돼요? 된다면 어떤 서류를 어디에 내야 해요?",
+      "results": {
+        "baseline": {
+          "answer": "GKS 장학생은 아르바이트를 할 수 있지만, 몇 가지 조건이 있습니다. 먼저, 아르바이트는 학업을 우선시해야 하며, 한국어 프로그램에 있는 경우 최소 6개월을 이수한 후에만 가능합니다. 또한, 아르바이트는 방학 기간 동안만 허용됩니다[2][3].\n\n아르바이트를 하려면, 해당 기관의 장학금 관리 규정에 따라 아르바이트를 신청해야 하며, 필요한 서류를 제출해야 합니다. 구체적인 서류나 제출처에 대한 정보는 문서에 명시되어 있지 않으므로, 소속 기관의 장학금 관리 부서에 문의하여 정확한 절차를 확인하는 것이 좋습니다.",
+          "mode": "baseline",
+          "context_ids": [
+            "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c4",
+            "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c3",
+            "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c2",
+            "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p3#c1",
+            "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p6#c3",
+            "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p7#c4",
+            "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p5#c3"
+          ],
+          "cited_ids": [
+            "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c3",
+            "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c2"
+          ],
+          "search_ms": 13550,
+          "latency_ms": 16230,
+          "tokens": 1279,
+          "llm_calls": 1,
+          "recall_ctx": 0.5,
+          "recall_cited": 0.5,
+          "bad_cited": 0
+        },
+        "single_agent": {
+          "answer": "GKS 장학생은 총장 승인을 받아야 아르바이트가 가능합니다[1]. 아르바이트를 위해서는 교육원장과 법무부의 사전 승인이 필요하며, 한국어 기관의 승인을 받아야 하고 최소 7일 전에 신청서를 제출해야 합니다[4][5]. 학업을 우선해야 하며, 아르바이트는 학업에 방해가 되지 않아야 합니다[2]. \n\n확인하지 못한 내용: 아르바이트를 위한 요청 서류에 대한 정보가 없습니다. 학교 담당 부서에 문의하시기 바랍니다.",
+          "mode": "partial_answer",
+          "context_ids": [
+            "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c0",
+            "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c3",
+            "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p7#c3",
+            "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c4",
+            "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p6#c3"
+          ],
+          "pool_ids": [
+            "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c3",
+            "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c0",
+            "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c2",
+            "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p3#c1",
+            "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c4",
+            "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p5#c3",
+            "(KO)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c1",
+            "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c2",
+            "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c4",
+            "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p6#c3",
+            "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p7#c3"
+          ],
+          "cited_ids": [
+            "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c0",
+            "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c3",
+            "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c4",
+            "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p6#c3"
+          ],
+          "latency_ms": 101104,
+          "tokens": 24769,
+          "llm_calls": 8,
+          "telemetry": {
+            "mode": "partial_answer",
+            "rounds": 3,
+            "stopped": "decided: partial_answer",
+            "verification_skips": 0,
+            "metrics_version": "single-agent-v2",
+            "stage_usage": {
+              "analyze": {
+                "prompt_tokens": 3585,
+                "completion_tokens": 651,
+                "sdk_calls": 1,
+                "usage_complete": true,
+                "cached_prompt_tokens": 3456
+              },
+              "plan": {
+                "prompt_tokens": 1133,
+                "completion_tokens": 106,
+                "sdk_calls": 2,
+                "usage_complete": true,
+                "cached_prompt_tokens": 0
+              },
+              "verify": {
+                "prompt_tokens": 13668,
+                "completion_tokens": 3849,
+                "sdk_calls": 4,
+                "usage_complete": true,
+                "cached_prompt_tokens": 4864
+              },
+              "answer": {
+                "prompt_tokens": 1643,
+                "completion_tokens": 134,
+                "sdk_calls": 1,
+                "usage_complete": true,
+                "cached_prompt_tokens": 0
+              }
+            },
+            "sdk_calls": 8,
+            "usage_complete": true,
+            "recheck": {
+              "sdk_calls": 1,
+              "latency_ms": 3867.759,
+              "tokens": 2230
+            },
+            "searches": [
+              {
+                "type": "new",
+                "ok": true,
+                "returned_chunks": 7,
+                "new_chunks": 7,
+                "latency_ms": 17165,
+                "retrieval_calls": [
+                  {
+                    "retriever_already_imported": true,
+                    "import_init_ms": 0.0016999993022182025,
+                    "bm25_ms": 0.8358000004591304,
+                    "vector_with_embedding_ms": 176.87780000051134,
+                    "rrf_ms": 0.07060000007186318,
+                    "bm25_candidates": 25,
+                    "vector_candidates": 25,
+                    "vector_prefetched": false,
+                    "merged_candidates": 47,
+                    "rerank_candidate_limit": 40,
+                    "rerank_effective_limit": 40,
+                    "rerank_dropped_candidates": 7,
+                    "rerank_pairs": 40,
+                    "reranker_device": "cpu",
+                    "rerank_ms": 16987.77659999996,
+                    "returned_chunks": 7
+                  }
+                ]
+              },
+              {
+                "type": "expand_context",
+                "ok": true,
+                "returned_chunks": 2,
+                "new_chunks": 2,
+                "latency_ms": 3,
+                "retrieval_calls": []
+              },
+              {
+                "type": "new",
+                "ok": true,
+                "returned_chunks": 7,
+                "new_chunks": 1,
+                "latency_ms": 16203,
+                "retrieval_calls": [
+                  {
+                    "retriever_already_imported": true,
+                    "import_init_ms": 0.0018000000636675395,
+                    "bm25_ms": 0.9065999993254081,
+                    "vector_with_embedding_ms": 187.73310000051424,
+                    "rrf_ms": 0.07000000005064066,
+                    "bm25_candidates": 25,
+                    "vector_candidates": 25,
+                    "vector_prefetched": false,
+                    "merged_candidates": 43,
+                    "rerank_candidate_limit": 40,
+                    "rerank_effective_limit": 40,
+                    "rerank_dropped_candidates": 3,
+                    "rerank_pairs": 40,
+                    "reranker_device": "cpu",
+                    "rerank_ms": 16014.357900000505,
+                    "returned_chunks": 7
+                  }
+                ]
+              },
+              {
+                "type": "new",
+                "ok": true,
+                "returned_chunks": 7,
+                "new_chunks": 1,
+                "latency_ms": 16234,
+                "retrieval_calls": [
+                  {
+                    "retriever_already_imported": true,
+                    "import_init_ms": 0.001499999598308932,
+                    "bm25_ms": 0.7625999996889732,
+                    "vector_with_embedding_ms": 189.48720000025787,
+                    "rrf_ms": 0.060900000789843034,
+                    "bm25_candidates": 25,
+                    "vector_candidates": 25,
+                    "vector_prefetched": false,
+                    "merged_candidates": 46,
+                    "rerank_candidate_limit": 40,
+                    "rerank_effective_limit": 40,
+                    "rerank_dropped_candidates": 6,
+                    "rerank_pairs": 40,
+                    "reranker_device": "cpu",
+                    "rerank_ms": 16043.541099999857,
+                    "returned_chunks": 7
+                  }
+                ]
+              }
+            ],
+            "adopted_evidence_count": 5,
+            "latency_ms": 101104,
+            "stage_ms": {
+              "①": 6159,
+              "②": 2324,
+              "③": 49605,
+              "④": 41365,
+              "⑤": 1645
+            },
+            "tokens": 24769,
+            "llm_calls": 8,
+            "sources": 4
+          },
+          "rounds": 3,
+          "stopped": "decided: partial_answer",
+          "recall_ctx": 1.0,
+          "recall_cited": 1.0,
+          "bad_cited": 0
+        }
+      },
+      "judge": {
+        "order": {
+          "A": "baseline",
+          "B": "single_agent"
+        },
+        "reason": "B는 핵심 사실을 일부 포함하고 있으며 조건 처리도 잘 되어 있어 점수가 높음.",
+        "winner": "single_agent",
+        "baseline": {
+          "facts": 0.0,
+          "condition": 3,
+          "unsupported": 0,
+          "unsupported_list": [],
+          "overall": 2
+        },
+        "single_agent": {
+          "facts": 0.5,
+          "condition": 4,
+          "unsupported": 0,
+          "unsupported_list": [],
+          "overall": 4
+        }
+      }
+    },
+    {
+      "id": "D9",
+      "try": 1,
+      "question": "What documents do I need to apply for a student visa?",
+      "results": {
+        "baseline": {
+          "answer": "To apply for a student visa, you need to submit the following documents:\n\n1. Visa Application Form (Form no. 17) - e-signature not permitted.\n2. Passport with at least 6 months remainder validity.\n3. One 3.5X4.5 cm picture taken in the past 6 months (glued on the application form).\n4. Certificate of Admission from Dong-A University (with the university stamp clearly visible).\n5. A graduation certificate from the most recently attended school.\n6. Visa issuance fee.\n7. A confirmation letter of tuition fee (sent by the school after tuition payment) [1][2][3][4]. \n\nIf you are living overseas, you may also need to provide a study plan and a bank statement verifying a balance of over 8,000,000 KRW [5].",
+          "mode": "baseline",
+          "context_ids": [
+            "English_2026-2027+Korean+Language+Course.pdf#p4#c1",
+            "Study in KOREA! 한국 유학 가이드.pdf#p5#c5",
+            "Study in KOREA! 한국 유학 가이드.pdf#p12#c5",
+            "Study in KOREA! 한국 유학 가이드.pdf#p9#c3",
+            "English_2026-2027+Korean+Language+Course.pdf#p3#c7",
+            "Study in KOREA! 한국 유학 가이드.pdf#p14#c5",
+            "Study in KOREA! 한국 유학 가이드.pdf#p12#c11"
+          ],
+          "cited_ids": [
+            "English_2026-2027+Korean+Language+Course.pdf#p4#c1",
+            "Study in KOREA! 한국 유학 가이드.pdf#p5#c5",
+            "Study in KOREA! 한국 유학 가이드.pdf#p12#c5",
+            "Study in KOREA! 한국 유학 가이드.pdf#p9#c3",
+            "English_2026-2027+Korean+Language+Course.pdf#p3#c7"
+          ],
+          "search_ms": 11315,
+          "latency_ms": 13441,
+          "tokens": 1562,
+          "llm_calls": 1,
+          "recall_ctx": 0.5,
+          "recall_cited": 0.5,
+          "bad_cited": 1
+        },
+        "single_agent": {
+          "answer": "학생 비자를 신청하기 위해 필요한 서류는 다음과 같습니다:\n- 비자 신청서\n- 여권\n- 최근 6개월 이내 촬영한 사진\n- 입학허가서\n- 졸업증명서\n- 재정 능력 증명서 (연간 최소 8,000달러 또는 8,000,000원)\n- 결핵 검사 증명서[1][2][3].\n\n확인하지 못한 내용: 전체 서류 목록, 구체적인 조건, 국가별 예외 사항에 대한 정보는 확인하지 못했습니다. 학교 담당 부서에 문의하시기 바랍니다.",
+          "mode": "partial_answer",
+          "context_ids": [
+            "Study in KOREA! 한국 유학 가이드.pdf#p5#c5",
+            "English_2026-2027+Korean+Language+Course.pdf#p4#c1",
+            "English_2026-2027+Korean+Language+Course.pdf#p4#c2",
+            "English_2026-2027+Korean+Language+Course.pdf#p3#c11"
+          ],
+          "pool_ids": [
+            "English_2026-2027+Korean+Language+Course.pdf#p4#c1",
+            "Study in KOREA! 한국 유학 가이드.pdf#p17#c2",
+            "Study in KOREA! 한국 유학 가이드.pdf#p11#c5",
+            "Study in KOREA! 한국 유학 가이드.pdf#p5#c5",
+            "English_2026-2027+Korean+Language+Course.pdf#p3#c7",
+            "Study in KOREA! 한국 유학 가이드.pdf#p12#c5",
+            "Study in KOREA! 한국 유학 가이드.pdf#p17#c7",
+            "English_2026-2027+Korean+Language+Course.pdf#p4#c0",
+            "English_2026-2027+Korean+Language+Course.pdf#p4#c2",
+            "English_2026-2027+Korean+Language+Course.pdf#p3#c10",
+            "Study in KOREA! 한국 유학 가이드.pdf#p14#c5",
+            "Study in KOREA! 한국 유학 가이드.pdf#p1#c2",
+            "English_2026-2027+Korean+Language+Course.pdf#p3#c11"
+          ],
+          "cited_ids": [
+            "Study in KOREA! 한국 유학 가이드.pdf#p5#c5",
+            "English_2026-2027+Korean+Language+Course.pdf#p4#c1",
+            "English_2026-2027+Korean+Language+Course.pdf#p4#c2"
+          ],
+          "latency_ms": 90072,
+          "tokens": 22581,
+          "llm_calls": 9,
+          "telemetry": {
+            "mode": "partial_answer",
+            "rounds": 3,
+            "stopped": "decided: partial_answer",
+            "verification_skips": 0,
+            "metrics_version": "single-agent-v2",
+            "stage_usage": {
+              "analyze": {
+                "prompt_tokens": 3568,
+                "completion_tokens": 454,
+                "sdk_calls": 1,
+                "usage_complete": true,
+                "cached_prompt_tokens": 3072
+              },
+              "plan": {
+                "prompt_tokens": 1069,
+                "completion_tokens": 84,
+                "sdk_calls": 2,
+                "usage_complete": true,
+                "cached_prompt_tokens": 0
+              },
+              "verify": {
+                "prompt_tokens": 13239,
+                "completion_tokens": 2901,
+                "sdk_calls": 5,
+                "usage_complete": true,
+                "cached_prompt_tokens": 4864
+              },
+              "answer": {
+                "prompt_tokens": 1122,
+                "completion_tokens": 144,
+                "sdk_calls": 1,
+                "usage_complete": true,
+                "cached_prompt_tokens": 0
+              }
+            },
+            "sdk_calls": 9,
+            "usage_complete": true,
+            "recheck": {
+              "sdk_calls": 2,
+              "latency_ms": 5380.5830000000005,
+              "tokens": 2939
+            },
+            "searches": [
+              {
+                "type": "new",
+                "ok": true,
+                "returned_chunks": 7,
+                "new_chunks": 7,
+                "latency_ms": 15605,
+                "retrieval_calls": [
+                  {
+                    "retriever_already_imported": true,
+                    "import_init_ms": 0.0018999999156221747,
+                    "bm25_ms": 0.5560999998124316,
+                    "vector_with_embedding_ms": 176.95409999942058,
+                    "rrf_ms": 0.06940000002941815,
+                    "bm25_candidates": 25,
+                    "vector_candidates": 25,
+                    "vector_prefetched": false,
+                    "merged_candidates": 46,
+                    "rerank_candidate_limit": 40,
+                    "rerank_effective_limit": 40,
+                    "rerank_dropped_candidates": 6,
+                    "rerank_pairs": 40,
+                    "reranker_device": "cpu",
+                    "rerank_ms": 15427.932300000066,
+                    "returned_chunks": 7
+                  }
+                ]
+              },
+              {
+                "type": "expand_context",
+                "ok": true,
+                "returned_chunks": 2,
+                "new_chunks": 2,
+                "latency_ms": 4,
+                "retrieval_calls": []
+              },
+              {
+                "type": "new",
+                "ok": true,
+                "returned_chunks": 7,
+                "new_chunks": 2,
+                "latency_ms": 16827,
+                "retrieval_calls": [
+                  {
+                    "retriever_already_imported": true,
+                    "import_init_ms": 0.0015999994502635673,
+                    "bm25_ms": 0.76459999945655,
+                    "vector_with_embedding_ms": 376.67009999950096,
+                    "rrf_ms": 0.09419999969395576,
+                    "bm25_candidates": 25,
+                    "vector_candidates": 25,
+                    "vector_prefetched": false,
+                    "merged_candidates": 44,
+                    "rerank_candidate_limit": 40,
+                    "rerank_effective_limit": 40,
+                    "rerank_dropped_candidates": 4,
+                    "rerank_pairs": 40,
+                    "reranker_device": "cpu",
+                    "rerank_ms": 16449.474899999586,
+                    "returned_chunks": 7
+                  }
+                ]
+              },
+              {
+                "type": "new",
+                "ok": true,
+                "returned_chunks": 7,
+                "new_chunks": 2,
+                "latency_ms": 15515,
+                "retrieval_calls": [
+                  {
+                    "retriever_already_imported": true,
+                    "import_init_ms": 0.0017000002117129043,
+                    "bm25_ms": 0.6839999996373081,
+                    "vector_with_embedding_ms": 183.69389999952546,
+                    "rrf_ms": 0.057499999456922524,
+                    "bm25_candidates": 25,
+                    "vector_candidates": 25,
+                    "vector_prefetched": false,
+                    "merged_candidates": 41,
+                    "rerank_candidate_limit": 40,
+                    "rerank_effective_limit": 40,
+                    "rerank_dropped_candidates": 1,
+                    "rerank_pairs": 40,
+                    "reranker_device": "cpu",
+                    "rerank_ms": 15330.536100000245,
+                    "returned_chunks": 7
+                  }
+                ]
+              }
+            ],
+            "adopted_evidence_count": 4,
+            "latency_ms": 90072,
+            "stage_ms": {
+              "①": 5048,
+              "②": 2235,
+              "③": 47951,
+              "④": 33068,
+              "⑤": 1765
+            },
+            "tokens": 22581,
+            "llm_calls": 9,
+            "sources": 3
+          },
+          "rounds": 3,
+          "stopped": "decided: partial_answer",
+          "recall_ctx": 1.0,
+          "recall_cited": 1.0,
+          "bad_cited": 0
+        }
+      },
+      "judge": {
+        "order": {
+          "A": "single_agent",
+          "B": "baseline"
+        },
+        "reason": "두 답변 모두 필요한 서류를 일부 포함하고 있으나, 조건에 따른 구체적인 안내가 부족하다.",
+        "winner": "tie",
+        "single_agent": {
+          "facts": 0.5,
+          "condition": 2,
+          "unsupported": 0,
+          "unsupported_list": [],
+          "overall": 3
+        },
+        "baseline": {
+          "facts": 0.5,
+          "condition": 2,
+          "unsupported": 0,
+          "unsupported_list": [],
+          "overall": 3
+        }
+      }
+    }
+  ]
+}

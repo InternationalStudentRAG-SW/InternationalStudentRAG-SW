@@ -1,0 +1,77 @@
+{
+  "items": [
+    {
+      "label": null,
+      "question": "한국어학당 수업료가 얼마예요?",
+      "summary": {
+        "mode": "error",
+        "rounds": 0,
+        "stopped": "analysis_error: LLM 호출 실패 (2회 시도): RateLimitError: Error code: 429 - {'error': {'message': 'You have no credits remaining. Add credits to continue using the API at https://platform.openai.com/settings/organization/billing/.', 'type': 'insufficient_quota', 'param': None, 'code': 'credit_balance_exhausted'}}",
+        "latency_ms": 13395,
+        "stage_ms": {
+          "①": 7076,
+          "②": 0,
+          "③": 0,
+          "④": 0,
+          "⑤": 5676
+        },
+        "tokens": 0,
+        "llm_calls": 2,
+        "sources": 0
+      },
+      "run": {
+        "question": "한국어학당 수업료가 얼마예요?",
+        "analysis_run": {
+          "question": "한국어학당 수업료가 얼마예요?",
+          "history": [],
+          "analysis": null,
+          "warnings": [
+            "[API 재시도] RateLimitError: Error code: 429 - {'error': {'message': 'You have no credits remaining. Add credits to continue using the API at https://platform.openai.com/settings/organization/billing/.', 'type': 'insufficient_quo"
+          ],
+          "error": "LLM 호출 실패 (2회 시도): RateLimitError: Error code: 429 - {'error': {'message': 'You have no credits remaining. Add credits to continue using the API at https://platform.openai.com/settings/organization/billing/.', 'type': 'insufficient_quota', 'param': None, 'code': 'credit_balance_exhausted'}}",
+          "model": "gpt-4o-mini",
+          "latency_ms": 7076,
+          "prompt_tokens": 0,
+          "completion_tokens": 0,
+          "attempts": 1,
+          "raw_output": "",
+          "checklist_version": "v1-2026-09-28"
+        },
+        "plan_runs": [],
+        "search_runs": [],
+        "verify_runs": [],
+        "answer_run": {
+          "mode": "error",
+          "answer": "죄송합니다. 지금은 답변을 만들지 못했습니다. 잠시 후 다시 시도해 주세요.",
+          "sources": [],
+          "shown_evidence_ids": [],
+          "warnings": [
+            "[API 재시도] RateLimitError: Error code: 429 - {'error': {'message': 'You have no credits remaining. Add credits to continue using the API at https://platform.openai.com/settings/organization/billing/.', 'type': 'insufficient_quo"
+          ],
+          "error": "LLM 호출 실패 (2회 시도): RateLimitError: Error code: 429 - {'error': {'message': 'You have no credits remaining. Add credits to continue using the API at https://platform.openai.com/settings/organization/billing/.', 'type': 'insufficient_quota', 'param': None, 'code': 'credit_balance_exhausted'}}",
+          "model": "gpt-4o-mini",
+          "latency_ms": 5676,
+          "prompt_tokens": 0,
+          "completion_tokens": 0,
+          "attempts": 1,
+          "raw_output": ""
+        },
+        "analysis": null,
+        "pool": {
+          "chunks": {}
+        },
+        "budget": {
+          "total_calls": 0,
+          "expand_calls": 0,
+          "subqueries": 0
+        },
+        "decision": null,
+        "rounds": 0,
+        "stopped": "analysis_error: LLM 호출 실패 (2회 시도): RateLimitError: Error code: 429 - {'error': {'message': 'You have no credits remaining. Add credits to continue using the API at https://platform.openai.com/settings/organization/billing/.', 'type': 'insufficient_quota', 'param': None, 'code': 'credit_balance_exhausted'}}",
+        "warnings": [],
+        "latency_ms": 13395,
+        "checklist_version": "v1-2026-09-28"
+      }
+    }
+  ]
+}

@@ -65,6 +65,29 @@ class QueryTranslator:
         "ja": "Japanese",
     }
 
+    def translate_to_en(self, user_query: str) -> str:
+        """원문을 영어로 직접 번역. 이중 번역(원문→한국어→영어) 품질 손실 방지용."""
+        alpha_chars = [c for c in user_query if c.isalpha()]
+        if alpha_chars:
+            en_ratio = sum(1 for c in alpha_chars if 'a' <= c.lower() <= 'z') / len(alpha_chars)
+            if en_ratio >= 0.7:
+                return user_query
+        try:
+            domain_terms_hint = _load_domain_terms()
+            messages = [
+                SystemMessage(content=(
+                    "Translate the following text into English. "
+                    "Keep official names and codes as-is (GKS, TOPIK, D-4, IELTS, etc.). "
+                    f"{domain_terms_hint}\n"
+                    "Output only the translated text, no explanations."
+                )),
+                HumanMessage(content=user_query),
+            ]
+            return self.llm.invoke(messages).content.strip()
+        except Exception as e:
+            print(f"⚠️ 번역 오류 (→en): {e}")
+            return user_query
+
     def translate_from_ko(self, text: str, target_lang: str) -> str:
         """한국어 텍스트를 target_lang으로 번역. 캐시 HIT 시 언어 변환에 사용."""
         if target_lang in ("ko", "auto"):

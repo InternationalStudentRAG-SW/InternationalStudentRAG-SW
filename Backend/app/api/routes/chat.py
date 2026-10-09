@@ -54,7 +54,7 @@ async def _choose_route(question: str, history: List[Dict]) -> Tuple[str, Dict]:
 
 
 def _detect_language(question: str, explicit: Optional[str]) -> str:
-    if explicit:
+    if explicit and explicit != "auto":
         return explicit
     if re.search(r'[가-힣]', question):
         return "ko"
@@ -66,9 +66,9 @@ def _detect_language(question: str, explicit: Optional[str]) -> str:
         return "ar"
     try:
         detected = detect(question)
-        return detected if detected in {"en", "vi", "es", "ko", "zh"} else "auto"
+        return detected if detected in {"en", "vi", "es", "ko", "zh"} else "en"
     except LangDetectException:
-        return "auto"
+        return "en"
 
 
 def _insert_chat_log(query: str, answer: str, sources: list, language: str):
@@ -134,7 +134,7 @@ async def _save_streaming_results(
     is_first_message: bool,
     is_clarify: bool,
 ):
-    if is_first_message and full_answer and not is_clarify:
+    if is_first_message and full_answer and not is_clarify and sources:
         if language == "ko":
             await asyncio.to_thread(
                 semantic_cache.set,
@@ -174,10 +174,19 @@ async def chat_stream(request: ChatRequest, background_tasks: BackgroundTasks):
     try:
         language = _detect_language(request.question, request.language)
         ko_query = await asyncio.to_thread(translator.translate_to_ko, request.question)
+        # 원문 기반 영어 쿼리 생성 (이중 번역 품질 손실 방지)
+        # 영어: 원문이 이미 영어 → 그대로 사용 (LLM 호출 없음)
+        # 한국어/기타 언어: 원문→영어 직접 번역
+        query_en_direct: Optional[str] = None
+        if language == "en":
+            query_en_direct = request.question
+        elif language != "auto":
+            query_en_direct = await asyncio.to_thread(translator.translate_to_en, request.question)
         history = [{"role": m.role, "content": m.content} for m in (request.history or [])]
         is_first_message = len(history) == 0
-        logger.info("[Chat] 질문='%s' lang=%s ko_query='%s' first=%s",
-                    request.question[:60], language, ko_query[:60], is_first_message)
+        logger.info("[Chat] 질문='%s' lang=%s ko_query='%s' query_en_direct=%s first=%s",
+                    request.question[:60], language, ko_query[:60],
+                    (query_en_direct or "")[:40] or "None", is_first_message)
 
         # ── 캐시 조회 (첫 질문만) ─────────────────────────────────────────
         if is_first_message:
@@ -205,15 +214,15 @@ async def chat_stream(request: ChatRequest, background_tasks: BackgroundTasks):
             final_suggestions: list = []
             is_clarify = False
 
-            # 라우터(LLM 1회, 약 3초) 동안 화면이 멈춰 보이지 않게 먼저 상태를 보낸다
-            if (settings.agent_routing or "off").strip().lower() == "auto":
-                labels = _STATUS_LABELS.get(language, _STATUS_LABELS["en"])
-                yield f"data: {json.dumps({'type': 'status', 'content': labels['analyzing']}, ensure_ascii=False)}\n\n"
+            # 경로 결정 전 항상 analyzing 상태를 먼저 보낸다 (off 모드도 포함)
+            labels = _STATUS_LABELS.get(language, _STATUS_LABELS["en"])
+            yield f"data: {json.dumps({'type': 'status', 'content': labels['analyzing']}, ensure_ascii=False)}\n\n"
             route, route_meta = await _choose_route(request.question, history)
             logger.info("[Route] %s (routing_mode=%s)", route, route_meta.get("routing_mode"))
             if route == "agent":
                 stream = run_agent_stream(question=request.question, language=language,
-                                          ko_query=ko_query, history=history, log_meta=route_meta)
+                                          ko_query=ko_query, history=history, log_meta=route_meta,
+                                          query_en_direct=query_en_direct)
             else:
                 stream = run_rag_stream(question=request.question, language=language,
                                         ko_query=ko_query, history=history)

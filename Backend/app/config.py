@@ -14,7 +14,7 @@ class Settings(BaseSettings):
     #   always : 모든 질문을 단일 에이전트로 (비교·디버깅용)
     agent_routing: str = "off"
     # 에이전트 실행 기록 저장 (환경변수 AGENT_RUN_LOG). 켜면 {log_dir}/agent_runs/*.json, {log_dir}/routes.jsonl
-    agent_run_log: bool = True
+    agent_run_log: bool = False
 
     # ChromaDB Configuration
     chroma_db_path: str = "../DATA/chroma_db"
@@ -47,7 +47,7 @@ class Settings(BaseSettings):
 
     # Redis 시맨틱 캐시
     upstash_redis_url: str = ""
-    semantic_cache_threshold: float = 0.75
+    semantic_cache_threshold: float = 0.82
     semantic_cache_ttl: int = 86400
 
     # CORS

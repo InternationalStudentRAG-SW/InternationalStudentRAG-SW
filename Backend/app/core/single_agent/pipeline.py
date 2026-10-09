@@ -139,6 +139,7 @@ def run_pipeline(
     store=None,
     on_event: Optional[EventFn] = None,
     route_asks=None,
+    query_en_direct: Optional[str] = None,
 ) -> PipelineRun:
     """
     질문 1개를 끝까지 처리한다. history: 이전 대화 [{"role": "user"/"assistant", "content": ...}].
@@ -169,6 +170,9 @@ def run_pipeline(
         return finish("error")
     analysis = a_run.analysis
     run.analysis = analysis
+    # 원문→영어 직접 번역이 있으면 first_search.query_en을 교체 (이중 번역 품질 손실 방지)
+    if query_en_direct and analysis.first_search and analysis.first_search.query_ko.strip():
+        analysis.first_search.query_en = query_en_direct
     emit("analysis", {"type": analysis.primary_type, "next_action": analysis.next_action,
                       "slots": [s.slot_id for s in analysis.document_slots if s.active]})
     if analysis.next_action != "search":
@@ -186,6 +190,7 @@ def run_pipeline(
         p_run = plan_search(
             analysis, budget=budget, history=attempts, model=model, client=client,
             anchors_by_slot=anchors_by_slot, completed_expansions=completed_expansions,
+            query_en_direct=query_en_direct,
         )
         run.plan_runs.append(p_run)
         plan = p_run.plan

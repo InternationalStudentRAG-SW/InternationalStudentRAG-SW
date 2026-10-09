@@ -29,6 +29,12 @@ class AnswerRun(LLMMetrics):
     answer: str = ""
     sources: List[AnswerSource] = []   # 본문에 실제로 쓴 번호만
     shown_evidence_ids: List[str] = [] # 프롬프트에 넣은 근거 청크 (번호 순)
+    facts: List[dict] = []             # 인용 먼저 쓰기: 원문 대조를 통과한 {ask, evidence(번호), evidence_id, quote}
+    check_issues: List[str] = []       # 답변 검사(answer_check)에서 처음 걸린 항목
+    caveat_sentences: List[str] = []   # 단서 확인에서 짚어 준 문장 (있으면 1회 다시 씀)
+    rewrites: int = 0                  # 검사에 걸려 다시 쓴 횟수
+    dropped_sentences: List[str] = []  # 다시 써도 근거가 없어 뺀 문장
+    prohibition_issues: List[str] = [] # 금지 규정 검사에서 처음 걸린 문장 ('불가' 근거에 다른 문서의 허용 조건을 붙임)
     warnings: List[str] = []
     error: Optional[str] = None
     model: str = ""

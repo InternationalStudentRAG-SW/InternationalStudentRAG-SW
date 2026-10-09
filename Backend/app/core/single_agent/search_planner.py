@@ -124,7 +124,9 @@ SEARCH_QUERY_SYSTEM_PROMPT = """당신은 동아대학교 유학생 챗봇의 '�
 5. 결과는 반드시 JSON 객체 하나로만 출력합니다: {"query_ko": "...", "query_en": "...", "reason": "..."}
    reason에는 이 칸을 왜 이 검색어로 확인하려는지 한 줄로 적습니다.
 6. query_en은 query_ko와 같은 뜻의 영어 검색어입니다. 영어로만 된 문서(영어트랙 모집요강, 한국어과정 안내 등)를
-   찾을 때 씁니다. 공식 명칭·코드(GKS, D-2, TOPIK, IELTS)는 그대로 둡니다."""
+   찾을 때 씁니다. 공식 명칭·코드(GKS, D-2, TOPIK, IELTS)는 그대로 둡니다.
+7. '원문 영어 번역'이 제공된 경우, 그 표현을 참고해 query_en을 작성합니다. 단, query_en은 이 칸에 맞게
+   구체화한 검색어여야 하며 원문 번역을 그대로 복사하지 않습니다."""
 
 
 def _build_query_user_prompt(
@@ -134,6 +136,7 @@ def _build_query_user_prompt(
     search_type: str,
     tried_for_slot: List[str],
     tried_other: List[str],
+    query_en_direct: Optional[str] = None,
 ) -> str:
     cond_lines = "\n".join(
         f"- {c.field_id}={c.value} ({c.subject})" for c in conditions
@@ -156,7 +159,8 @@ def _build_query_user_prompt(
         f"## 검색 종류\n{search_type} ({'원문 확장' if search_type == 'expand_context' else '신규 검색'})\n\n"
         f"## 이미 시도한 검색어 (이 칸)\n{tried_slot_lines}\n\n"
         f"## 이미 시도한 검색어 (다른 칸, 같은 문구 금지)\n{tried_other_lines}\n\n"
-        "위 규칙에 따라 검색어 JSON을 출력하세요."
+        + (f"## 원문 영어 번역 (query_en 참고용)\n{query_en_direct}\n\n" if query_en_direct else "")
+        + "위 규칙에 따라 검색어 JSON을 출력하세요."
     )
 
 
@@ -168,6 +172,7 @@ def _generate_query(
     slot: DocSlot,
     search_type: str,
     history: List[SearchAttempt],
+    query_en_direct: Optional[str] = None,
 ) -> Tuple[Optional[str], str, bool]:
     """
     칸 하나에 대한 검색어를 LLM으로 만든다. 형식 오류나 중복이면 1회 다시 만든다.
@@ -182,6 +187,7 @@ def _generate_query(
         {"role": "system", "content": SEARCH_QUERY_SYSTEM_PROMPT},
         {"role": "user", "content": _build_query_user_prompt(
             analysis.intent_summary, analysis.conditions, slot, search_type, tried_for_slot, tried_other,
+            query_en_direct=query_en_direct,
         )},
     ]
 
@@ -235,6 +241,7 @@ def plan_search(
     client=None,
     anchors_by_slot: Optional[dict] = None,
     completed_expansions: Optional[set] = None,
+    query_en_direct: Optional[str] = None,
 ) -> SearchPlanRun:
     """
     이번 바퀴에 실행할 검색 액션 1개를 정한다.
@@ -322,7 +329,8 @@ def plan_search(
             run.model = model
         client = client or get_client()
 
-        query_ko, reason, is_dup = _generate_query(run, client, model, analysis, slot, search_type, history)
+        query_ko, reason, is_dup = _generate_query(run, client, model, analysis, slot, search_type, history,
+                                                    query_en_direct=query_en_direct)
         if query_ko is None:
             # LLM이 끝내 검색어를 못 만들면, 슬롯 라벨로 최소한의 검색어를 만들어 진행한다.
             slot_def = cfg.DOC_SLOTS.get(slot.slot_id, {})

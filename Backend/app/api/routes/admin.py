@@ -189,13 +189,15 @@ async def get_chat_daily(user: dict = Depends(get_admin_user)):
     try:
         result = []
         for i in range(6, -1, -1):
-            d = (date.today() - timedelta(days=i)).isoformat()
+            d = date.today() - timedelta(days=i)
+            start = d.isoformat()
+            end = (d + timedelta(days=1)).isoformat()
             res = supabase.table("chat_logs") \
                 .select("id", count="exact") \
-                .gte("created_at", d) \
-                .lte("created_at", d + "T23:59:59") \
+                .gte("created_at", start) \
+                .lt("created_at", end) \
                 .execute()
-            result.append({"date": d[5:], "count": res.count})
+            result.append({"date": start[5:], "count": res.count or 0})
         return {"daily": result}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

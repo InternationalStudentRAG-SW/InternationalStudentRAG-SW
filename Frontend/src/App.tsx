@@ -146,6 +146,16 @@ function ChatApp() {
 }
 
 export default function App() {
+  // Supabase가 백그라운드에서 토큰을 갱신하면 localStorage도 함께 갱신
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'TOKEN_REFRESHED' && session) {
+        localStorage.setItem('token', session.access_token)
+      }
+    })
+    return () => subscription.unsubscribe()
+  }, [])
+
   return (
     <Routes>
       <Route path="/" element={<ChatApp />} />

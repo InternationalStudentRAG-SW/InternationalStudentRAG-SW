@@ -120,49 +120,54 @@ def _is_no_result_answer(answer: str) -> bool:
 
 _STATUS_LABELS = {
     "ko": {
-        "analyzing":        "질문 의도를 파악하는 중",
-        "searching":        "문서를 탐색하는 중",
-        "searching_done":   "관련 문서 검색 완료",
-        "search_one":       "[{name}] 검색 완료",
-        "search_many":      "[{name}] 외 {n}건 검색 완료",
-        "generating":       "답변을 작성하는 중",
-        "meta":             "출처를 정리하는 중",
+        "analyzing":              "질문 의도를 파악하는 중",
+        "searching":              "문서를 탐색하는 중",
+        "searching_done":         "관련 문서 검색 완료",
+        "search_one":             "[{name}] 검색 완료",
+        "search_many":            "[{name}] 외 {n}건 검색 완료",
+        "generating":             "답변을 작성하는 중",
+        "meta":                   "출처를 정리하는 중",
+        "meta_with_suggestions":  "출처와 추천질문 정리하는 중",
     },
     "en": {
-        "analyzing":        "Understanding your question",
-        "searching":        "Searching through documents",
-        "searching_done":   "Document search complete",
-        "search_one":       "[{name}] found",
-        "search_many":      "[{name}] and {n} more found",
-        "generating":       "Writing your answer",
-        "meta":             "Preparing sources",
+        "analyzing":              "Understanding your question",
+        "searching":              "Searching through documents",
+        "searching_done":         "Document search complete",
+        "search_one":             "[{name}] found",
+        "search_many":            "[{name}] and {n} more found",
+        "generating":             "Writing your answer",
+        "meta":                   "Preparing sources",
+        "meta_with_suggestions":  "Preparing sources and suggestions",
     },
     "zh": {
-        "analyzing":        "正在理解您的问题",
-        "searching":        "正在搜索文档",
-        "searching_done":   "文档搜索完成",
-        "search_one":       "已找到 [{name}]",
-        "search_many":      "已找到 [{name}] 等 {n} 份文档",
-        "generating":       "正在撰写答案",
-        "meta":             "正在整理来源",
+        "analyzing":              "正在理解您的问题",
+        "searching":              "正在搜索文档",
+        "searching_done":         "文档搜索完成",
+        "search_one":             "已找到 [{name}]",
+        "search_many":            "已找到 [{name}] 等 {n} 份文档",
+        "generating":             "正在撰写答案",
+        "meta":                   "正在整理来源",
+        "meta_with_suggestions":  "正在整理来源和推荐问题",
     },
     "es": {
-        "analyzing":        "Entendiendo tu pregunta",
-        "searching":        "Buscando en documentos",
-        "searching_done":   "Búsqueda completada",
-        "search_one":       "[{name}] encontrado",
-        "search_many":      "[{name}] y {n} más encontrados",
-        "generating":       "Escribiendo tu respuesta",
-        "meta":             "Preparando fuentes",
+        "analyzing":              "Entendiendo tu pregunta",
+        "searching":              "Buscando en documentos",
+        "searching_done":         "Búsqueda completada",
+        "search_one":             "[{name}] encontrado",
+        "search_many":            "[{name}] y {n} más encontrados",
+        "generating":             "Escribiendo tu respuesta",
+        "meta":                   "Preparando fuentes",
+        "meta_with_suggestions":  "Preparando fuentes y sugerencias",
     },
     "vi": {
-        "analyzing":        "Đang phân tích câu hỏi",
-        "searching":        "Đang tìm kiếm tài liệu",
-        "searching_done":   "Tìm kiếm tài liệu hoàn tất",
-        "search_one":       "Đã tìm thấy [{name}]",
-        "search_many":      "Đã tìm thấy [{name}] và {n} tài liệu khác",
-        "generating":       "Đang soạn câu trả lời",
-        "meta":             "Đang chuẩn bị nguồn",
+        "analyzing":              "Đang phân tích câu hỏi",
+        "searching":              "Đang tìm kiếm tài liệu",
+        "searching_done":         "Tìm kiếm tài liệu hoàn tất",
+        "search_one":             "Đã tìm thấy [{name}]",
+        "search_many":            "Đã tìm thấy [{name}] và {n} tài liệu khác",
+        "generating":             "Đang soạn câu trả lời",
+        "meta":                   "Đang chuẩn bị nguồn",
+        "meta_with_suggestions":  "Đang chuẩn bị nguồn và gợi ý",
     },
 }
 
@@ -249,10 +254,12 @@ async def run_rag_stream(
         return
 
     # 4. 출처·후속 질문
-    yield _sse({"type": "meta", "content": labels["meta"]})
+    _suggestions_on = getattr(settings, "suggestions_enabled", False)
+    _meta_key = "meta_with_suggestions" if _suggestions_on else "meta"
+    yield _sse({"type": "meta", "content": labels[_meta_key]})
     await asyncio.sleep(0)
     try:
-        suggestions = await asyncio.wait_for(suggestion_task, timeout=30.0)
+        suggestions = await asyncio.wait_for(suggestion_task, timeout=120.0)
     except Exception:
         suggestions = []
     logger.info("[RAG] done suggestions=%d", len(suggestions))

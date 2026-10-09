@@ -104,7 +104,7 @@ def _default_search_fn(query: str, k: int, metrics: Optional[dict] = None) -> Li
         from app.core.retriever import retriever
     finally:
         stats["import_init_ms"] = (time.perf_counter() - started) * 1000
-    return retriever.retrieve(query, k=k, metrics=stats)
+    return retriever.retrieve(query, k=k)
 
 
 # ── 변환 ─────────────────────────────────────────────────────────────────

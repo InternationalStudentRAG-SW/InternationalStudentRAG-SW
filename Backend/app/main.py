@@ -2,9 +2,16 @@ import logging
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s %(levelname)s %(name)s: %(message)s",
+    datefmt="%H:%M:%S",
+)
 logging.getLogger("neo4j").propagate = False
 logging.getLogger("neo4j").setLevel(logging.ERROR)
 logging.getLogger("huggingface_hub").propagate = False
+logging.getLogger("httpx").setLevel(logging.WARNING)
+logging.getLogger("openai").setLevel(logging.WARNING)
 
 from app.api.routes import chat, admin, auth, document
 from app.api.routes.faq import router as faq_router

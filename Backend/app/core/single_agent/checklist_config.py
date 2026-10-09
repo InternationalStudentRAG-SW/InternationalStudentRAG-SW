@@ -96,7 +96,7 @@ VERIFY_MAX_CHUNKS = 20      # 판정 프롬프트에 넣을 청크 상한 (이�
 MAX_CLARIFY_FIELDS = 2      # 한 번에 되물을 사용자 칸 최대 수 (체크리스트 4.2절)
 MAX_NO_PROGRESS_ROUNDS = 2  # 연속으로 새 근거가 없던 검색이 이만큼이면 더 검색하지 않음 (체크리스트 7절)
 # 전체 흐름 (pipeline.py, 초기값이며 평가로 조정한다)
-MAX_VERIFY_ROUNDS = 3        # ②③④ 라운드 최대 횟수 (④ LLM 호출 비용이 커서 검색 예산보다 먼저 제한)
+MAX_VERIFY_ROUNDS = 2        # ②③④ 라운드 최대 횟수 (④ LLM 호출 비용이 커서 검색 예산보다 먼저 제한)
 AUTO_EXPAND_FIRST_ROUND = True
 # 첫 바퀴에 ①의 general_query_ko(사용자 조건을 뺀 일반 규정 검색어)로 신규 검색을 1회 더 한다 (LLM 없음).
 # 예: 'GKS 장학생 첫 학기 휴학'만 검색하면 GKS 지침만 나오고 모집요강의 '입학 후 첫 학기 휴학 불가'를 놓친다 (2026-10-02 기록)

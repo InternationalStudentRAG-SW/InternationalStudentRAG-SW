@@ -1,4 +1,5 @@
 import os
+import math
 import numpy as np
 from typing import List, Tuple, Optional, Dict, Any, Literal
 from langchain_community.retrievers import BM25Retriever
@@ -99,14 +100,14 @@ class RAGRetriever:
         if self.mode == "hybrid_rerank":
             pairs = [[rerank_q, doc.page_content] for doc in docs]
             # batch_size를 작게 나눠서 처리 → MPS/GPU OOM 방지
-            scores = self.reranker.predict(pairs, batch_size=8)
+            scores = self.reranker.predict(pairs, batch_size=8, show_progress_bar=False)
 
             scored_docs = sorted(zip(scores, docs), key=lambda x: x[0], reverse=True)
 
             final_k = k or self.top_k
             final_docs = []
             for score, doc in scored_docs[:final_k]:
-                doc.metadata["similarity_score"] = float(score)
+                doc.metadata["similarity_score"] = round(1.0 / (1.0 + math.exp(-float(score))), 4)
                 final_docs.append(doc)
             return final_docs
 

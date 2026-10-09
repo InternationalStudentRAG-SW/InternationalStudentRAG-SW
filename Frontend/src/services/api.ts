@@ -1,5 +1,6 @@
 import axios from 'axios'
 import type { ChatRequest, ChatResponse, HealthResponse, UserProfile, FaqItem } from '../types'
+import { supabase } from '../lib/supabaseClient'
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8000'
 
@@ -15,17 +16,60 @@ client.interceptors.request.use((config) => {
   return config
 })
 
-// 토큰 만료(401) 시 자동 로그아웃
+// 토큰 갱신 중 동시에 실패한 요청들을 대기시키는 큐
+let _isRefreshing = false
+let _pendingQueue: Array<{ resolve: (token: string) => void; reject: (err: unknown) => void }> = []
+
+function _drainQueue(err: unknown, token?: string) {
+  _pendingQueue.forEach(p => (err ? p.reject(err) : p.resolve(token!)))
+  _pendingQueue = []
+}
+
+function _logout() {
+  localStorage.removeItem('token')
+  localStorage.removeItem('role')
+  localStorage.removeItem('userEmail')
+  window.location.href = '/login'
+}
+
+// 토큰 만료(401) 시 갱신 후 재요청, 갱신 실패 시 로그아웃
 client.interceptors.response.use(
   (response) => response,
-  (error) => {
-    if (error.response?.status === 401) {
-      localStorage.removeItem('token')
-      localStorage.removeItem('role')
-      localStorage.removeItem('userEmail')
-      window.location.href = '/login'
+  async (error) => {
+    const original = error.config
+    if (error.response?.status !== 401 || original._retry) {
+      return Promise.reject(error)
     }
-    return Promise.reject(error)
+
+    // 이미 갱신 중이면 큐에 대기
+    if (_isRefreshing) {
+      return new Promise<string>((resolve, reject) => {
+        _pendingQueue.push({ resolve, reject })
+      }).then(token => {
+        original.headers.Authorization = `Bearer ${token}`
+        return client(original)
+      })
+    }
+
+    original._retry = true
+    _isRefreshing = true
+
+    try {
+      const { data, error: refreshError } = await supabase.auth.refreshSession()
+      if (refreshError || !data.session) throw refreshError ?? new Error('no session')
+
+      const token = data.session.access_token
+      localStorage.setItem('token', token)
+      _drainQueue(null, token)
+      original.headers.Authorization = `Bearer ${token}`
+      return client(original)
+    } catch (err) {
+      _drainQueue(err)
+      _logout()
+      return Promise.reject(err)
+    } finally {
+      _isRefreshing = false
+    }
   }
 )
 

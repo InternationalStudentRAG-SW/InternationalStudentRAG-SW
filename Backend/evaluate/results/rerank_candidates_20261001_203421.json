@@ -1,0 +1,165 @@
+{
+  "input": "evaluate\\results\\pipeline_20260930_221219.json",
+  "limits": [
+    12,
+    20,
+    30,
+    0
+  ],
+  "summary": [
+    {
+      "limit": 12,
+      "queries": 1,
+      "mean_rerank_ms": 4989.9,
+      "total_rerank_ms": 4989.9,
+      "mean_rerank_pairs": 12,
+      "baseline_recall": 0.5714,
+      "exact_topk_matches": 0
+    },
+    {
+      "limit": 20,
+      "queries": 1,
+      "mean_rerank_ms": 8658.0,
+      "total_rerank_ms": 8658.0,
+      "mean_rerank_pairs": 20,
+      "baseline_recall": 0.7143,
+      "exact_topk_matches": 0
+    },
+    {
+      "limit": 30,
+      "queries": 1,
+      "mean_rerank_ms": 11133.4,
+      "total_rerank_ms": 11133.4,
+      "mean_rerank_pairs": 30,
+      "baseline_recall": 0.8571,
+      "exact_topk_matches": 0
+    },
+    {
+      "limit": 0,
+      "queries": 1,
+      "mean_rerank_ms": 15353.2,
+      "total_rerank_ms": 15353.2,
+      "mean_rerank_pairs": 43,
+      "baseline_recall": 1.0,
+      "exact_topk_matches": 1
+    }
+  ],
+  "rows": [
+    {
+      "label": "D1",
+      "query": "한국어학당 수업료",
+      "limit": 12,
+      "baseline_chunk_ids": [
+        "[동아대]2026학년도+후기+학부+외국인+신(편)입학+특별전형+모집요강_한국어트랙.pdf#p20#c3",
+        "English_2026-2027+Korean+Language+Course.pdf#p2#c1",
+        "[동아대]2026학년도+후기+학부+외국인+신(편)입학+특별전형+모집요강_한국어트랙.pdf#p19#c6",
+        "[동아대]2026학년도+후기+학부+외국인+신(편)입학+특별전형+모집요강_한국어트랙.pdf#p20#c2",
+        "[동아대]2026학년도+후기+학부+외국인+신(편)입학+특별전형+모집요강_한국어트랙.pdf#p21#c0",
+        "English_2026-2027+Korean+Language+Course.pdf#p2#c2",
+        "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p3#c0"
+      ],
+      "result_chunk_ids": [
+        "[동아대]2026학년도+후기+학부+외국인+신(편)입학+특별전형+모집요강_한국어트랙.pdf#p20#c3",
+        "English_2026-2027+Korean+Language+Course.pdf#p2#c1",
+        "[동아대]2026학년도+후기+학부+외국인+신(편)입학+특별전형+모집요강_한국어트랙.pdf#p20#c2",
+        "[동아대]2026학년도+후기+학부+외국인+신(편)입학+특별전형+모집요강_한국어트랙.pdf#p21#c0",
+        "[동아대]2026학년도+후기+학부+외국인+신(편)입학+특별전형+모집요강_한국어트랙.pdf#p20#c5",
+        "English_2026-2027+Korean+Language+Course.pdf#p3#c1",
+        "[동아대]2026학년도+후기+학부+외국인+신(편)입학+특별전형+모집요강_한국어트랙.pdf#p21#c1"
+      ],
+      "baseline_count": 7,
+      "baseline_hits": 4,
+      "merged_candidates": 43,
+      "rerank_pairs": 12,
+      "rerank_ms": 4989.9,
+      "reranker_device": "cpu"
+    },
+    {
+      "label": "D1",
+      "query": "한국어학당 수업료",
+      "limit": 20,
+      "baseline_chunk_ids": [
+        "[동아대]2026학년도+후기+학부+외국인+신(편)입학+특별전형+모집요강_한국어트랙.pdf#p20#c3",
+        "English_2026-2027+Korean+Language+Course.pdf#p2#c1",
+        "[동아대]2026학년도+후기+학부+외국인+신(편)입학+특별전형+모집요강_한국어트랙.pdf#p19#c6",
+        "[동아대]2026학년도+후기+학부+외국인+신(편)입학+특별전형+모집요강_한국어트랙.pdf#p20#c2",
+        "[동아대]2026학년도+후기+학부+외국인+신(편)입학+특별전형+모집요강_한국어트랙.pdf#p21#c0",
+        "English_2026-2027+Korean+Language+Course.pdf#p2#c2",
+        "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p3#c0"
+      ],
+      "result_chunk_ids": [
+        "[동아대]2026학년도+후기+학부+외국인+신(편)입학+특별전형+모집요강_한국어트랙.pdf#p20#c3",
+        "English_2026-2027+Korean+Language+Course.pdf#p2#c1",
+        "[동아대]2026학년도+후기+학부+외국인+신(편)입학+특별전형+모집요강_한국어트랙.pdf#p20#c2",
+        "[동아대]2026학년도+후기+학부+외국인+신(편)입학+특별전형+모집요강_한국어트랙.pdf#p21#c0",
+        "English_2026-2027+Korean+Language+Course.pdf#p2#c2",
+        "[동아대]2026학년도+후기+학부+외국인+신(편)입학+특별전형+모집요강_한국어트랙.pdf#p20#c5",
+        "English_2026-2027+Korean+Language+Course.pdf#p3#c1"
+      ],
+      "baseline_count": 7,
+      "baseline_hits": 5,
+      "merged_candidates": 43,
+      "rerank_pairs": 20,
+      "rerank_ms": 8658.0,
+      "reranker_device": "cpu"
+    },
+    {
+      "label": "D1",
+      "query": "한국어학당 수업료",
+      "limit": 30,
+      "baseline_chunk_ids": [
+        "[동아대]2026학년도+후기+학부+외국인+신(편)입학+특별전형+모집요강_한국어트랙.pdf#p20#c3",
+        "English_2026-2027+Korean+Language+Course.pdf#p2#c1",
+        "[동아대]2026학년도+후기+학부+외국인+신(편)입학+특별전형+모집요강_한국어트랙.pdf#p19#c6",
+        "[동아대]2026학년도+후기+학부+외국인+신(편)입학+특별전형+모집요강_한국어트랙.pdf#p20#c2",
+        "[동아대]2026학년도+후기+학부+외국인+신(편)입학+특별전형+모집요강_한국어트랙.pdf#p21#c0",
+        "English_2026-2027+Korean+Language+Course.pdf#p2#c2",
+        "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p3#c0"
+      ],
+      "result_chunk_ids": [
+        "[동아대]2026학년도+후기+학부+외국인+신(편)입학+특별전형+모집요강_한국어트랙.pdf#p20#c3",
+        "English_2026-2027+Korean+Language+Course.pdf#p2#c1",
+        "[동아대]2026학년도+후기+학부+외국인+신(편)입학+특별전형+모집요강_한국어트랙.pdf#p20#c2",
+        "[동아대]2026학년도+후기+학부+외국인+신(편)입학+특별전형+모집요강_한국어트랙.pdf#p21#c0",
+        "English_2026-2027+Korean+Language+Course.pdf#p2#c2",
+        "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p3#c0",
+        "[동아대]2026학년도+후기+학부+외국인+신(편)입학+특별전형+모집요강_한국어트랙.pdf#p20#c5"
+      ],
+      "baseline_count": 7,
+      "baseline_hits": 6,
+      "merged_candidates": 43,
+      "rerank_pairs": 30,
+      "rerank_ms": 11133.4,
+      "reranker_device": "cpu"
+    },
+    {
+      "label": "D1",
+      "query": "한국어학당 수업료",
+      "limit": 0,
+      "baseline_chunk_ids": [
+        "[동아대]2026학년도+후기+학부+외국인+신(편)입학+특별전형+모집요강_한국어트랙.pdf#p20#c3",
+        "English_2026-2027+Korean+Language+Course.pdf#p2#c1",
+        "[동아대]2026학년도+후기+학부+외국인+신(편)입학+특별전형+모집요강_한국어트랙.pdf#p19#c6",
+        "[동아대]2026학년도+후기+학부+외국인+신(편)입학+특별전형+모집요강_한국어트랙.pdf#p20#c2",
+        "[동아대]2026학년도+후기+학부+외국인+신(편)입학+특별전형+모집요강_한국어트랙.pdf#p21#c0",
+        "English_2026-2027+Korean+Language+Course.pdf#p2#c2",
+        "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p3#c0"
+      ],
+      "result_chunk_ids": [
+        "[동아대]2026학년도+후기+학부+외국인+신(편)입학+특별전형+모집요강_한국어트랙.pdf#p20#c3",
+        "English_2026-2027+Korean+Language+Course.pdf#p2#c1",
+        "[동아대]2026학년도+후기+학부+외국인+신(편)입학+특별전형+모집요강_한국어트랙.pdf#p19#c6",
+        "[동아대]2026학년도+후기+학부+외국인+신(편)입학+특별전형+모집요강_한국어트랙.pdf#p20#c2",
+        "[동아대]2026학년도+후기+학부+외국인+신(편)입학+특별전형+모집요강_한국어트랙.pdf#p21#c0",
+        "English_2026-2027+Korean+Language+Course.pdf#p2#c2",
+        "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p3#c0"
+      ],
+      "baseline_count": 7,
+      "baseline_hits": 7,
+      "merged_candidates": 43,
+      "rerank_pairs": 43,
+      "rerank_ms": 15353.2,
+      "reranker_device": "cpu"
+    }
+  ]
+}

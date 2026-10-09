@@ -1,0 +1,5 @@
+﻿id,try,method,mode,recall_ctx,recall_cited,bad_cited,facts,condition,unsupported,overall,winner,latency_s,tokens,llm_calls
+D1,1,baseline,baseline,1.0,1.0,0,0.5,5,0,4,single_agent,1.4,2154,1
+D1,1,single_agent,answer,1.0,1.0,0,0.5,5,0,5,single_agent,35.1,16482,4
+D6,1,baseline,baseline,0.6666666666666666,0.3333333333333333,0,0.75,4,0,4,single_agent,1.7,1675,1
+D6,1,single_agent,partial_answer,0.6666666666666666,0.6666666666666666,0,1.0,5,0,5,single_agent,73.5,36413,8

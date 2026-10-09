@@ -1,22 +1,60 @@
 import re
 import json
 import asyncio
-from typing import Optional, List, Dict
+import logging
+from typing import Optional, List, Dict, Tuple
 from langdetect import detect, DetectorFactory, LangDetectException
 DetectorFactory.seed = 0
 from fastapi import APIRouter, BackgroundTasks, HTTPException
 from fastapi.responses import StreamingResponse
 from app.models.schemas import ChatRequest, ChatResponse
-from app.core.agent import run_agent_stream
+from app.config import settings
+from app.core.rag_stream import _STATUS_LABELS, run_rag_stream  # 기본 경로: 하이브리드+리랭커 (팀원 agent.py는 쓰지 않음)
+from app.core.agent_stream import run_agent_stream  # 복합 질문 경로: 단일 에이전트
 from app.core.translation import translator
 from app.core.cache import semantic_cache
 from app.db.database import supabase
 
 router = APIRouter(prefix="/chat", tags=["chat"])
+logger = logging.getLogger(__name__)
+
+ROUTING_MODES = ("off", "auto", "always")
+
+
+async def _choose_route(question: str, history: List[Dict]) -> Tuple[str, Dict]:
+    """
+    AGENT_ROUTING 설정에 따라 'simple'(기본 RAG) 또는 'agent'(단일 에이전트)를 고른다. 실패해도 예외 없음.
+    돌려주는 dict는 실행 기록용 (설정 모드, 라우터 판단 전체).
+    """
+    mode = (settings.agent_routing or "off").strip().lower()
+    if mode not in ROUTING_MODES:
+        logger.warning("알 수 없는 AGENT_ROUTING=%r → off로 처리", mode)
+        mode = "off"
+    if mode == "off":
+        return "simple", {"routing_mode": mode}
+    if mode == "always":
+        return "agent", {"routing_mode": mode}
+    try:
+        from app.core.single_agent import run_log
+        from app.core.single_agent.router import route_question
+        run = await asyncio.to_thread(route_question, question, history)
+        route = run.result.route or "agent"
+        logger.info("route=%s reasons=%s fallback=%s latency=%dms", route,
+                    run.result.route_reasons, run.fallback_used, run.latency_ms)
+        if run_log.enabled():
+            await asyncio.to_thread(run_log.append_route, {
+                "question": question, "route": route, "reasons": run.result.route_reasons,
+                "action": run.result.action, "asks": [a.text for a in run.result.asks],
+                "user_conditions": [f"{c.field_id}={c.value}" for c in run.result.user_conditions],
+                "fallback": run.fallback_used, "latency_ms": run.latency_ms})
+        return route, {"routing_mode": mode, "router": run.model_dump()}
+    except Exception as e:  # route_question은 예외를 던지지 않지만 import 실패 등 대비
+        logger.exception("router failed: %s → simple", e)
+        return "simple", {"routing_mode": mode, "router_error": str(e)}
 
 
 def _detect_language(question: str, explicit: Optional[str]) -> str:
-    if explicit:
+    if explicit and explicit != "auto":
         return explicit
     if re.search(r'[가-힣]', question):
         return "ko"
@@ -28,9 +66,9 @@ def _detect_language(question: str, explicit: Optional[str]) -> str:
         return "ar"
     try:
         detected = detect(question)
-        return detected if detected in {"en", "vi", "es", "ko", "zh"} else "auto"
+        return detected if detected in {"en", "vi", "es", "ko", "zh"} else "en"
     except LangDetectException:
-        return "auto"
+        return "en"
 
 
 def _insert_chat_log(query: str, answer: str, sources: list, language: str):
@@ -96,12 +134,31 @@ async def _save_streaming_results(
     is_first_message: bool,
     is_clarify: bool,
 ):
-    if is_first_message and full_answer and not is_clarify:
-        await asyncio.to_thread(
-            semantic_cache.set,
-            ko_query, language,
-            {"answer": full_answer, "sources": sources, "suggestions": suggestions or []},
-        )
+    if is_first_message and full_answer and not is_clarify and sources:
+        if language == "ko":
+            await asyncio.to_thread(
+                semantic_cache.set,
+                ko_query, "ko",
+                {"answer": full_answer, "sources": sources, "suggestions": suggestions or []},
+            )
+            logger.info("[Cache] SET ko '%s'", ko_query[:50])
+        else:
+            ko_answer = await asyncio.to_thread(translator.translate_to_ko, full_answer)
+            ko_suggestions = [
+                await asyncio.to_thread(translator.translate_to_ko, s)
+                for s in (suggestions or [])
+            ]
+            cache_key = await asyncio.to_thread(
+                semantic_cache.set,
+                ko_query, "ko",
+                {"answer": ko_answer, "sources": sources, "suggestions": ko_suggestions},
+            )
+            if cache_key:
+                await asyncio.to_thread(
+                    semantic_cache.add_language,
+                    cache_key, language, full_answer, suggestions or [],
+                )
+            logger.info("[Cache] SET ko(번역) + %s '%s'", language, ko_query[:50])
     await asyncio.to_thread(
         _insert_chat_log,
         query=question,
@@ -117,13 +174,25 @@ async def chat_stream(request: ChatRequest, background_tasks: BackgroundTasks):
     try:
         language = _detect_language(request.question, request.language)
         ko_query = await asyncio.to_thread(translator.translate_to_ko, request.question)
+        # 원문 기반 영어 쿼리 생성 (이중 번역 품질 손실 방지)
+        # 영어: 원문이 이미 영어 → 그대로 사용 (LLM 호출 없음)
+        # 한국어/기타 언어: 원문→영어 직접 번역
+        query_en_direct: Optional[str] = None
+        if language == "en":
+            query_en_direct = request.question
+        elif language != "auto":
+            query_en_direct = await asyncio.to_thread(translator.translate_to_en, request.question)
         history = [{"role": m.role, "content": m.content} for m in (request.history or [])]
         is_first_message = len(history) == 0
+        logger.info("[Chat] 질문='%s' lang=%s ko_query='%s' query_en_direct=%s first=%s",
+                    request.question[:60], language, ko_query[:60],
+                    (query_en_direct or "")[:40] or "None", is_first_message)
 
         # ── 캐시 조회 (첫 질문만) ─────────────────────────────────────────
         if is_first_message:
             cached = await _get_cached_response(ko_query, language, request.question, background_tasks)
             if cached:
+                logger.info("[Cache] HIT lang=%s", language)
                 async def cached_generator():
                     chunk_size = 15
                     answer = cached.answer
@@ -138,19 +207,27 @@ async def chat_stream(request: ChatRequest, background_tasks: BackgroundTasks):
                     headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
                 )
 
-        # ── 에이전트 스트리밍 ──────────────────────────────────────────────
+        # ── 경로 선택: 기본 RAG(하이브리드+리랭커) / 단일 에이전트 ─────────────────────
         async def event_generator():
             full_answer = ""
             final_sources: list = []
             final_suggestions: list = []
             is_clarify = False
 
-            async for chunk in run_agent_stream(
-                question=request.question,
-                language=language,
-                ko_query=ko_query,
-                history=history,
-            ):
+            # 경로 결정 전 항상 analyzing 상태를 먼저 보낸다 (off 모드도 포함)
+            labels = _STATUS_LABELS.get(language, _STATUS_LABELS["en"])
+            yield f"data: {json.dumps({'type': 'status', 'content': labels['analyzing']}, ensure_ascii=False)}\n\n"
+            route, route_meta = await _choose_route(request.question, history)
+            logger.info("[Route] %s (routing_mode=%s)", route, route_meta.get("routing_mode"))
+            if route == "agent":
+                stream = run_agent_stream(question=request.question, language=language,
+                                          ko_query=ko_query, history=history, log_meta=route_meta,
+                                          query_en_direct=query_en_direct)
+            else:
+                stream = run_rag_stream(question=request.question, language=language,
+                                        ko_query=ko_query, history=history)
+
+            async for chunk in stream:
                 if chunk.startswith("data: "):
                     try:
                         payload = json.loads(chunk[6:].strip())

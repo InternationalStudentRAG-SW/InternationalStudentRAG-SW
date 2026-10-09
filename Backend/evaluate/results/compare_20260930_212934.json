@@ -1,0 +1,219 @@
+{
+  "meta": {
+    "model": "gpt-4o",
+    "repeat": 1,
+    "k": null,
+    "only": "D1,D6",
+    "judge": true
+  },
+  "summary": {
+    "baseline": {
+      "recall_ctx": 0.8333333333333333,
+      "recall_cited": 0.6666666666666666,
+      "bad_cited": 0,
+      "facts": 0.625,
+      "condition": 4.5,
+      "unsupported": 0,
+      "overall": 4.0,
+      "wins": 0,
+      "latency_s": 1.5685,
+      "tokens": 1914.5,
+      "llm_calls": 1.0,
+      "errors": 0
+    },
+    "single_agent": {
+      "recall_ctx": 0.8333333333333333,
+      "recall_cited": 0.8333333333333333,
+      "bad_cited": 0,
+      "facts": 0.75,
+      "condition": 5.0,
+      "unsupported": 0,
+      "overall": 5.0,
+      "wins": 2,
+      "latency_s": 54.318,
+      "tokens": 26447.5,
+      "llm_calls": 6.0,
+      "errors": 0
+    },
+    "ties": 0
+  },
+  "rows": [
+    {
+      "id": "D1",
+      "try": 1,
+      "question": "한국어학당 수업료가 얼마예요?",
+      "results": {
+        "baseline": {
+          "answer": "한국어학당 수업료는 한 학기당 1,300,000원입니다[2][4][7].",
+          "mode": "baseline",
+          "context_ids": [
+            "[동아대]2026학년도+후기+학부+외국인+신(편)입학+특별전형+모집요강_한국어트랙.pdf#p20#c3",
+            "English_2026-2027+Korean+Language+Course.pdf#p2#c1",
+            "[동아대]2026학년도+후기+학부+외국인+신(편)입학+특별전형+모집요강_한국어트랙.pdf#p19#c6",
+            "English_2026-2027+Korean+Language+Course.pdf#p2#c2",
+            "[동아대]2026학년도+후기+학부+외국인+신(편)입학+특별전형+모집요강_한국어트랙.pdf#p21#c0",
+            "[동아대]2026학년도+후기+학부+외국인+신(편)입학+특별전형+모집요강_한국어트랙.pdf#p20#c2",
+            "English_2026-2027+Korean+Language+Course.pdf#p3#c1"
+          ],
+          "cited_ids": [
+            "English_2026-2027+Korean+Language+Course.pdf#p2#c1",
+            "English_2026-2027+Korean+Language+Course.pdf#p2#c2",
+            "English_2026-2027+Korean+Language+Course.pdf#p3#c1"
+          ],
+          "latency_ms": 1434,
+          "tokens": 2154,
+          "llm_calls": 1,
+          "recall_ctx": 1.0,
+          "recall_cited": 1.0,
+          "bad_cited": 0
+        },
+        "single_agent": {
+          "answer": "한국어학당 수업료는 학기당 1,300,000원입니다[1][2].",
+          "mode": "answer",
+          "context_ids": [
+            "English_2026-2027+Korean+Language+Course.pdf#p2#c1",
+            "English_2026-2027+Korean+Language+Course.pdf#p2#c2"
+          ],
+          "pool_ids": [
+            "[동아대]2026학년도+후기+학부+외국인+신(편)입학+특별전형+모집요강_한국어트랙.pdf#p20#c3",
+            "English_2026-2027+Korean+Language+Course.pdf#p2#c1",
+            "[동아대]2026학년도+후기+학부+외국인+신(편)입학+특별전형+모집요강_한국어트랙.pdf#p19#c6",
+            "[동아대]2026학년도+후기+학부+외국인+신(편)입학+특별전형+모집요강_한국어트랙.pdf#p20#c2",
+            "[동아대]2026학년도+후기+학부+외국인+신(편)입학+특별전형+모집요강_한국어트랙.pdf#p21#c0",
+            "English_2026-2027+Korean+Language+Course.pdf#p2#c2",
+            "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p3#c0",
+            "[동아대]2026학년도+후기+학부+외국인+신(편)입학+특별전형+모집요강_한국어트랙.pdf#p20#c4"
+          ],
+          "cited_ids": [
+            "English_2026-2027+Korean+Language+Course.pdf#p2#c1",
+            "English_2026-2027+Korean+Language+Course.pdf#p2#c2"
+          ],
+          "latency_ms": 35117,
+          "tokens": 16482,
+          "llm_calls": 4,
+          "rounds": 1,
+          "stopped": "decided: answer",
+          "recall_ctx": 1.0,
+          "recall_cited": 1.0,
+          "bad_cited": 0
+        }
+      },
+      "judge": {
+        "order": {
+          "A": "baseline",
+          "B": "single_agent"
+        },
+        "reason": "B는 불필요한 출처 번호 없이 간결하게 답변했습니다.",
+        "winner": "single_agent",
+        "baseline": {
+          "facts": 0.5,
+          "condition": 5,
+          "unsupported": 0,
+          "unsupported_list": [],
+          "overall": 4
+        },
+        "single_agent": {
+          "facts": 0.5,
+          "condition": 5,
+          "unsupported": 0,
+          "unsupported_list": [],
+          "overall": 5
+        }
+      }
+    },
+    {
+      "id": "D6",
+      "try": 1,
+      "question": "GKS 장학생은 아르바이트할 수 있어?",
+      "results": {
+        "baseline": {
+          "answer": "네, GKS 장학생은 아르바이트를 할 수 있습니다. 하지만 몇 가지 조건이 있습니다. 학위 과정에 있는 GKS 장학생은 대학 총장의 승인을 받아야 하며, 이는 아르바이트가 학업에 크게 지장을 주지 않는다고 판단될 때 가능합니다. 이 판단은 학업 성취도, 출석 기록, 지도 교수의 의견 등을 종합적으로 고려하여 이루어집니다[1]. 또한, 한국어 연수 과정에 있는 장학생은 프로그램을 최소 6개월 이상 완료한 후에만 방학 기간 동안 아르바이트가 허용됩니다[2].",
+          "mode": "baseline",
+          "context_ids": [
+            "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c0",
+            "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c3",
+            "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c4",
+            "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c2",
+            "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c2",
+            "(KO)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c1",
+            "(KO)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c0"
+          ],
+          "cited_ids": [
+            "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c0",
+            "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c3"
+          ],
+          "latency_ms": 1703,
+          "tokens": 1675,
+          "llm_calls": 1,
+          "recall_ctx": 0.6666666666666666,
+          "recall_cited": 0.3333333333333333,
+          "bad_cited": 0
+        },
+        "single_agent": {
+          "answer": "GKS 장학생은 한국어연수과정에서는 6개월 경과 후 방학 중에만 시간제 취업이 가능하며, 학위과정에서는 총장의 승인을 받은 경우에만 시간제 취업이 가능합니다[1][2][3][5]. 학기 중 시간제 취업은 TOPIK 등급을 충족한 경우에만 주당 20시간 이내로 허용됩니다[2][5]. 성적 경고를 두 번 받은 경우에는 예외가 적용되지 않습니다[6]. 더 자세한 사항은 학교 담당 부서에 문의하시기 바랍니다.",
+          "mode": "partial_answer",
+          "context_ids": [
+            "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c3",
+            "(KO)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p9#c1",
+            "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c0",
+            "(KO)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p9#c0",
+            "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c4",
+            "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c4",
+            "(KO)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p6#c1",
+            "(KO)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c1"
+          ],
+          "pool_ids": [
+            "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c3",
+            "(KO)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p9#c1",
+            "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c0",
+            "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c4",
+            "(KO)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c1",
+            "(KO)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p6#c1",
+            "(KO)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p9#c0",
+            "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c2",
+            "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c4",
+            "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c1",
+            "(KO)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c0"
+          ],
+          "cited_ids": [
+            "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c3",
+            "(KO)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p9#c1",
+            "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c0",
+            "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c4",
+            "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c4"
+          ],
+          "latency_ms": 73519,
+          "tokens": 36413,
+          "llm_calls": 8,
+          "rounds": 3,
+          "stopped": "decided: partial_answer",
+          "recall_ctx": 0.6666666666666666,
+          "recall_cited": 0.6666666666666666,
+          "bad_cited": 0
+        }
+      },
+      "judge": {
+        "order": {
+          "A": "baseline",
+          "B": "single_agent"
+        },
+        "reason": "B는 모든 조건을 명확히 설명하고 성적 경고에 대한 정보도 포함하여 더 완전한 답변을 제공했습니다.",
+        "winner": "single_agent",
+        "baseline": {
+          "facts": 0.75,
+          "condition": 4,
+          "unsupported": 0,
+          "unsupported_list": [],
+          "overall": 4
+        },
+        "single_agent": {
+          "facts": 1.0,
+          "condition": 5,
+          "unsupported": 0,
+          "unsupported_list": [],
+          "overall": 5
+        }
+      }
+    }
+  ]
+}

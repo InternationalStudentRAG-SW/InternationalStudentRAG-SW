@@ -162,10 +162,10 @@ class SemanticCache:
         except Exception as e:
             print(f"[Cache] add_language 실패: {e}")
 
-    def set(self, ko_query: str, language: str, response: Dict[str, Any]) -> None:
-        """새 답변을 Redis에 캐시 저장. ko_query를 임베딩 키로 사용."""
+    def set(self, ko_query: str, language: str, response: Dict[str, Any]) -> Optional[str]:
+        """새 답변을 Redis에 캐시 저장. ko_query를 임베딩 키로 사용. 성공 시 cache key 반환."""
         if not self._enabled:
-            return
+            return None
         try:
             r = self._get_redis()
             q_emb = self._embed(ko_query)
@@ -183,8 +183,10 @@ class SemanticCache:
             r.lpush(self._INDEX_KEY, cid)
             total = r.llen(self._INDEX_KEY)
             print(f"[Cache] SET 완료 | lang={language} | 전체 {total}개 | '{ko_query[:60]}'")
+            return key
         except Exception as e:
             print(f"[Cache] SET 실패: {e}")
+            return None
 
 
 semantic_cache = SemanticCache()

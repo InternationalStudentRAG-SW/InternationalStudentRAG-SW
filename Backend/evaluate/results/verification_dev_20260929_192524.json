@@ -1,0 +1,633 @@
+{
+  "rows": [
+    {
+      "label": "D1",
+      "model": "gpt-4o",
+      "try": 1,
+      "statuses": {
+        "requested_value": "missing",
+        "applicable_scope": "supported",
+        "reference_time": "unchecked",
+        "variation_notes": "partial",
+        "extra_info": "unchecked"
+      },
+      "ref_counts": {
+        "requested_value": 0,
+        "applicable_scope": 1,
+        "reference_time": 0,
+        "variation_notes": 1,
+        "extra_info": 0
+      },
+      "refs": {
+        "requested_value": [],
+        "applicable_scope": [
+          "English_2026-2027+Korean+Language+Course.pdf#p2#c1"
+        ],
+        "reference_time": [],
+        "variation_notes": [
+          "English_2026-2027+Korean+Language+Course.pdf#p2#c2"
+        ],
+        "extra_info": []
+      },
+      "user_active": [],
+      "distinct_chunks": 2,
+      "next_action": "continue_search",
+      "removed_refs": 1,
+      "tokens": 4342,
+      "latency_ms": 6419,
+      "error": null,
+      "score": {
+        "slots": {
+          "pass": 1,
+          "total": 2
+        },
+        "cite": {
+          "pass": 1,
+          "total": 2
+        },
+        "not_cite": {
+          "pass": 1,
+          "total": 1
+        },
+        "users": {
+          "pass": 0,
+          "total": 0
+        },
+        "action": {
+          "pass": 1,
+          "total": 1
+        },
+        "misses": [
+          "[상태] requested_value=missing (기대 supported)",
+          "[빠뜨림] requested_value: p2#c1 등 미인용"
+        ]
+      }
+    },
+    {
+      "label": "D2",
+      "model": "gpt-4o",
+      "try": 1,
+      "statuses": {
+        "requested_value": "missing",
+        "applicable_scope": "unchecked",
+        "reference_time": "unchecked",
+        "variation_notes": "partial",
+        "extra_info": "unchecked"
+      },
+      "ref_counts": {
+        "requested_value": 0,
+        "applicable_scope": 0,
+        "reference_time": 0,
+        "variation_notes": 1,
+        "extra_info": 0
+      },
+      "refs": {
+        "requested_value": [],
+        "applicable_scope": [],
+        "reference_time": [],
+        "variation_notes": [
+          "[동아대]2026학년도+후기+학부+외국인+신(편)입학+특별전형+모집요강_한국어트랙.pdf#p5#c1"
+        ],
+        "extra_info": []
+      },
+      "user_active": [
+        "program"
+      ],
+      "distinct_chunks": 1,
+      "next_action": "continue_search",
+      "removed_refs": 2,
+      "tokens": 4732,
+      "latency_ms": 6095,
+      "error": null,
+      "score": {
+        "slots": {
+          "pass": 0,
+          "total": 2
+        },
+        "cite": {
+          "pass": 1,
+          "total": 3
+        },
+        "not_cite": {
+          "pass": 0,
+          "total": 0
+        },
+        "users": {
+          "pass": 0,
+          "total": 1
+        },
+        "action": {
+          "pass": 0,
+          "total": 1
+        },
+        "misses": [
+          "[상태] requested_value=missing (기대 supported)",
+          "[상태] applicable_scope=unchecked (기대 supported/partial)",
+          "[빠뜨림] requested_value: p5#c0 등 미인용",
+          "[빠뜨림] requested_value: p5#c0 등 미인용",
+          "[갈래 누락] 사용자 칸 track 비활성",
+          "[다음 행동] continue_search (기대 answer_by_condition/answer)"
+        ]
+      }
+    },
+    {
+      "label": "D3",
+      "model": "gpt-4o",
+      "try": 1,
+      "statuses": {
+        "requested_list": "partial",
+        "applicable_scope": "partial",
+        "item_eligibility": "partial",
+        "item_details": "unchecked"
+      },
+      "ref_counts": {
+        "requested_list": 1,
+        "applicable_scope": 1,
+        "item_eligibility": 3,
+        "item_details": 0
+      },
+      "refs": {
+        "requested_list": [
+          "[동아대]2026학년도+후기+학부+외국인+신(편)입학+특별전형+모집요강_한국어트랙.pdf#p20#c5"
+        ],
+        "applicable_scope": [
+          "[동아대]2026학년도+후기+학부+외국인+신(편)입학+특별전형+모집요강_한국어트랙.pdf#p20#c5"
+        ],
+        "item_eligibility": [
+          "[동아대]2026학년도+후기+학부+외국인+신(편)입학+특별전형+모집요강_한국어트랙.pdf#p21#c0",
+          "[동아대]2026학년도+후기+학부+외국인+신(편)입학+특별전형+모집요강_한국어트랙.pdf#p20#c5",
+          "[동아대]2026학년도+후기+학부+외국인+신(편)입학+특별전형+모집요강_한국어트랙.pdf#p20#c2"
+        ],
+        "item_details": []
+      },
+      "user_active": [
+        "program"
+      ],
+      "distinct_chunks": 3,
+      "next_action": "continue_search",
+      "removed_refs": 4,
+      "tokens": 5943,
+      "latency_ms": 8650,
+      "error": null,
+      "score": {
+        "slots": {
+          "pass": 1,
+          "total": 1
+        },
+        "cite": {
+          "pass": 1,
+          "total": 3
+        },
+        "not_cite": {
+          "pass": 1,
+          "total": 1
+        },
+        "users": {
+          "pass": 0,
+          "total": 0
+        },
+        "action": {
+          "pass": 1,
+          "total": 1
+        },
+        "misses": [
+          "[빠뜨림] requested_list: p20#c2 등 미인용",
+          "[빠뜨림] requested_list: p21#c0 등 미인용"
+        ]
+      }
+    },
+    {
+      "label": "D4",
+      "model": "gpt-4o",
+      "try": 1,
+      "statuses": {
+        "requested_documents": "partial",
+        "conditional_documents": "unchecked",
+        "format_validity": "unchecked",
+        "country_exceptions": "unchecked",
+        "submission_method": "unchecked"
+      },
+      "ref_counts": {
+        "requested_documents": 2,
+        "conditional_documents": 0,
+        "format_validity": 0,
+        "country_exceptions": 0,
+        "submission_method": 0
+      },
+      "refs": {
+        "requested_documents": [
+          "[동아대]2026학년도+후기+학부+외국인+신(편)입학+특별전형+모집요강_한국어트랙.pdf#p13#c1",
+          "[동아대]2026학년도+후기+학부+외국인+신(편)입학+특별전형+모집요강_한국어트랙.pdf#p14#c0"
+        ],
+        "conditional_documents": [],
+        "format_validity": [],
+        "country_exceptions": [],
+        "submission_method": []
+      },
+      "user_active": [
+        "admission_type"
+      ],
+      "distinct_chunks": 2,
+      "next_action": "continue_search",
+      "removed_refs": 0,
+      "tokens": 4121,
+      "latency_ms": 4547,
+      "error": null,
+      "score": {
+        "slots": {
+          "pass": 1,
+          "total": 1
+        },
+        "cite": {
+          "pass": 1,
+          "total": 2
+        },
+        "not_cite": {
+          "pass": 1,
+          "total": 1
+        },
+        "users": {
+          "pass": 1,
+          "total": 1
+        },
+        "action": {
+          "pass": 1,
+          "total": 1
+        },
+        "misses": [
+          "[빠뜨림] requested_documents: p13#c2 등 미인용"
+        ]
+      }
+    },
+    {
+      "label": "D5",
+      "model": "gpt-4o",
+      "try": 1,
+      "statuses": {
+        "step_sequence": "missing",
+        "application_channel": "partial",
+        "prerequisites": "unchecked",
+        "deadline": "unchecked",
+        "approval_exceptions": "unchecked",
+        "extra_info": "unchecked"
+      },
+      "ref_counts": {
+        "step_sequence": 0,
+        "application_channel": 1,
+        "prerequisites": 0,
+        "deadline": 0,
+        "approval_exceptions": 0,
+        "extra_info": 0
+      },
+      "refs": {
+        "step_sequence": [],
+        "application_channel": [
+          "[동아대]2026학년도+후기+학부+외국인+신(편)입학+특별전형+모집요강_한국어트랙.pdf#p21#c3"
+        ],
+        "prerequisites": [],
+        "deadline": [],
+        "approval_exceptions": [],
+        "extra_info": []
+      },
+      "user_active": [],
+      "distinct_chunks": 1,
+      "next_action": "continue_search",
+      "removed_refs": 0,
+      "tokens": 3556,
+      "latency_ms": 3555,
+      "error": null,
+      "score": {
+        "slots": {
+          "pass": 1,
+          "total": 1
+        },
+        "cite": {
+          "pass": 0,
+          "total": 0
+        },
+        "not_cite": {
+          "pass": 2,
+          "total": 2
+        },
+        "users": {
+          "pass": 0,
+          "total": 0
+        },
+        "action": {
+          "pass": 1,
+          "total": 1
+        },
+        "misses": []
+      }
+    },
+    {
+      "label": "D6",
+      "model": "gpt-4o",
+      "try": 1,
+      "statuses": {
+        "rule": "supported",
+        "applicable_scope": "partial",
+        "conditions_limits": "partial",
+        "exceptions_related": "partial",
+        "approval_reporting": "supported"
+      },
+      "ref_counts": {
+        "rule": 1,
+        "applicable_scope": 2,
+        "conditions_limits": 2,
+        "exceptions_related": 1,
+        "approval_reporting": 1
+      },
+      "refs": {
+        "rule": [
+          "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c3"
+        ],
+        "applicable_scope": [
+          "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c3",
+          "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c0"
+        ],
+        "conditions_limits": [
+          "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c3",
+          "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c0"
+        ],
+        "exceptions_related": [
+          "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c2"
+        ],
+        "approval_reporting": [
+          "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c0"
+        ]
+      },
+      "user_active": [
+        "gks_stage"
+      ],
+      "distinct_chunks": 3,
+      "next_action": "continue_search",
+      "removed_refs": 0,
+      "tokens": 4375,
+      "latency_ms": 7949,
+      "error": null,
+      "score": {
+        "slots": {
+          "pass": 4,
+          "total": 5
+        },
+        "cite": {
+          "pass": 6,
+          "total": 10
+        },
+        "not_cite": {
+          "pass": 5,
+          "total": 5
+        },
+        "users": {
+          "pass": 1,
+          "total": 1
+        },
+        "action": {
+          "pass": 1,
+          "total": 1
+        },
+        "misses": [
+          "[상태] applicable_scope=partial (기대 supported)",
+          "[빠뜨림] rule: p11#c0 등 미인용",
+          "[빠뜨림] conditions_limits: p10#c4 등 미인용",
+          "[빠뜨림] exceptions_related: p11#c4 등 미인용",
+          "[빠뜨림] approval_reporting: p10#c4 등 미인용"
+        ]
+      }
+    },
+    {
+      "label": "D7",
+      "model": "gpt-4o",
+      "try": 1,
+      "statuses": {
+        "event_trigger": "supported",
+        "full_reason_list": "unchecked",
+        "consequence": "partial",
+        "applicable_scope": "supported",
+        "exceptions_remedies": "partial"
+      },
+      "ref_counts": {
+        "event_trigger": 1,
+        "full_reason_list": 0,
+        "consequence": 1,
+        "applicable_scope": 1,
+        "exceptions_remedies": 1
+      },
+      "refs": {
+        "event_trigger": [
+          "(KO)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p7#c0"
+        ],
+        "full_reason_list": [],
+        "consequence": [
+          "(KO)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p6#c1"
+        ],
+        "applicable_scope": [
+          "(KO)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p7#c0"
+        ],
+        "exceptions_remedies": [
+          "(KO)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p7#c0"
+        ]
+      },
+      "user_active": [],
+      "distinct_chunks": 2,
+      "next_action": "continue_search",
+      "removed_refs": 0,
+      "tokens": 4988,
+      "latency_ms": 6472,
+      "error": null,
+      "score": {
+        "slots": {
+          "pass": 2,
+          "total": 3
+        },
+        "cite": {
+          "pass": 2,
+          "total": 2
+        },
+        "not_cite": {
+          "pass": 1,
+          "total": 1
+        },
+        "users": {
+          "pass": 0,
+          "total": 1
+        },
+        "action": {
+          "pass": 1,
+          "total": 1
+        },
+        "misses": [
+          "[상태] consequence=partial (기대 supported)",
+          "[갈래 누락] 사용자 칸 gks_status 비활성"
+        ]
+      }
+    },
+    {
+      "label": "D8",
+      "model": "gpt-4o",
+      "try": 1,
+      "statuses": {
+        "rule": "supported",
+        "applicable_scope": "partial",
+        "conditions_limits": "partial",
+        "exceptions_related": "partial",
+        "approval_reporting": "supported",
+        "requested_documents": "unchecked",
+        "conditional_documents": "unchecked",
+        "format_validity": "unchecked",
+        "country_exceptions": "unchecked",
+        "submission_method": "unchecked",
+        "step_sequence": "unchecked",
+        "application_channel": "unchecked",
+        "prerequisites": "unchecked",
+        "deadline": "unchecked",
+        "approval_exceptions": "unchecked",
+        "extra_info": "unchecked"
+      },
+      "ref_counts": {
+        "rule": 1,
+        "applicable_scope": 2,
+        "conditions_limits": 1,
+        "exceptions_related": 1,
+        "approval_reporting": 1,
+        "requested_documents": 0,
+        "conditional_documents": 0,
+        "format_validity": 0,
+        "country_exceptions": 0,
+        "submission_method": 0,
+        "step_sequence": 0,
+        "application_channel": 0,
+        "prerequisites": 0,
+        "deadline": 0,
+        "approval_exceptions": 0,
+        "extra_info": 0
+      },
+      "refs": {
+        "rule": [
+          "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c0"
+        ],
+        "applicable_scope": [
+          "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p10#c3",
+          "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c0"
+        ],
+        "conditions_limits": [
+          "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c0"
+        ],
+        "exceptions_related": [
+          "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c2"
+        ],
+        "approval_reporting": [
+          "(EN)정부초청+외국인+장학생+학사+운영+지침(2026.3.1.개정).pdf#p11#c0"
+        ],
+        "requested_documents": [],
+        "conditional_documents": [],
+        "format_validity": [],
+        "country_exceptions": [],
+        "submission_method": [],
+        "step_sequence": [],
+        "application_channel": [],
+        "prerequisites": [],
+        "deadline": [],
+        "approval_exceptions": [],
+        "extra_info": []
+      },
+      "user_active": [
+        "gks_stage"
+      ],
+      "distinct_chunks": 3,
+      "next_action": "continue_search",
+      "removed_refs": 0,
+      "tokens": 5647,
+      "latency_ms": 12871,
+      "error": null,
+      "score": {
+        "slots": {
+          "pass": 2,
+          "total": 2
+        },
+        "cite": {
+          "pass": 1,
+          "total": 2
+        },
+        "not_cite": {
+          "pass": 2,
+          "total": 2
+        },
+        "users": {
+          "pass": 1,
+          "total": 1
+        },
+        "action": {
+          "pass": 1,
+          "total": 1
+        },
+        "misses": [
+          "[빠뜨림] rule: p10#c3 등 미인용"
+        ]
+      }
+    },
+    {
+      "label": "D9",
+      "model": "gpt-4o",
+      "try": 1,
+      "statuses": {
+        "requested_documents": "partial",
+        "conditional_documents": "unchecked",
+        "format_validity": "unchecked",
+        "country_exceptions": "unchecked",
+        "submission_method": "unchecked"
+      },
+      "ref_counts": {
+        "requested_documents": 3,
+        "conditional_documents": 0,
+        "format_validity": 0,
+        "country_exceptions": 0,
+        "submission_method": 0
+      },
+      "refs": {
+        "requested_documents": [
+          "English_2026-2027+Korean+Language+Course.pdf#p4#c1",
+          "Study in KOREA! 한국 유학 가이드.pdf#p5#c5",
+          "English_2026-2027+Korean+Language+Course.pdf#p4#c2"
+        ],
+        "conditional_documents": [],
+        "format_validity": [],
+        "country_exceptions": [],
+        "submission_method": []
+      },
+      "user_active": [],
+      "distinct_chunks": 3,
+      "next_action": "continue_search",
+      "removed_refs": 0,
+      "tokens": 3239,
+      "latency_ms": 2510,
+      "error": null,
+      "score": {
+        "slots": {
+          "pass": 1,
+          "total": 1
+        },
+        "cite": {
+          "pass": 2,
+          "total": 2
+        },
+        "not_cite": {
+          "pass": 1,
+          "total": 1
+        },
+        "users": {
+          "pass": 0,
+          "total": 1
+        },
+        "action": {
+          "pass": 1,
+          "total": 1
+        },
+        "misses": [
+          "[갈래 누락] 사용자 칸 program 비활성"
+        ]
+      }
+    }
+  ]
+}

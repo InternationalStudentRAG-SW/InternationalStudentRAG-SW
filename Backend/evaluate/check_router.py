@@ -15,6 +15,10 @@ CI(pytest tests/)에는 포함되지 않는다.
   # 보류 세트(프롬프트를 고칠 때 보지 않은 질문)로 채점 → evaluate/results/router_heldout_*.json
   python -m evaluate.check_router --heldout
 
+  # 비교 실험(compare_service)에 쓸 질문들이 agent로 가는지만 확인 (채점 없음)
+  python -m evaluate.check_router --compare-set heldout
+  python -m evaluate.check_router --compare-set all
+
 옵션
   --model gpt-4o      다른 모델로 비교
   --json              전체 결과를 JSON으로도 출력
@@ -152,6 +156,34 @@ def run_gold(only: Optional[List[str]], model: Optional[str], as_json: bool, hel
     return path
 
 
+def check_compare_set(name: str, model: Optional[str]) -> int:
+    """compare_service의 질문 세트가 전부 agent로 가는지 확인한다. 채점은 하지 않는다.
+
+    simple로 가면 비교 실험에서 기존 검색과 같은 답이 나와 비교가 성립하지 않는다.
+    """
+    from evaluate.compare_service import QUESTION_SETS
+    questions = QUESTION_SETS[name]
+    simple: List[str] = []
+    for q in questions:
+        run = route_question(q["question"], None, model=model)
+        route = run.result.route
+        mark = "OK " if route == "agent" else "!! "
+        print(f"\n{mark}[{q['id']}] 경로={route} 요구={len(run.result.asks)}개"
+              + ("  [라우터 실패 → fallback]" if run.fallback_used else ""))
+        print(f"    {q['question']}")
+        for a in run.result.asks:
+            print(f"      - {a.text}  | 검색어 '{a.query_ko}'")
+        if route != "agent":
+            simple.append(q["id"])
+    print(f"\n{'='*60}")
+    if simple:
+        print(f"simple로 간 질문: {', '.join(simple)}")
+        print("→ 이 질문들은 비교 실험에서 기존 검색과 같은 답이 나온다. 질문을 고치거나 세트에서 빼야 한다.")
+        return 1
+    print(f"{name} 세트 {len(questions)}개 모두 agent로 간다. 비교 실험을 돌려도 된다.")
+    return 0
+
+
 def main() -> int:
     p = argparse.ArgumentParser(description="⓪ 라우터 확인")
     p.add_argument("question", nargs="?")
@@ -159,6 +191,8 @@ def main() -> int:
     p.add_argument("--gold", action="store_true")
     p.add_argument("--heldout", action="store_true", help="보류 세트(노션 복합 질문)로 채점")
     p.add_argument("--hard", action="store_true", help="어려운 세트(경계·후속·범위 밖 등)")
+    p.add_argument("--compare-set", dest="compare_set", choices=["dev", "heldout", "all"],
+                   help="compare_service 질문 세트가 전부 agent로 가는지 확인 (채점 없음)")
     p.add_argument("--only", nargs="*")
     p.add_argument("--model")
     p.add_argument("--json", action="store_true")
@@ -167,6 +201,8 @@ def main() -> int:
 
     if a.show_prompt:
         print(build_system_prompt())
+    if a.compare_set:
+        return check_compare_set(a.compare_set, a.model)
     if a.gold or a.heldout or a.hard:
         run_gold(a.only, a.model, a.json, heldout=a.heldout, hard=a.hard)
         return 0

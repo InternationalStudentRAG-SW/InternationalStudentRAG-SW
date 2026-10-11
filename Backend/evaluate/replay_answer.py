@@ -26,8 +26,8 @@ def find_logs(since: str = "", until: str = "") -> List[Path]:
 
 
 def question_spec(question: str) -> Optional[Dict]:
-    from evaluate.compare_service import QUESTIONS
-    return next((q for q in QUESTIONS if q["question"].strip() == question.strip()), None)
+    from evaluate.compare_service import ALL_QUESTIONS
+    return next((q for q in ALL_QUESTIONS if q["question"].strip() == question.strip()), None)
 
 
 def replay(log: Dict, write_fn=None):

@@ -3,6 +3,8 @@
 
   python -m evaluate.compare_service                 # 복합 질문 5개 × 1회
   python -m evaluate.compare_service --only Q7,E3 --repeat 1
+  python -m evaluate.compare_service --set heldout --repeat 1   # 개발에 쓰지 않은 질문 5개
+  python -m evaluate.compare_service --set all --repeat 3
   python -m evaluate.compare_service --label "⑤ gpt-4o"
 
 무엇을 돌리나 (서버 없이, 서비스 코드를 그대로 호출)
@@ -32,6 +34,8 @@ import time
 from datetime import datetime
 from pathlib import Path
 from typing import AsyncIterator, Callable, Dict, List, Optional, Tuple
+
+from evaluate.heldout_questions import HELDOUT_QUESTIONS
 
 RESULTS_DIR = Path(__file__).resolve().parent / "results"
 DEFAULT_JUDGE_MODEL = "gpt-4o"
@@ -65,6 +69,16 @@ QUESTIONS: List[Dict] = [
                "지각 2번은 결석 1번으로 계산한다"],
      "source": "Korean Language Course 안내 p.2 Grading"},
 ]
+
+# 개발에 쓴 5개(위)와 개발에 쓰지 않은 5개(heldout_questions.py)를 세트로 구분한다.
+# QUESTIONS 기본값은 dev 그대로라 기존 호출·replay_answer는 영향을 받지 않는다.
+DEV_QUESTIONS: List[Dict] = QUESTIONS
+QUESTION_SETS: Dict[str, List[Dict]] = {
+    "dev": DEV_QUESTIONS,
+    "heldout": HELDOUT_QUESTIONS,
+    "all": DEV_QUESTIONS + HELDOUT_QUESTIONS,
+}
+ALL_QUESTIONS: List[Dict] = QUESTION_SETS["all"]
 
 JUDGE_SYSTEM = (
     "당신은 대학 유학생 안내 챗봇의 답변을 채점하는 엄격한 평가자입니다. 정답 핵심 사실을 기준으로 답변 하나를 채점합니다.\n"
@@ -236,6 +250,9 @@ def summarize(rows: List[Dict]) -> Dict:
             "coverage": _avg([r["score"]["coverage"] for r in rs]),
             "wrong": sum(r["score"]["wrong"] for r in rs),
             "full_correct": sum(1 for r in rs if r["score"]["coverage"] == 1.0 and r["score"]["wrong"] == 0),
+            # 0점 답변 수와 최저 포함률: "완전 정답 수"만 보면 한쪽이 만점과 0점으로 갈리는 것이 가려진다.
+            "zero": sum(1 for r in rs if r["score"]["coverage"] == 0.0),
+            "min_coverage": min([r["score"]["coverage"] for r in rs]) if rs else None,
             "latency_s": _avg([r["latency_s"] for r in rs]),
             "n": len(rs),
         }
@@ -260,6 +277,8 @@ def print_summary(s: Dict) -> None:
     print(f"핵심 사실 포함률     {_pct(b['coverage']):>8s}    {_pct(a['coverage']):>8s}")
     print(f"틀린 내용 수(합계)   {b['wrong']:>8d}    {a['wrong']:>8d}")
     print(f"완전 정답 답변 수    {b['full_correct']:>5d}/{b['n']:<2d}    {a['full_correct']:>5d}/{a['n']:<2d}")
+    print(f"0점 답변 수          {b.get('zero', 0):>5d}/{b['n']:<2d}    {a.get('zero', 0):>5d}/{a['n']:<2d}")
+    print(f"최저 포함률          {_pct(b.get('min_coverage')):>8s}    {_pct(a.get('min_coverage')):>8s}")
     print(f"평균 응답 시간       {b['latency_s'] or 0:>7.1f}s    {a['latency_s'] or 0:>7.1f}s")
     print("\n질문별 핵심 사실 포함률")
     for qid, v in s["per_question"].items():
@@ -277,6 +296,8 @@ def to_markdown(rows: List[Dict], s: Dict, meta: Dict) -> str:
         f"| 핵심 사실 포함률 | {_pct(b['coverage'])} | {_pct(a['coverage'])} |",
         f"| 틀린 내용 수 (합계) | {b['wrong']} | {a['wrong']} |",
         f"| 완전 정답 답변 수 | {b['full_correct']}/{b['n']} | {a['full_correct']}/{a['n']} |",
+        f"| 0점 답변 수 | {b.get('zero', 0)}/{b['n']} | {a.get('zero', 0)}/{a['n']} |",
+        f"| 최저 포함률 | {_pct(b.get('min_coverage'))} | {_pct(a.get('min_coverage'))} |",
         f"| 평균 응답 시간 | {b['latency_s'] or 0:.1f}초 | {a['latency_s'] or 0:.1f}초 |", "",
         "## 질문별 답변", "",
     ]
@@ -350,13 +371,18 @@ def save(rows: List[Dict], summary: Dict, meta: Dict) -> Tuple[Path, Path]:
 
 def main() -> int:
     p = argparse.ArgumentParser(description="기존 검색 vs 현재 서비스 (실제 서비스 코드·설정 기준)")
-    p.add_argument("--only", help="Q7,E3 처럼 일부 질문만 (Q7, LANG, GKSW, E2, E3)")
+    p.add_argument("--set", dest="qset", default="dev", choices=sorted(QUESTION_SETS),
+                   help="질문 세트: dev=개발에 쓴 5개(기본), heldout=개발에 쓰지 않은 5개, all=10개")
+    p.add_argument("--only", help="Q7,E3 처럼 일부 질문만 (세트 안의 id로 고른다)")
     p.add_argument("--repeat", type=int, default=1, help="질문당 반복 횟수 (기본 1)")
     p.add_argument("--judge-model", default=DEFAULT_JUDGE_MODEL)
     p.add_argument("--label", default="")
     args = p.parse_args()
+    global QUESTIONS
+    QUESTIONS = QUESTION_SETS[args.qset]
     only = set(args.only.split(",")) if args.only else None
-    meta = {"started_at": datetime.now().isoformat(timespec="seconds"), "label": args.label, "repeat": args.repeat,
+    meta = {"started_at": datetime.now().isoformat(timespec="seconds"), "label": args.label,
+            "question_set": args.qset, "repeat": args.repeat,
             "judge_model": args.judge_model, "models": _models(), "questions": QUESTIONS}
     try:
         import subprocess

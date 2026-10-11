@@ -7,7 +7,7 @@ class Settings(BaseSettings):
     openai_api_key: str
     openai_model: str = "gpt-4o-mini"
     verify_model: str = ""  # 단일 에이전트 ④ 충분성 검증 전용 모델 (환경변수 VERIFY_MODEL, 비우면 openai_model)
-    answer_model: str = "ANSWER_MODEL"  # 단일 에이전트 ⑤ 답변 전용 모델 (환경변수 ANSWER_MODEL, 비우면 openai_model). 예: gpt-4o
+    answer_model: str = ""  # 단일 에이전트 ⑤ 답변 전용 모델 (환경변수 ANSWER_MODEL, 비우면 openai_model). 예: gpt-4o
     # 질문 경로 선택 (환경변수 AGENT_ROUTING)
     #   off    : 모든 질문을 기본 RAG(하이브리드+리랭커)로 (기본값, 기존 동작)
     #   auto   : ⓪ 라우터가 단순 질문은 기본 RAG, 복합 질문은 단일 에이전트로 보냄

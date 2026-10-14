@@ -1,5 +1,4 @@
 import os
-import math
 import numpy as np
 from typing import List, Tuple, Optional, Dict, Any, Literal
 from langchain_community.retrievers import BM25Retriever
@@ -107,7 +106,7 @@ class RAGRetriever:
             final_k = k or self.top_k
             final_docs = []
             for score, doc in scored_docs[:final_k]:
-                doc.metadata["similarity_score"] = round(1.0 / (1.0 + math.exp(-float(score))), 4)
+                doc.metadata["similarity_score"] = float(score)  # BGE 원점수 그대로 (기준값 0.7·0.55가 이 척도로 맞춰져 있음)
                 final_docs.append(doc)
             return final_docs
 

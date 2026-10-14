@@ -230,10 +230,13 @@ class KnowledgeGraph:
                     CALL db.index.vector.queryNodes('entity_embedding', 5, $q_emb)
                     YIELD node AS e, score
                     WHERE score > 0.75
+                    WITH e, score
                     OPTIONAL MATCH (e)-[r:RELATES]->(related:Entity)
+                    WITH e, score, collect({rel: r, related: related})[..5] AS out_rels
                     OPTIONAL MATCH (e)<-[r2:RELATES]-(incoming:Entity)
+                    WITH e, score, out_rels, collect({rel: r2, incoming: incoming})[..5] AS in_rels
                     OPTIONAL MATCH (e)-[:MENTIONED_IN]->(c:Chunk)
-                    RETURN e, r, related, r2, incoming, c, score
+                    RETURN e, out_rels, in_rels, collect(c)[..3] AS chunks, score
                     """,
                     q_emb=q_emb,
                 )
@@ -241,31 +244,32 @@ class KnowledgeGraph:
                 for record in result:
                     e = record["e"]
                     entities[e["name"]] = {"name": e["name"], "type": e.get("type", "")}
-
-                    if record["related"]:
-                        related = record["related"]
-                        entities[related["name"]] = {"name": related["name"], "type": related.get("type", "")}
-                        relations.append({
-                            "from": e["name"],
-                            "relation": record["r"]["type"] if record["r"] else "",
-                            "to": related["name"],
-                        })
-                    if record["incoming"]:
-                        incoming = record["incoming"]
-                        entities[incoming["name"]] = {"name": incoming["name"], "type": incoming.get("type", "")}
-                        relations.append({
-                            "from": incoming["name"],
-                            "relation": record["r2"]["type"] if record["r2"] else "",
-                            "to": e["name"],
-                        })
-                    if record["c"]:
-                        c = record["c"]
-                        key = (c["source"], c["page"], c["chunk_index"])
-                        chunks[key] = {
-                            "source": c["source"],
-                            "page": c["page"],
-                            "chunk_index": c["chunk_index"],
-                        }
+                    for item in record["out_rels"]:
+                        if item["related"]:
+                            related = item["related"]
+                            entities[related["name"]] = {"name": related["name"], "type": related.get("type", "")}
+                            relations.append({
+                                "from": e["name"],
+                                "relation": item["rel"]["type"] if item["rel"] else "",
+                                "to": related["name"],
+                            })
+                    for item in record["in_rels"]:
+                        if item["incoming"]:
+                            incoming = item["incoming"]
+                            entities[incoming["name"]] = {"name": incoming["name"], "type": incoming.get("type", "")}
+                            relations.append({
+                                "from": incoming["name"],
+                                "relation": item["rel"]["type"] if item["rel"] else "",
+                                "to": e["name"],
+                            })
+                    for c in record["chunks"]:
+                        if c:
+                            key = (c["source"], c["page"], c["chunk_index"])
+                            chunks[key] = {
+                                "source": c["source"],
+                                "page": c["page"],
+                                "chunk_index": c["chunk_index"],
+                            }
 
                 return {
                     "entities": list(entities.values()),
@@ -276,6 +280,92 @@ class KnowledgeGraph:
             # 벡터 인덱스 미생성(build_graph 미실행) 또는 Neo4j 연결 오류 시 빈 결과 반환
             print(f"[KG] search_by_embedding 오류 (인덱스 미생성 또는 연결 오류): {e}")
             return {"entities": [], "relations": [], "chunks": []}
+
+    def search_by_keywords_batch(self, keywords: List[str]) -> Dict:
+        """키워드 목록을 배치 임베딩 후 Neo4j 1회 세션으로 처리."""
+        if not self._enabled or not keywords:
+            return {"entities": [], "relations": [], "chunks": []}
+
+        try:
+            resp = self._client.embeddings.create(input=keywords, model="text-embedding-3-small")
+            embeddings = [item.embedding for item in resp.data]
+        except Exception as e:
+            print(f"[KG] 배치 임베딩 오류: {e}")
+            return {"entities": [], "relations": [], "chunks": []}
+
+        merged: Dict = {"entities": {}, "relations": [], "chunks": {}}
+        try:
+            with self._get_driver().session() as session:
+                for emb in embeddings:
+                    result = session.run(
+                        """
+                        CALL db.index.vector.queryNodes('entity_embedding', 5, $q_emb)
+                        YIELD node AS e, score
+                        WHERE score > 0.75
+                        WITH e, score
+                        OPTIONAL MATCH (e)-[r:RELATES]->(related:Entity)
+                        WITH e, score, collect({rel: r, related: related})[..5] AS out_rels
+                        OPTIONAL MATCH (e)<-[r2:RELATES]-(incoming:Entity)
+                        WITH e, score, out_rels, collect({rel: r2, incoming: incoming})[..5] AS in_rels
+                        OPTIONAL MATCH (e)-[:MENTIONED_IN]->(c:Chunk)
+                        RETURN e, out_rels, in_rels, collect(c)[..3] AS chunks, score
+                        """,
+                        q_emb=emb,
+                    )
+                    for record in result:
+                        e = record["e"]
+                        merged["entities"][e["name"]] = {"name": e["name"], "type": e.get("type", "")}
+                        for item in record["out_rels"]:
+                            if item["related"]:
+                                related = item["related"]
+                                merged["entities"][related["name"]] = {"name": related["name"], "type": related.get("type", "")}
+                                merged["relations"].append({
+                                    "from": e["name"],
+                                    "relation": item["rel"]["type"] if item["rel"] else "",
+                                    "to": related["name"],
+                                })
+                        for item in record["in_rels"]:
+                            if item["incoming"]:
+                                incoming = item["incoming"]
+                                merged["entities"][incoming["name"]] = {"name": incoming["name"], "type": incoming.get("type", "")}
+                                merged["relations"].append({
+                                    "from": incoming["name"],
+                                    "relation": item["rel"]["type"] if item["rel"] else "",
+                                    "to": e["name"],
+                                })
+                        for c in record["chunks"]:
+                            if c:
+                                key = (c["source"], c["page"], c["chunk_index"])
+                                merged["chunks"][key] = {"source": c["source"], "page": c["page"], "chunk_index": c["chunk_index"]}
+        except Exception as e:
+            print(f"[KG] 배치 검색 오류: {e}")
+
+        return {
+            "entities": list(merged["entities"].values()),
+            "relations": merged["relations"],
+            "chunks": list(merged["chunks"].values()),
+        }
+
+    def build_graph_for_document(self, content: str, metadata: Dict) -> None:
+        """KG 추출/저장 - 백그라운드 업로드 처리용."""
+        if not self._enabled:
+            return
+        from app.core.knowledge_base import knowledge_base as kb
+
+        content = kb.splitter.normalize_text(content)
+        lang = metadata.get("lang")
+        if not lang or lang == "unknown":
+            lang = kb.splitter.detect_language(content)
+
+        chunks = kb.splitter.split_text(content, lang=lang)
+        for i, chunk in enumerate(chunks):
+            graph_data = self.extract_graph_from_text(
+                chunk,
+                source=metadata.get("source", ""),
+                page=metadata.get("page", 0),
+                chunk_index=i,
+            )
+            self.save_graph(graph_data)
 
 
 # 전역 인스턴스

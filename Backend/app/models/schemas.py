@@ -96,10 +96,12 @@ class FaqItem(BaseModel):
     question_en: str
     question_zh: str
     question_es: str
+    question_vi: str = ""
     answer_ko: str
     answer_en: str
     answer_zh: str
     answer_es: str
+    answer_vi: str = ""
     is_active: bool
     display_order: int
     created_at: Optional[datetime] = None

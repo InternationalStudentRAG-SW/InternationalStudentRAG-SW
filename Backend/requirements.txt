@@ -44,6 +44,7 @@ langdetect==1.0.9
 kss==6.0.6                    # 한국어 문장 분리
 pysbd==0.3.4                  # 다국어 문장 분리
 numpy==2.4.4
+kiwipiepy>=0.20               # PDF 띄어쓰기 복원 (app/core/spacing.py)
 
 # ── 지식그래프 (Neo4j) ────────────────────────────────────
 neo4j==6.3.1
@@ -54,7 +55,7 @@ SQLAlchemy==2.0.48
 
 # ── 캐시 (Upstash Redis) ──────────────────────────────────
 redis==8.1.0
+async-timeout==4.0.3
 
 # ── RunPod Serverless ─────────────────────────────────────
-runpod==1.7.9
 requests==2.32.5

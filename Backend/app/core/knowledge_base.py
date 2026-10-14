@@ -82,7 +82,6 @@ class MultilingualSentenceSplitter:
                     continue
                 normalized = self.normalize_text(md_text)
                 if getattr(settings, "pdf_spacing_fix", True):
-                    # 공백 없이 추출되는 PDF(예: 한국어트랙 모집요강)의 붙은 한국어만 띄어 쓴다 (app/core/spacing.py)
                     from app.core.spacing import restore_spacing
                     normalized, _ = restore_spacing(normalized)
                 lang = self.detect_language(normalized)
@@ -176,8 +175,6 @@ class KnowledgeBase:
         )
 
     def add_document(self, content: str, metadata: Dict) -> int:
-        from app.core.knowledge_graph import knowledge_graph
-
         content = self.splitter.normalize_text(content)
 
         lang = metadata.get("lang")
@@ -193,17 +190,9 @@ class KnowledgeBase:
             m["chunk_index"] = i
             chunk_metadatas.append(m)
 
-            # Neo4j 그래프 구축: ChromaDB와 동일한 식별자 사용
-            graph_data = knowledge_graph.extract_graph_from_text(
-                chunk,
-                source=metadata.get("source", ""),
-                page=metadata.get("page", 0),
-                chunk_index=i,
-            )
-            knowledge_graph.save_graph(graph_data)
-
         self.vector_store.add_texts(texts=chunks, metadatas=chunk_metadatas)
         return len(chunks)
+
 
     def get_all_documents(self) -> List[Dict]:
         """BM25 색인을 위해 DB에 저장된 모든 청크와 메타데이터를 가져옵니다."""

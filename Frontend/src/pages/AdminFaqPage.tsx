@@ -442,10 +442,10 @@ export default function AdminFaqPage() {
             </p>
 
             <div style={{ display: 'grid', gap: '12px', marginBottom: '16px' }}>
-              {(['ko', 'en', 'zh', 'es'] as const).map(lang => (
+              {(['ko', 'en', 'zh', 'es', 'vi'] as const).map(lang => (
                 <div key={lang}>
                   <div style={{ fontSize: '12px', fontWeight: 600, color: 'var(--color-text-muted)', marginBottom: '4px', textTransform: 'uppercase' }}>
-                    {lang === 'ko' ? '한국어' : lang === 'en' ? 'English' : lang === 'zh' ? '中文' : 'Español'}
+                    {lang === 'ko' ? '한국어' : lang === 'en' ? 'English' : lang === 'zh' ? '中文' : lang === 'es' ? 'Español' : 'Tiếng Việt'}
                   </div>
                   <div style={{ fontSize: '13px', color: 'var(--color-text-muted)', marginBottom: '4px' }}>
                     Q: {editTarget[`question_${lang}`]}

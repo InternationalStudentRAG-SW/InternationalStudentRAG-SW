@@ -2,9 +2,16 @@ import logging
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s %(levelname)s %(name)s: %(message)s",
+    datefmt="%H:%M:%S",
+)
 logging.getLogger("neo4j").propagate = False
 logging.getLogger("neo4j").setLevel(logging.ERROR)
 logging.getLogger("huggingface_hub").propagate = False
+logging.getLogger("httpx").setLevel(logging.WARNING)
+logging.getLogger("openai").setLevel(logging.WARNING)
 
 from app.api.routes import chat, admin, auth, document
 from app.api.routes.faq import router as faq_router
@@ -40,7 +47,6 @@ _ROUTING_DESC = {
 
 @app.on_event("startup")
 def print_agent_routing_mode():
-    """서버가 켜질 때 지금 쓰는 에이전트 라우팅 모드(AGENT_ROUTING)를 터미널에 보여준다."""
     mode = (settings.agent_routing or "off").strip().lower()
     desc = _ROUTING_DESC.get(mode, "알 수 없는 값 → off로 처리")
     print(f"[AGENT_ROUTING] {mode} | {desc}", flush=True)

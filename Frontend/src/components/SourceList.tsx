@@ -26,9 +26,11 @@ export function SourceList({ sources, language }: Props) {
               >
                 {src.source}
               </a>
-              <span className="source-item__meta">
-                {labels.relevance} {(src.similarity_score * 100).toFixed(1)}%
-              </span>
+              {src.similarity_score > 0 && (
+                <span className="source-item__meta">
+                  {labels.relevance} {(src.similarity_score * 100).toFixed(1)}%
+                </span>
+              )}
             </li>
           )
         })}

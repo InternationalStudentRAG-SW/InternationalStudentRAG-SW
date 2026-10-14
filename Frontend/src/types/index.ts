@@ -56,10 +56,12 @@ export interface FaqItem {
   question_en: string
   question_zh: string
   question_es: string
+  question_vi: string
   answer_ko: string
   answer_en: string
   answer_zh: string
   answer_es: string
+  answer_vi: string
   is_active: boolean
   display_order: number
   created_at?: string

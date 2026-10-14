@@ -6,7 +6,7 @@ from app.config import settings
 from app.core.auth_middleware import get_current_user
 from app.models.schemas import SignupRequest, LoginRequest, AdditionalInfoRequest, AdminSignupRequest
 
-router = APIRouter(prefix="/api", tags=["auth"])
+router = APIRouter(prefix="", tags=["auth"])
 
 _SUPABASE_HEADERS = {
     "apikey": settings.supabase_service_key,

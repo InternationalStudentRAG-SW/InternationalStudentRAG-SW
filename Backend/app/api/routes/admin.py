@@ -1,6 +1,6 @@
 import os
 from datetime import date
-from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, UploadFile, File
 from app.models.schemas import DocumentUploadResponse, DocumentUploadRequest, HealthResponse, UpdateRoleRequest, UpdateStatusRequest
 from app.core.knowledge_base import knowledge_base
 from app.core.auth_middleware import get_admin_user
@@ -11,7 +11,11 @@ router = APIRouter(prefix="/admin", tags=["admin"])
 
 
 @router.post("/upload", response_model=DocumentUploadResponse)
-async def upload_document(file: UploadFile = File(...), user: dict = Depends(get_admin_user)):
+async def upload_document(
+    background_tasks: BackgroundTasks,
+    file: UploadFile = File(...),
+    user: dict = Depends(get_admin_user),
+):
     """지식베이스에 PDF 문서를 업로드합니다."""
     if file.filename and not file.filename.lower().endswith('.pdf'):
         raise HTTPException(status_code=400, detail="PDF 파일만 지원합니다")
@@ -35,6 +39,16 @@ async def upload_document(file: UploadFile = File(...), user: dict = Depends(get
             knowledge_base.add_document(p["content"], p["metadata"])
             for p in pages_data
         )
+
+        # KG 추출은 백그라운드에서 처리 (GPT 호출이 오래 걸려 프록시 타임아웃 방지)
+        from app.core.knowledge_graph import knowledge_graph
+        for p in pages_data:
+            background_tasks.add_task(
+                knowledge_graph.build_graph_for_document,
+                p["content"],
+                p["metadata"],
+            )
+
         return DocumentUploadResponse(
             filename=file.filename,
             status="success",
@@ -175,13 +189,15 @@ async def get_chat_daily(user: dict = Depends(get_admin_user)):
     try:
         result = []
         for i in range(6, -1, -1):
-            d = (date.today() - timedelta(days=i)).isoformat()
+            d = date.today() - timedelta(days=i)
+            start = d.isoformat()
+            end = (d + timedelta(days=1)).isoformat()
             res = supabase.table("chat_logs") \
                 .select("id", count="exact") \
-                .gte("created_at", d) \
-                .lte("created_at", d + "T23:59:59") \
+                .gte("created_at", start) \
+                .lt("created_at", end) \
                 .execute()
-            result.append({"date": d[5:], "count": res.count})
+            result.append({"date": start[5:], "count": res.count or 0})
         return {"daily": result}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

@@ -14,6 +14,7 @@ SSE 이벤트 형식(status / token / meta / done)은 프론트가 쓰던 형식
 import os
 import json
 import asyncio
+import logging
 from typing import AsyncGenerator, Dict, List, Optional
 
 from openai import AsyncOpenAI
@@ -28,6 +29,7 @@ from app.core.llm import (
 )
 
 _async_client = AsyncOpenAI(api_key=settings.openai_api_key)
+logger = logging.getLogger(__name__)
 
 SOURCE_MIN_SCORE = 0.7  # done 이벤트에 보낼 출처의 최소 점수
 
@@ -118,49 +120,54 @@ def _is_no_result_answer(answer: str) -> bool:
 
 _STATUS_LABELS = {
     "ko": {
-        "analyzing":        "질문 의도를 파악하는 중",
-        "searching":        "문서를 탐색하는 중",
-        "searching_done":   "관련 문서 검색 완료",
-        "search_one":       "[{name}] 검색 완료",
-        "search_many":      "[{name}] 외 {n}건 검색 완료",
-        "generating":       "답변을 작성하는 중",
-        "meta":             "출처를 정리하는 중",
+        "analyzing":              "질문 의도를 파악하는 중",
+        "searching":              "문서를 탐색하는 중",
+        "searching_done":         "관련 문서 검색 완료",
+        "search_one":             "[{name}] 검색 완료",
+        "search_many":            "[{name}] 외 {n}건 검색 완료",
+        "generating":             "답변을 작성하는 중",
+        "meta":                   "출처를 정리하는 중",
+        "meta_with_suggestions":  "출처와 추천질문 정리하는 중",
     },
     "en": {
-        "analyzing":        "Understanding your question",
-        "searching":        "Searching through documents",
-        "searching_done":   "Document search complete",
-        "search_one":       "[{name}] found",
-        "search_many":      "[{name}] and {n} more found",
-        "generating":       "Writing your answer",
-        "meta":             "Preparing sources",
+        "analyzing":              "Understanding your question",
+        "searching":              "Searching through documents",
+        "searching_done":         "Document search complete",
+        "search_one":             "[{name}] found",
+        "search_many":            "[{name}] and {n} more found",
+        "generating":             "Writing your answer",
+        "meta":                   "Preparing sources",
+        "meta_with_suggestions":  "Preparing sources and suggestions",
     },
     "zh": {
-        "analyzing":        "正在理解您的问题",
-        "searching":        "正在搜索文档",
-        "searching_done":   "文档搜索完成",
-        "search_one":       "已找到 [{name}]",
-        "search_many":      "已找到 [{name}] 等 {n} 份文档",
-        "generating":       "正在撰写答案",
-        "meta":             "正在整理来源",
+        "analyzing":              "正在理解您的问题",
+        "searching":              "正在搜索文档",
+        "searching_done":         "文档搜索完成",
+        "search_one":             "已找到 [{name}]",
+        "search_many":            "已找到 [{name}] 等 {n} 份文档",
+        "generating":             "正在撰写答案",
+        "meta":                   "正在整理来源",
+        "meta_with_suggestions":  "正在整理来源和推荐问题",
     },
     "es": {
-        "analyzing":        "Entendiendo tu pregunta",
-        "searching":        "Buscando en documentos",
-        "searching_done":   "Búsqueda completada",
-        "search_one":       "[{name}] encontrado",
-        "search_many":      "[{name}] y {n} más encontrados",
-        "generating":       "Escribiendo tu respuesta",
-        "meta":             "Preparando fuentes",
+        "analyzing":              "Entendiendo tu pregunta",
+        "searching":              "Buscando en documentos",
+        "searching_done":         "Búsqueda completada",
+        "search_one":             "[{name}] encontrado",
+        "search_many":            "[{name}] y {n} más encontrados",
+        "generating":             "Escribiendo tu respuesta",
+        "meta":                   "Preparando fuentes",
+        "meta_with_suggestions":  "Preparando fuentes y sugerencias",
     },
     "vi": {
-        "analyzing":        "Đang phân tích câu hỏi",
-        "searching":        "Đang tìm kiếm tài liệu",
-        "searching_done":   "Tìm kiếm tài liệu hoàn tất",
-        "search_one":       "Đã tìm thấy [{name}]",
-        "search_many":      "Đã tìm thấy [{name}] và {n} tài liệu khác",
-        "generating":       "Đang soạn câu trả lời",
-        "meta":             "Đang chuẩn bị nguồn",
+        "analyzing":              "Đang phân tích câu hỏi",
+        "searching":              "Đang tìm kiếm tài liệu",
+        "searching_done":         "Tìm kiếm tài liệu hoàn tất",
+        "search_one":             "Đã tìm thấy [{name}]",
+        "search_many":            "Đã tìm thấy [{name}] và {n} tài liệu khác",
+        "generating":             "Đang soạn câu trả lời",
+        "meta":                   "Đang chuẩn bị nguồn",
+        "meta_with_suggestions":  "Đang chuẩn bị nguồn và gợi ý",
     },
 }
 
@@ -180,10 +187,13 @@ async def run_rag_stream(
     await asyncio.sleep(0)
 
     # 1. 하이브리드 + 리랭커 검색
+    logger.info("[RAG] 검색 시작 query='%s'", (ko_query or question)[:60])
     context, sources = await asyncio.to_thread(
         retriever.retrieve_with_sources, query=question, ko_query=ko_query or question,
     )
     sources = sources or []
+    max_score = _get_max_relevance_score(sources)
+    logger.info("[RAG] 검색 완료 chunks=%d max_score=%.3f", len(sources), max_score)
 
     if sources:
         top_name = os.path.basename(sources[0].get("source", "문서"))
@@ -196,7 +206,8 @@ async def run_rag_stream(
     await asyncio.sleep(0)
 
     # 2. 관련 문서가 없으면 안내 문구로 끝냄
-    if _get_max_relevance_score(sources) < _RELEVANCE_THRESHOLD:
+    if max_score < _RELEVANCE_THRESHOLD:
+        logger.info("[RAG] 관련 문서 없음(max_score=%.3f < %.1f) → fallback", max_score, _RELEVANCE_THRESHOLD)
         fallback_msg = await _classify_and_get_fallback(question, language)
         yield _sse({"type": "token", "content": fallback_msg})
         yield _sse({"type": "done", "sources": [], "suggestions": []})
@@ -219,6 +230,7 @@ async def run_rag_stream(
     else:
         suggestion_task = asyncio.create_task(_no_suggestions())
     full_answer = ""
+    logger.info("[RAG] 답변 생성 시작")
     try:
         async for token in stream_answer(
             question=question, context=context, lang_instruction=lang_inst, session_history=history_text,
@@ -234,16 +246,21 @@ async def run_rag_stream(
          "similarity_score": s.get("similarity_score", 0.0)}
         for s in sources if s.get("similarity_score", 0.0) >= SOURCE_MIN_SCORE
     ]
+    logger.info("[RAG] 답변 완료 len=%d sources=%d", len(full_answer), len(formatted_sources))
     if _is_no_result_answer(full_answer) or not formatted_sources:
+        logger.info("[RAG] 답변 내용 없음 또는 출처 없음 → done(빈 출처)")
         suggestion_task.cancel()
         yield _sse({"type": "done", "sources": [], "suggestions": []})
         return
 
     # 4. 출처·후속 질문
-    yield _sse({"type": "meta", "content": labels["meta"]})
+    _suggestions_on = getattr(settings, "suggestions_enabled", False)
+    _meta_key = "meta_with_suggestions" if _suggestions_on else "meta"
+    yield _sse({"type": "meta", "content": labels[_meta_key]})
     await asyncio.sleep(0)
     try:
-        suggestions = await asyncio.wait_for(suggestion_task, timeout=30.0)
+        suggestions = await asyncio.wait_for(suggestion_task, timeout=120.0)
     except Exception:
         suggestions = []
+    logger.info("[RAG] done suggestions=%d", len(suggestions))
     yield _sse({"type": "done", "sources": formatted_sources, "suggestions": suggestions})

@@ -7,6 +7,7 @@ import {
 import { getChatLogs, getChatStats, getChatDaily } from '../services/api'
 import type { ChatLog, ChatStats } from '../services/api'
 import AdminLayout from '../components/AdminLayout'
+import { formatRelevance } from '../lib/score'
 import './admin.css'
 
 const LIMIT = 20
@@ -344,7 +345,7 @@ export default function AdminChatLogPage() {
                     <div key={i} className="admin-log-source-item">
                       <span className="admin-log-source-name">{src.source}</span>
                       <span className="admin-log-source-meta">
-                        유사도 {(src.similarity_score * 100).toFixed(1)}%
+                        유사도 {formatRelevance(src.similarity_score)}
                       </span>
                     </div>
                   ))}

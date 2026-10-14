@@ -1,6 +1,7 @@
 import type { Source, Language } from '../types'
 import { getDocumentUrl } from '../services/api'
 import { getLabels } from '../i18n'
+import { formatRelevance } from '../lib/score'
 
 interface Props {
   sources: Source[]
@@ -26,9 +27,9 @@ export function SourceList({ sources, language }: Props) {
               >
                 {src.source}
               </a>
-              {src.similarity_score > 0 && (
+              {src.similarity_score !== 0 && (
                 <span className="source-item__meta">
-                  {labels.relevance} {(src.similarity_score * 100).toFixed(1)}%
+                  {labels.relevance} {formatRelevance(src.similarity_score)}
                 </span>
               )}
             </li>

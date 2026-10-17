@@ -55,8 +55,22 @@ jobs:
       - name: Redeploy RunPod Pod
         if: github.event_name == 'push'
         run: |
-          curl -s -X POST "https://rest.runpod.io/v2/pod/${{ secrets.RUNPOD_POD_ID }}/stop" \
-            -H "Authorization: Bearer ${{ secrets.RUNPOD_API_KEY }}"
-          sleep 15
-          curl -s -X POST "https://rest.runpod.io/v2/pod/${{ secrets.RUNPOD_POD_ID }}/start" \
-            -H "Authorization: Bearer ${{ secrets.RUNPOD_API_KEY }}"
+          set -e
+          BASE="https://rest.runpod.io/v1/pods/${{ secrets.RUNPOD_POD_ID }}"
+          AUTH="Authorization: Bearer ${{ secrets.RUNPOD_API_KEY }}"
+
+          # :latest는 RunPod이 캐시하므로 stop/start만으로는 새 이미지를 받아온다는
+          # 보장이 없다. 매 배포마다 달라지는 SHA 태그를 가리키게 해 캐시를 우회한다.
+          echo "Pointing pod at ${{ env.IMAGE_NAME }}:${{ github.sha }}"
+          curl -sS -f -X PATCH "$BASE" \
+            -H "$AUTH" \
+            -H "Content-Type: application/json" \
+            -d '{"imageName":"${{ env.IMAGE_NAME }}:${{ github.sha }}"}'
+
+          echo "Stopping pod..."
+          curl -sS -f -X POST "$BASE/stop" -H "$AUTH"
+
+          sleep 20
+
+          echo "Starting pod..."
+          curl -sS -f -X POST "$BASE/start" -H "$AUTH"

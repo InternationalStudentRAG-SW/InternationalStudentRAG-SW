@@ -52,8 +52,11 @@ jobs:
             ${{ env.IMAGE_NAME }}:latest
             ${{ env.IMAGE_NAME }}:${{ github.sha }}
 
-      - name: Restart RunPod Pod
+      - name: Redeploy RunPod Pod
         if: github.event_name == 'push'
         run: |
-          curl -s -X POST "https://rest.runpod.io/v2/pod/${{ secrets.RUNPOD_POD_ID }}/restart" \
+          curl -s -X POST "https://rest.runpod.io/v2/pod/${{ secrets.RUNPOD_POD_ID }}/stop" \
+            -H "Authorization: Bearer ${{ secrets.RUNPOD_API_KEY }}"
+          sleep 15
+          curl -s -X POST "https://rest.runpod.io/v2/pod/${{ secrets.RUNPOD_POD_ID }}/start" \
             -H "Authorization: Bearer ${{ secrets.RUNPOD_API_KEY }}"

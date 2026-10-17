@@ -763,29 +763,151 @@ body {
    Responsive
    ============================ */
 @media (max-width: 900px) {
+  /* ── 레이아웃: 2단 → 1단 ───────────────────────────────────────────
+     사이드바는 내용만큼(auto), 채팅이 남은 높이 전부(1fr).
+     이전의 height: calc(100dvh - 200px)는 사이드바 높이를 200px로 추정한
+     값이라 FAQ 개수·화면 크기에 따라 어긋났다. 행 배분을 그리드에 맡긴다. */
   .app {
-    padding: 16px;
+    padding: 12px;
   }
 
   .app-shell {
     grid-template-columns: 1fr;
-    margin-top: 0;
-    height: auto;
-    gap: 16px;
+    grid-template-rows: auto 1fr;
+    margin-top: 10px;
+    gap: 10px;
+    min-height: 0;
   }
 
+  .top-nav {
+    gap: 8px;
+    flex-wrap: nowrap;
+  }
+
+  .top-nav-btn {
+    padding: 7px 14px;
+    font-size: 13px;
+    white-space: nowrap;
+  }
+
+  /* ── 사이드바: 높이 최소화, 내부 스크롤 제거 ─────────────────────────
+     base의 overflow-y: auto가 좁은 영역 안에서만 굴러가는 상자를 만든다. */
+  /* 그리드/플렉스 항목의 기본 min-width: auto는 내용의 최소 너비 아래로
+     줄어드는 걸 막는다. 그대로 두면 가로 스크롤 영역(칩·언어탭)이 스크롤되지
+     않고 부모를 밀어 넓혀 페이지 전체에 가로 넘침이 생긴다. */
+  .app-sidebar {
+    gap: 10px;
+    overflow: visible;
+    min-height: 0;
+    min-width: 0;
+  }
+
+  .quick-card,
+  .logo-card { min-width: 0; }
+
+  .logo-card { padding: 11px 14px; }
+  .logo-row { margin-bottom: 0; gap: 9px; align-items: center; }
+  .logo-icon { width: 28px; height: 28px; }
+  .logo-badge { font-size: 9px; margin-bottom: 1px; }
+  .logo-title { font-size: 15px; }
+
+  /* 제목은 JSX에서 \n 자리에 <br>을 넣어 두 줄로 고정돼 있다. 모바일에서는
+     그 강제 줄바꿈만 없애고 공백으로 이어 붙인다. nowrap은 주지 않는다 —
+     스페인어처럼 긴 문구는 폭이 모자라면 자연스럽게 넘어가야 한다. */
+  .logo-title br { display: none; }
+  .logo-title span + span::before { content: " "; }
+  .logo-desc { display: none; }
+  .status-badge { margin-top: 8px; padding: 5px 10px; font-size: 11px; }
+  .status-dot { width: 8px; height: 8px; box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.14); }
+
+  /* ── 자주 묻는 질문: 세로 목록 → 가로 스크롤 칩 ───────────────────── */
+  .quick-card { padding: 11px 14px; }
+  .quick-title { font-size: 12px; margin-bottom: 8px; }
+
+  .quick-list {
+    flex-direction: row;
+    gap: 8px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+  .quick-list::-webkit-scrollbar { display: none; }
+
+  .quick-button {
+    width: auto;
+    flex: 0 0 auto;
+    white-space: nowrap;
+    gap: 8px;
+    padding: 7px 12px;
+    font-size: 12px;
+    border-radius: var(--radius-pill);
+    box-shadow: none;
+  }
+  .quick-icon { width: 18px; height: 18px; font-size: 10px; }
+
+  /* ── 채팅: 남은 높이를 채우고 메시지 영역만 스크롤 ──────────────────── */
   .app-main {
-    height: calc(100dvh - 200px);
+    height: auto;
+    min-height: 0;
+    min-width: 0;
   }
 
+  .chat-interface { min-height: 0; min-width: 0; }
+
+  /* 헤더: 제목과 언어 탭을 세로로. base의 space-between + flex-shrink: 0
+     조합 때문에 언어 탭이 줄지 않고 화면 밖으로 잘려 나갔다. */
+  .chat-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+    padding: 14px 16px;
+    min-width: 0;
+  }
+  .chat-header-title { font-size: 18px; }
+  .chat-header-sub { font-size: 12px; }
+
+  .language-selector {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scrollbar-width: none;
+    justify-content: flex-start;
+  }
+  .language-selector::-webkit-scrollbar { display: none; }
+  .lang-btn { flex: 0 0 auto; padding: 7px 12px; font-size: 12px; }
+
+  .chat-interface__messages {
+    padding: 16px 12px;
+    gap: 14px;
+    min-height: 0;
+  }
+
+  .message-row { gap: 8px; }
+  .bot-avatar { width: 34px; height: 34px; }
+
+  /* 태블릿 세로(834px)에서 말풍선이 과도하게 퍼지지 않게 상한을 둔다 */
+  .message-wrap { max-width: min(88%, 560px); }
   .message__bubble,
-  .source-list {
-    max-width: 90%;
+  .source-list { max-width: 100%; }
+  .message__bubble { padding: 12px 14px; font-size: 14.5px; }
+  .message__bubble pre { overflow-x: auto; }
+
+  /* ── 입력창 ──────────────────────────────────────────────────────── */
+  .chat-interface__input-area {
+    padding: 12px 12px calc(12px + env(safe-area-inset-bottom));
   }
 
-  .message-wrap {
-    max-width: 88%;
+  .input-box { gap: 8px; padding: 6px 6px 6px 14px; }
+
+  /* min-width: 0이 없으면 flex 기본값(auto) 때문에 입력창이 줄지 않고
+     버튼을 화면 밖으로 밀어낸다. 16px은 iOS 포커스 시 자동 확대 방지. */
+  .chat-input {
+    min-width: 0;
+    font-size: 16px;
   }
+
+  .clear-btn { display: none; }
+  .send-btn { padding: 10px 16px; font-size: 13px; white-space: nowrap; }
 }
 
 /* ── ThinkingSteps ─────────────────────────────────────────────────── */

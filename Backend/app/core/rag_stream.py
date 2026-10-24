@@ -6,10 +6,10 @@ SSE 이벤트 형식(status / token / meta / done)은 프론트가 쓰던 형식
 
 흐름
   1. retriever.retrieve_with_sources (mode=hybrid_rerank)
-  2. 관련도 최고 점수 < 0.7 → 질문 범위를 분류해 안내 문구로 끝냄
+  2. 관련도 최고 점수 < 0.5 → 질문 범위를 분류해 안내 문구로 끝냄
      (다음 단계에서 라우터를 붙이면 이 경우는 단일 에이전트로 넘긴다: single_agent/escalation.py)
   3. llm.stream_answer로 답변 스트리밍 + 후속 질문을 동시에 생성
-  4. 점수 0.7 이상 출처만 done 이벤트로 보냄
+  4. 점수 0.5 이상 출처만 done 이벤트로 보냄
 """
 import os
 import json
@@ -31,7 +31,7 @@ from app.core.llm import (
 _async_client = AsyncOpenAI(api_key=settings.openai_api_key)
 logger = logging.getLogger(__name__)
 
-SOURCE_MIN_SCORE = 0.7  # done 이벤트에 보낼 출처의 최소 점수
+SOURCE_MIN_SCORE = 0.5  # done 이벤트에 보낼 출처의 최소 점수
 
 
 async def _no_suggestions() -> List[str]:

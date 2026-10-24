@@ -129,7 +129,7 @@ class RAGRetriever:
 
     def retrieve_with_sources(self, query: str, k: Optional[int] = None, ko_query: Optional[str] = None,
                               prefetched_vector_docs: Optional[List[Document]] = None,
-                              context_min_score: float = 0.55) -> Tuple[str, List[Dict[str, Any]]]:
+                              context_min_score: float = 0.5) -> Tuple[str, List[Dict[str, Any]]]:
         docs = self.retrieve(query, k=k, ko_query=ko_query, prefetched_vector_docs=prefetched_vector_docs)
         context_docs = [d for d in docs if d.metadata.get("similarity_score", 1.0) >= context_min_score]
         context = self.format_context(context_docs if context_docs else docs)

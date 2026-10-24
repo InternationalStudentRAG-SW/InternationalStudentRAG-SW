@@ -55,7 +55,7 @@ def _get_max_relevance_score(sources: List[dict]) -> float:
 
 
 # 관련성 임계값 — 이 값 미만이면 PDF 범위 밖 질문으로 판단하여 답변 차단
-_RELEVANCE_THRESHOLD = 0.7
+_RELEVANCE_THRESHOLD = 0.5
 
 # PDF 범위 밖 질문에 대한 고정 응답 메시지
 _OUT_OF_SCOPE_ANSWER = (
